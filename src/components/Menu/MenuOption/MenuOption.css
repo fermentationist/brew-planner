@@ -1,0 +1,7 @@
+.menu-option-link {
+  text-decoration: none;
+  color: inherit;
+}
+.active-link {
+  color: #F79420;
+}

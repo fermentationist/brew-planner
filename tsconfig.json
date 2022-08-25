@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "module": "system", 
+    "noImplicitAny": true,
+    "jsx": "preserve",
+    "typeRoots": ["src/types/"],
+    "moduleResolution": "node",
+    "target": "esnext",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["**/node_modules"]
+}

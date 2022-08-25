@@ -1,0 +1,16 @@
+.path-builder-container {
+  border: 1px solid lightgray;
+  margin: 1em;
+}
+.path-builder-input {
+  margin-top: 0 !important;
+}
+.path-builder-textarea {
+  margin: 0 1em 0 1em !important;
+  width: 325px !important;
+  min-height: 80px !important;
+  border: 1px solid gray;
+}
+.path-builder-dropdown {
+  margin: 0 1em 1em 1em !important;
+}

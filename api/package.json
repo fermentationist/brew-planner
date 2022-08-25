@@ -1,0 +1,50 @@
+{
+  "name": "sh-plus-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Spirit Hub Plus API",
+  "main": "src/server/app.js",
+  "type": "module",
+  "scripts": {
+    "start": "sudo forever start -o console_log.txt -e console_err.txt src/server/app.js",
+    "stop": "sudo forever stop src/server/app.js",
+    "restart": "sudo forever stop src/server/app.js\nsudo forever start -o console_log.txt -e console_err.txt src/server/app.js",
+    "test": "mocha --recursive './src/**/*test.js' './test/*test.js' -grep $1",
+    "lint": "npx eslint -c .eslintrc.cjs '**/*'",
+    "unit-test": "mocha --recursive './src/**/*test.js' -g $1",
+    "int-test": "mocha --recursive './test/*test.js' -g $1",
+    "int-test-fast": "mocha --recursive './test/test.js' --invert -g '/.+(?=tag:slow)/'",
+    "create-docs": "apidoc -i src/ -o doc/",
+    "dev": "TEST_MODE=true\nexport TEST_MODE\napidoc -i src/ -o doc/\nnode src/server/app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@firebase/app-types": "0.x",
+    "@spirithub/logger": "github:BigFishCraftSpirits/logger",
+    "axios": "^0.27.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "es-main": "^1.2.0",
+    "express": "^4.18.1",
+    "express-validator": "^6.14.2",
+    "firebase": "^9.8.4",
+    "firebase-admin": "^11.0.0",
+    "ip": "^1.1.8",
+    "module": "^1.2.5",
+    "mysql": "^2.18.1",
+    "node-mysql-deadlock-retries": "^2.0.5",
+    "qs": "^6.11.0",
+    "uuid": "^8.3.2",
+    "xss": "^1.0.13"
+  },
+  "devDependencies": {
+    "apidoc": "^0.51.1",
+    "concurrently": "^7.2.2",
+    "eslint": "^8.18.0",
+    "forever": "^4.0.3",
+    "inquirer": "^9.0.0",
+    "mocha": "^10.0.0"
+  }
+}
