@@ -1,4 +1,4 @@
-import mysql from "mysql";
+import mysql from "mysql2";
 import { OperationalError, ProgramError } from "../../../server/errors.js";
 import proxyMysqlDeadlockRetries from "node-mysql-deadlock-retries";
 

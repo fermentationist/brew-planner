@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS brewery (
   city VARCHAR (100),
   stateOrProvince VARCHAR(50),
   postalCode VARCHAR (20),
-  country VARCHAR(100),
+  country VARCHAR (100),
   is_private BOOLEAN DEFAULT 1
 );
 

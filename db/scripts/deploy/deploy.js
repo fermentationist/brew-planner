@@ -24,7 +24,6 @@ const STAGE_DB_CREDENTIALS = {
 }
 
 const deploy = async liveOrStage => {
-  console.log("liveOrStage:", liveOrStage);
   const mode = (liveOrStage || "").toLowerCase() || "stage";
   const credentials = mode === "live" ? LIVE_DB_CREDENTIALS : STAGE_DB_CREDENTIALS;
   const db = dbInit(credentials);

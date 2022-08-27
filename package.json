@@ -39,7 +39,6 @@
     "jspdf": "^2.5.1",
     "module": "^1.2.5",
     "mui-datatables": "^4.2.2",
-    "mysql": "^2.18.1",
     "mysql2": "^2.3.3",
     "node-mysql-deadlock-retries": "^2.0.5",
     "qs": "^6.11.0",

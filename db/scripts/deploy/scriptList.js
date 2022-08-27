@@ -3,5 +3,10 @@ export default [
   "brewhouse.sql",
   "recipe.sql",
   "batch.sql",
-  // "insert.sql"
+  "fermentable.sql",
+  "hop.sql",
+  "yeast.sql",
+  "misc.sql",
+  "water.sql",
+  "insert.sql"
 ]

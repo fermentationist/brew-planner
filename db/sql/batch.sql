@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS batch (
   -- CONSTRAINT fk_recipe_id FOREIGN KEY (recipe_id) REFERENCES recipe (recipe_id),
   brewhouse_id BINARY (16) NOT NULL UNIQUE,
   CONSTRAINT fk_brewhouse_id FOREIGN KEY (brewhouse_id) REFERENCES brewhouse(brewhouse_id),
-  status ENUM("planning", "brewing", "fermenting", "completed") DEFAULT "planning",
+  status ENUM ("planning", "brewing", "fermenting", "completed") DEFAULT "planning",
   date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   date_brewed TIMESTAMP NULL DEFAULT NULL,
   date_packaged TIMESTAMP NULL DEFAULT NULL,
