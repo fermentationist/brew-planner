@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS misc (
   misc_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  misc_id BINARY (16) NOT NULL,
+  misc_id BINARY (16) NOT NULL UNIQUE,
   created_by VARCHAR (36) NOT NULL,
   version INT NOT NULL DEFAULT 1,
   UNIQUE KEY (misc_id), -- there can be only one version per misc_id

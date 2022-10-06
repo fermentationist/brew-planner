@@ -5,15 +5,37 @@ CREATE TABLE IF NOT EXISTS recipe (
   CONSTRAINT fk_brewery_id FOREIGN KEY (brewery_id) REFERENCES brewery (brewery_id),
   name VARCHAR (100) NOT NULL,
   UNIQUE KEY (brewery_id, name),
+  brewer VARCHAR (100),
+  asst_brewer VARCHAR (100),
   batch_size DECIMAL (10, 4), -- liters
-  target_og DECIMAL (4, 3), -- specific gravity (SG)
-  target_fg DECIMAL (4, 3), -- specific gravity (SG)
+  og DECIMAL (4, 3), -- specific gravity (SG)
+  fg DECIMAL (4, 3), -- specific gravity (SG)
   boil_time INT, -- minutes
   fermentation_temp DECIMAL (5, 2), -- degrees Celcius
   strike_water_vol DECIMAL (10, 4), -- liters
   strike_water_temp DECIMAL (5, 2), -- degrees Celcius
-  preboil_volume DECIMAL (10, 4), -- liters
+  boil_size DECIMAL (10, 4), -- liters, (preboil volume, named to match beerxml)
   preboil_sg DECIMAL (4, 3), -- specific gravity (SG)
+  efficiency DECIMAL (5, 2), -- efficiency assumed by recipe - this decimal represents a whole number percentage, i.e. the value 75 represents an efficiency of 75%, or 0.75
+  notes TEXT,
+  taste_notes TEXT,
+  fermentation_stages INT,
+  primary_age INT, -- in days
+  primary_temp DECIMAL (5, 2), -- degrees Celcius
+  secondary_age INT, -- in days
+  secondary_temp DECIMAL (5, 2), -- degrees Celcius
+  tertiary_age INT, -- in days
+  tertiary_temp DECIMAL (5, 2), -- degrees Celcius
+  taste_rating DECIMAL (4, 2), -- a number between 0 and 50
+  age INT, -- days to age after packaging
+  age_temp DECIMAL (5, 2), -- degrees Celcius
+  date TIMESTAMP, -- beerxml uses string
+  carbonation DECIMAL (5, 2), -- in volumes of CO2
+  forced_carbonation BOOLEAN,
+  priming_sugar_name VARCHAR (25), -- type of priming sugar
+  carbonation_temp DECIMAL (5, 2),
+  priming_sugar_equiv DECIMAL (5, 2), -- Factor used to convert this priming agent to an equivalent amount of corn sugar
+  keg_priming_factor DECIMAL (4, 2), -- Used to factor in the smaller amount of sugar needed for large containers.  For example, this might be 0.5 for a typical 5 gallon keg since naturally priming a keg requires about 50% as much sugar as priming bottles.
   is_private BOOLEAN DEFAULT 1,
   is_draft BOOLEAN DEFAULT 1,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

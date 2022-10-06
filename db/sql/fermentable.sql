@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS fermentable (
   fermentable_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  fermentable_id BINARY (16) NOT NULL,
-  created_by VARCHAR(36) NOT NULL,
+  fermentable_id BINARY (16) NOT NULL UNIQUE,
+  created_by VARCHAR (36) NOT NULL,
   version INT NOT NULL DEFAULT 1,
   UNIQUE KEY (fermentable_id), -- there can be only one version per fermentable_id
   name VARCHAR (100) NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS fermentable_version (
   fermentable_version_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   fermentable_id BINARY (16) NOT NULL,
   CONSTRAINT fk_fermentable_version_fermentable_id FOREIGN KEY (fermentable_id) REFERENCES fermentable (fermentable_id),
-  created_by VARCHAR(36) NOT NULL,
+  created_by VARCHAR (36) NOT NULL,
   version INT NOT NULL,
   UNIQUE KEY (fermentable_id), -- there can be only one version per fermentable_id
   name VARCHAR (100) NOT NULL,
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS recipe_fermentable (
   recipe_id BINARY (16) NOT NULL,
   CONSTRAINT fk_fermentable_recipe_id FOREIGN KEY (recipe_id) REFERENCES recipe(recipe_id),
   UNIQUE KEY (fermentable_id, version, recipe_id),
-  amount DECIMAL (10, 2), -- weight in kilograms
+  amount DECIMAL (10, 3), -- weight in kilograms
   mash BOOLEAN DEFAULT 1, -- whether or not the fermentable will be mashed
   added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

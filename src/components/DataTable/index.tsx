@@ -40,7 +40,7 @@ interface DataTableProps {
 }
 
 const StyledMUIDataTable = muiStyled(MUIDataTable)<DataTableProps>`
-  width: ${props => props.width || "calc(100vw - 3.5%)"};
+  width: ${props => props.width || "calc(100vw - 1.5%)"};
   @media screen and (max-width: 600px) {
     width: calc(100vw - 2em);
   }

@@ -4,12 +4,10 @@ import MenuIcon from "@mui/icons-material/Menu";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import AppBar from "@mui/material/AppBar";
-import BeerIcon from "@mui/icons-material/SportsBarTwoTone";
 import { styled as muiStyled } from "@mui/material/styles";
 import styled from "styled-components";
 import { ChildProps } from "../../types";
 import logo from "../../airlock_square.gif";
-// import logo from "../../SpiritHub_600x538@2x.png";
 import { useLocation } from "react-router-dom";
 import menuItems, { IMenuItem } from "../../config/menuItems";
 

@@ -10,34 +10,25 @@ const menuItems: IMenuItem[] = [
     link: "/home"
   },
   {
-    title: "Variants",
-    link: "/variants"
-  },
-  {
-    title: "Warehouse",
-    subMenu: [
-      {
-        title: "Inventory",
-        link: "/inventory"
-      },
-      {
-        title: "Fulfillment",
-        subMenu: [
-          // {
-          //   title: "Orders",
-          //   link: "/orders"
-          // },
-          {
-            title: "Shipments",
-            link: "/shipments"
-          }
-        ]
-      }
-    ]
-  },
-  {
     title: "Users",
     link: "/users"
+  },
+  {
+    title: "Brewhouses",
+    link: "/brewhouses"
+  },
+  {
+    title: "Ingredients",
+    subMenu: [
+      {
+        title: "Fermentables",
+        link: "/ingredients/fermentables"
+      },
+      {
+        title: "Hops",
+        link: "/ingredients/hops"
+      }
+    ]
   }
 ];
 

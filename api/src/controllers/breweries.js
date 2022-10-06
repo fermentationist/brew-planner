@@ -1,4 +1,4 @@
-// import * as breweryService from "../services/brewery.js";
+import * as breweryService from "../services/brewery.js";
 import * as validate from "../middleware/input-validation.js";
 import { rejectOnFalse } from "../utils/helpers.js";
 
@@ -29,18 +29,20 @@ const opt = { checkFalsy: true };
 
 export const getBreweries = async (req, res, next) => {
   try {
-    // const allBreweries = await breweryService.getBreweries();
     console.log("getBreweries hit")
-    const allBreweries = [{
-      breweryId: "fermentationists-brewery",
-      name: "Fermentationist's Brewery",
-      address: {
-        street: "4822 N Rockwell St",
-        city: "Chicago",
-        state: "IL",
-        zip: "60625"
-      }
-    }];
+
+    const allBreweries = await breweryService.getBreweries();
+    console.log("allBreweries:", allBreweries);
+    // const allBreweries = [{
+    //   breweryId: "fermentationists-brewery",
+    //   name: "Fermentationist's Brewery",
+    //   address: {
+    //     street: "4822 N Rockwell St",
+    //     city: "Chicago",
+    //     state: "IL",
+    //     zip: "60625"
+    //   }
+    // }];
     if (res.locals.user.role === "admin") {
       return res.locals.sendResponse(res, { breweries: allBreweries });
     }
@@ -86,27 +88,27 @@ const createBreweryValidation = [
     .isLength({ min: 2, max: 36 })
     .customSanitizer(validate.xssSanitize),
   validate
-    .body("address.street")
+    .body("street")
     .optional(opt)
     .isString()
     .isLength({ max: 100 })
     .customSanitizer(validate.xssSanitize),
   validate
-    .body("address.unit")
+    .body("unit")
     .optional(opt)
     .isString()
     .isLength({ max: 50 })
     .customSanitizer(validate.xssSanitize),
   validate
-    .body("address.city")
+    .body("city")
     .optional(opt)
     .isString()
     .isLength({ max: 50 })
     .customSanitizer(validate.xssSanitize),
-  validate.body("address.state").optional(opt).isString({ min: 2, max: 2 }),
-  validate.body("address.zip").optional(opt).isString({ min: 5, max: 5 }),
+  validate.body("state").optional(opt).isString({ min: 2, max: 2 }),
+  validate.body("zip").optional(opt).isString({ min: 5, max: 5 }),
   validate
-    .body("address.country")
+    .body("country")
     .optional(opt)
     .isString({ max: 30 })
     .customSanitizer(validate.xssSanitize),

@@ -7,11 +7,11 @@ import {
   patchUser,
   deleteUser
 } from "../controllers/users.js";
-// import {
-//   createBrewery,
-//   updateBrewery,
-//   deleteBrewery
-// } from "../controllers/breweries.js";
+import {
+  createBrewery,
+  // updateBrewery,
+  // deleteBrewery
+} from "../controllers/breweries.js";
 // import {
 //   createVariant,
 //   updateVariant,
@@ -27,7 +27,7 @@ router.get("/users", getUsers);
 router.post("/users", createUser);
 router.patch("/users/:uid", patchUser);
 router.delete("/users/:uid", deleteUser);
-// router.post("/breweries", createBrewery);
+router.post("/breweries", createBrewery);
 // router.patch("/breweries/:breweryId", updateBrewery);
 // router.delete("/breweries/:breweryId", deleteBrewery);
 // router.post("/variants", createVariant);

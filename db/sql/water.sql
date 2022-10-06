@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS water (
   water_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  water_id BINARY (16) NOT NULL,
+  water_id BINARY (16) NOT NULL UNIQUE,
   created_by VARCHAR(36) NOT NULL,
   version INT NOT NULL DEFAULT 1,
   UNIQUE KEY (water_id), -- there can be only one version per water_id

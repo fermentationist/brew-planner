@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS batch (
   date_packaged TIMESTAMP NULL DEFAULT NULL,
   notes TEXT,
   actual_og DECIMAL (4, 3),
-  actual_fg DECIMAL (4, 3)
+  actual_fg DECIMAL (4, 3),
+  ambient_temp DECIMAL (5, 2) -- degrees Celcius
 );
 
 DROP TRIGGER IF EXISTS before_insert_on_batch;

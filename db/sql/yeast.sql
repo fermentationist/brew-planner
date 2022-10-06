@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS yeast (
   yeast_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  yeast_id BINARY (16) NOT NULL,
+  yeast_id BINARY (16) NOT NULL UNIQUE,
   created_by VARCHAR (36) NOT NULL,
   version INT NOT NULL DEFAULT 1,
   UNIQUE KEY (yeast_id), -- there can be only one version per yeast_id

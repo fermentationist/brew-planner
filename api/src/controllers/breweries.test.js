@@ -29,12 +29,12 @@ const verifyBreweriesData = async breweriesData => {
       existingBrewery => existingBrewery.brewery_id === brewery.breweryId
     );
     assert.strictEqual(brewery.name, dbData.name);
-    assert.strictEqual(brewery.address.street, dbData.street);
-    assert.strictEqual(brewery.address.unit, dbData.unit);
-    assert.strictEqual(brewery.address.city, dbData.city);
-    assert.strictEqual(brewery.address.state, dbData.state);
-    assert.strictEqual(brewery.address.zip, dbData.zip);
-    assert.strictEqual(brewery.address.country, dbData.country);
+    assert.strictEqual(brewery.street, dbData.street);
+    assert.strictEqual(brewery.unit, dbData.unit);
+    assert.strictEqual(brewery.city, dbData.city);
+    assert.strictEqual(brewery.state, dbData.state);
+    assert.strictEqual(brewery.zip, dbData.zip);
+    assert.strictEqual(brewery.country, dbData.country);
   }
 };
 
@@ -76,24 +76,24 @@ export default describe("brewery routes", function () {
   const testData = {
     name: `Test Brewery ${randomId}`,
     breweryId: randomId,
-    address: {
-      street: "6428 N Ridgeway Av",
-      unit: null,
-      city: "Lincolnwood",
-      state: "IL",
-      zip: "60712",
-      country: "United States"
-    }
+    street: "6428 N Ridgeway Av",
+    unit: null,
+    city: "Lincolnwood",
+    state: "IL",
+    zip: "60712",
+    country: "United States",
+    isPrivate: false
   };
   // For these tests to work, there need to be test breweries in the database
-  const breweryIds = [randomString(6), randomString(6), randomString(6)];
-
+  const breweryNames = [randomString(6), randomString(6), randomString(6)];
+  const breweriesToDelete = [];
   before(async function () {
     //create test breweries
-    for (const breweryId of breweryIds) {
-      const name = `Test Brewery ${breweryId}`;
+    for (const breweryName of breweryNames) {
+      const name = `Test Brewery ${breweryName}`;
       console.log("creating test brewery:", name);
-      await createBrewery({ name, breweryId });
+      const breweryId = await createBrewery({ name });
+      breweriesToDelete.push(breweryId);
     }
     // since these are created directly through the db, need to invalidate cached table
     memCache.invalidate("brewery");
@@ -258,7 +258,7 @@ export default describe("brewery routes", function () {
   });
 
   after(async () => {
-    for (const breweryId of breweryIds) {
+    for (const breweryId of breweriesToDelete) {
       console.log("deleting test brewery:", breweryId);
       await deleteBrewery(breweryId);
     }

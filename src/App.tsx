@@ -18,7 +18,7 @@ const queryClient = new QueryClient(queryClientConfig);
 const App = () => {
   const [globalState] = useGlobalState();
   return (
-    <div className="App">
+    <div className="App" style={{position: "absolute"}}>
       <ThemeProvider theme={globalState?.theme === "dark" ? darkTheme : lightTheme}>
         <QueryClientProvider client={queryClient}>
           <APIProvider>

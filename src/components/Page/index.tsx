@@ -13,7 +13,12 @@ const Background = styled.div`
 
 const PageContainer = styled.div`
   position: absolute;
+  width: 100vw;
+  height: calc(100vh - ${props => props.theme?.componentStyles?.Header?.desktop?.height});
   margin: 1em;
+  @media screen and (max-width: 600px) {
+    height: calc(100vh - ${props => props.theme?.componentStyles?.Header?.mobile?.height});
+  }
 `;
 
 const StyledPaper = muiStyled(Paper)`

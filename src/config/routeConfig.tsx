@@ -1,4 +1,6 @@
 import Home from "../pages/Home";
+import BrewhousesPage from "../pages/Brewhouses";
+import Fermentables from "../pages/Fermentables";
 import InventoryPage from "../pages/Inventory";
 import InventoryDetailsPage from "../pages/InventoryDetails";
 import Users from "../pages/Users";
@@ -10,6 +12,7 @@ import ShipmentsPage from "../pages/Shipments";
 const Inventory = withBreweryRequired(InventoryPage);
 const InventoryDetails = withBreweryRequired(InventoryDetailsPage);
 const Shipments = withBreweryRequired(ShipmentsPage);
+const Brewhouses = withBreweryRequired(BrewhousesPage);
 
 export interface Routes {
   [route: string]: {
@@ -27,9 +30,13 @@ const routes: Routes = {
     roles: ["user", "manager", "admin"],
     component: <Home />
   },
-  "/inventory": {
+  "/brewhouses": {
     roles: ["user", "manager", "admin"],
-    component: <Inventory />
+    component: <Brewhouses />
+  },
+  "/ingredients/fermentables": {
+    roles: ["user", "manager", "admin"],
+    component: <Fermentables />
   },
   "/inventory/details": {
     roles: ["user", "manager", "admin"],

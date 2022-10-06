@@ -3,12 +3,12 @@ import {getAuth, signInWithEmailAndPassword, signOut, setPersistence, inMemoryPe
 export {createUser, deleteUser, updateUser, getUser, getAllUsers} from "../src/services/user.js";
 
 const clientApp = initializeClientApp({
-  apiKey: "AIzaSyCyEZO5bTPEI_yRguNegf01FYmrwpzcePY",
-  authDomain: "spirit-hub-plus-test.firebaseapp.com",
-  projectId: "spirit-hub-plus-test",
-  storageBucket: "spirit-hub-plus-test.appspot.com",
-  messagingSenderId: "405422551429",
-  appId: "1:405422551429:web:87360901e95f6c0c8d54ec"
+  apiKey: "AIzaSyBnsIopHa8DPfHyOwOVuB9tL4uNhjCe-xU",
+  authDomain: "fermentationist-brew-planner.firebaseapp.com",
+  projectId: "fermentationist-brew-planner",
+  storageBucket: "fermentationist-brew-planner.appspot.com",
+  messagingSenderId: "398501432243",
+  appId: "1:398501432243:web:a100413dd760fa5e5419c6"
 });
 
 const clientAuth = getAuth(clientApp);

@@ -8,5 +8,7 @@ export default [
   "yeast.sql",
   "misc.sql",
   "water.sql",
+  "style.sql",
+  "mash.sql",
   "insert.sql"
 ]

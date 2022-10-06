@@ -20,7 +20,7 @@ if (!TEST_MODE) {
 export default class TestAPI {
   constructor(config = {}) {
     this.config = config;
-    this.config.baseURL = config.baseURL || "http://localhost:" + PORT;
+    this.config.baseURL = config.baseURL || `http://localhost:${PORT}/api`;
     this.config.headers = config.headers || {};
     this.user = {
       email: null,
