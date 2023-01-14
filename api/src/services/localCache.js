@@ -1,3 +1,6 @@
+const DEFAULT_CACHE_EXPIRATION_TIME =
+  process.env.DEFAULT_CACHE_EXPIRATION_TIME || 1000 * 60 * 15;
+
 export const LocalCache = function () {
   return {
     _cache: new Map(),
@@ -6,10 +9,11 @@ export const LocalCache = function () {
       if (entry) {
         if (Date.now() >= entry.expires) {
           if (entry.updateFn) {
-            return entry.updateFn().then(freshData => {
+            return entry.updateFn().then((freshData) => {
+              console.log("updateFn called for key:", key);
               this.put(key, freshData, {
                 updateFn: entry.updateFn,
-                expirationTime: entry.expirationTime
+                expirationTime: entry.expirationTime,
               });
               return freshData;
             });
@@ -26,7 +30,7 @@ export const LocalCache = function () {
         expirationTime,
         expires: Date.now() + expirationTime,
         value,
-        updateFn
+        updateFn,
       };
       this._cache.set(key, data);
     },
@@ -40,42 +44,52 @@ export const LocalCache = function () {
       return this._cache.size;
     },
     invalidate: function (key) {
-      const keys = Array.isArray ? [key] : key;
+      const keys = Array.isArray(key) ? key : [key];
       for (const cacheKey of keys) {
         const entry = this._cache.get(cacheKey);
         const invalidatedEntry = {
           ...entry,
-          expires: Date.now()
+          expires: Date.now(),
         };
         this._cache.set(cacheKey, invalidatedEntry);
       }
-    }
+    },
   };
 };
 
 const localCache = new LocalCache();
 
 export const getCachedTable = async (tableName, updateFn, expirationTime) => {
+  console.log(
+    `getCachedTable called for ${tableName}, with updateFn: ${updateFn}`
+  );
   let tableData = await localCache.get(tableName);
-  if (!tableData) {
+  const dataExists =
+    tableData &&
+    (Array.isArray(tableData)
+      ? tableData.length
+      : typeof dataExists === "object"
+      ? Object.keys(dataExists).length
+      : true);
+  if (!dataExists) {
     const data = await updateFn();
     localCache.put(tableName, data, {
       updateFn,
-      expirationTime
+      expirationTime,
     });
     tableData = data;
   }
   return tableData;
 };
 
-export const isExistingTableAttribute = (tableName, updateFn) => {
+export const isExistingTableAttribute = (
+  tableName,
+  updateFn,
+  expirationTime = DEFAULT_CACHE_EXPIRATION_TIME
+) => {
   return async (inputStr, tableAttribute) => {
-    const tableData = await getCachedTable(
-      tableName,
-      updateFn,
-      1000 * 60 * 15
-    );
-    const attributeArray = tableData.map(row => row[tableAttribute]);
+    const tableData = await getCachedTable(tableName, updateFn, expirationTime);
+    const attributeArray = tableData.map((row) => row[tableAttribute]);
     return attributeArray.includes(inputStr);
   };
 };

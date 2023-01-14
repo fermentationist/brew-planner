@@ -1,10 +1,10 @@
 CREATE TABLE IF NOT EXISTS batch (
   batch_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  batch_id BINARY (16) NOT NULL UNIQUE,
+  batch_uuid BINARY (16) NOT NULL UNIQUE,
   -- recipe_id BINARY (16) NOT NULL UNIQUE,
   -- CONSTRAINT fk_recipe_id FOREIGN KEY (recipe_id) REFERENCES recipe (recipe_id),
-  brewhouse_id BINARY (16) NOT NULL UNIQUE,
-  CONSTRAINT fk_brewhouse_id FOREIGN KEY (brewhouse_id) REFERENCES brewhouse(brewhouse_id),
+  brewhouse_uuid BINARY (16) NOT NULL UNIQUE,
+  CONSTRAINT fk_brewhouse_uuid FOREIGN KEY (brewhouse_uuid) REFERENCES brewhouse(brewhouse_uuid),
   status ENUM ("planning", "brewing", "fermenting", "completed") DEFAULT "planning",
   date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   date_brewed TIMESTAMP NULL DEFAULT NULL,
@@ -21,7 +21,7 @@ CREATE TRIGGER before_insert_on_batch
   BEFORE INSERT ON batch 
   FOR EACH ROW 
     BEGIN 
-      IF (NEW.batch_id IS NULL) THEN
-        SET NEW.batch_id = UUID_TO_BIN(UUID());
+      IF (NEW.batch_uuid IS NULL) THEN
+        SET NEW.batch_uuid = UUID_TO_BIN(UUID());
       END IF;
     END;

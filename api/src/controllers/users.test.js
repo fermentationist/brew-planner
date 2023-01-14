@@ -2,15 +2,25 @@
 import assert from "assert";
 import TestAPI from "../../test/TestAPI.js";
 import { getUser } from "../../test/firebase.js";
-import { getRandomArrayMembers, randomString } from "../utils/helpers.js";
-import { expectError, expectInvalidInput, getExistingBreweryIds } from "../../test/testHelpers.js";
+import { randomString } from "../utils/helpers.js";
+import {
+  createEntityFactory,
+  deleteEntityFactory,
+  expectError,
+  expectInvalidInput,
+} from "../../test/testHelpers.js";
+
+// utility functions
+
+const createBrewery = createEntityFactory("brewery");
+const deleteBrewery = deleteEntityFactory("brewery");
 
 const verifyUser = async ({ ...testData }) => {
   delete testData.password;
   const user = await getUser({ email: testData.email });
   const userWithClaims = {
     ...user,
-    ...user.customClaims
+    ...user.customClaims,
   };
   for (const key in testData) {
     if (Array.isArray(testData[key])) {
@@ -30,25 +40,43 @@ export default describe("user routes", function () {
   const api = new TestAPI();
   let uid = null;
   let testData;
+  let brewery1Uuid, brewery2Uuid;
+  const breweriesToDelete = [];
 
   before(async function () {
-    const [breweryId] = getRandomArrayMembers(await getExistingBreweryIds(), 1)
+    const brewery1Data = {
+      name: `Test Brewery ${randomString(6)}`,
+      street: "6428 N Ridgeway Av",
+      unit: null,
+      city: "Lincolnwood",
+      state_or_province: "IL",
+      postal_code: "60712",
+      country: "United States",
+      is_private: false,
+    };
+    brewery1Uuid = await createBrewery(brewery1Data);
+    const brewery2Data = {
+      ...brewery1Data,
+      name: `Test Brewery ${randomString(6)}`,
+    };
+    brewery2Uuid = await createBrewery(brewery2Data);
     testData = {
       email: `${randomString(6)}@spirithub.com`,
       password: null,
       role: "user",
-      breweries: [breweryId],
-      displayName: "Test User"
+      breweries: [brewery1Uuid],
+      displayName: "Test User",
     };
+    breweriesToDelete.push(brewery1Uuid, brewery2Uuid);
   });
 
   it("/admin/users GET", async function () {
-    await api.signInAsNewUser({ role: "admin", breweries: [randomString(10)] });
+    await api.signInAsNewUser({ role: "admin", breweries: [brewery1Uuid] });
     const response = await api.request({ url: "/admin/users", method: "get" });
     assert.strictEqual(response.status, "ok");
     assert(Array.isArray(response.users));
     const containsNewUser = response.users.some(
-      user => user.uid === api.user.uid
+      (user) => user.uid === api.user.uid
     );
     assert(containsNewUser);
   });
@@ -57,7 +85,7 @@ export default describe("user routes", function () {
     const response = await api.request({
       url: "/admin/users",
       method: "post",
-      data: testData
+      data: testData,
     });
     uid = response.uid;
     assert.strictEqual(response.status, "ok");
@@ -76,7 +104,7 @@ export default describe("user routes", function () {
   it("/admin/users POST - input validation", async function () {
     const invalidData = {
       ...testData,
-      email: "invalid_email"
+      email: "invalid_email",
     };
     await expectInvalidInput(
       api.request({ url: "/admin/users", method: "post", data: invalidData }),
@@ -145,7 +173,7 @@ export default describe("user routes", function () {
     await api.request({
       url: "/admin/users",
       method: "post",
-      data: invalidData
+      data: invalidData,
     });
     const userData = await getUser({ email: invalidData.email });
     const sanitizedDisplayName = userData.displayName;
@@ -157,57 +185,57 @@ export default describe("user routes", function () {
 
   it("/admin/users/:uid PATCH", async function () {
     const newClaims = {
-      role: "admin"
+      role: "admin",
     };
     await api.request({
       url: `admin/users/${uid}`,
       method: "patch",
-      data: newClaims
+      data: newClaims,
     });
     await verifyUser({ ...testData, ...newClaims });
     const newBreweryClaims = {
-      breweries: getRandomArrayMembers(await getExistingBreweryIds(), 1)
-    }
+      breweries: [brewery2Uuid],
+    };
     await api.request({
       url: `admin/users/${uid}`,
       method: "patch",
-      data: newBreweryClaims
+      data: newBreweryClaims,
     });
     await verifyUser({ ...testData, ...newClaims, ...newBreweryClaims });
   });
 
-  it("/breweries/:breweryId/users GET", async function () {
-    const breweryId = api.user.breweries[0];
+  it("/breweries/:breweryUuid/users GET", async function () {
+    const breweryUuid = api.user.breweries[0];
     const response = await api.request({
-      url: `/breweries/${breweryId}/users`,
-      method: "get"
+      url: `/breweries/${breweryUuid}/users`,
+      method: "get",
     });
     assert.strictEqual(response.status, "ok");
-    assert(response.users.some(user => user.uid === api.user.uid));
+    assert(response.users.some((user) => user.uid === api.user.uid));
   });
 
-  it("/breweries/:breweryId/users GET - input validation", async function () {
-    let breweryId = "1";
+  it("/breweries/:breweryUuid/users GET - input validation", async function () {
+    let breweryUuid = "1";
     await expectInvalidInput(
       api.request({
-        url: `/breweries/${breweryId}/users`,
-        method: "get"
+        url: `/breweries/${breweryUuid}/users`,
+        method: "get",
       }),
       "invalid brewery ID"
     );
   });
 
-  it("breweries/:breweryId/users POST", async function () {
-    const breweryId = api.user.breweries[0];
+  it("breweries/:breweryUuid/users POST", async function () {
+    const breweryUuid = api.user.breweries[0];
     const data = {
       ...testData,
       email: `${randomString(6)}@spirithub.com`,
-      breweries: [breweryId]
+      breweries: [breweryUuid],
     };
     const response = await api.request({
-      url: `breweries/${breweryId}/users`,
+      url: `breweries/${breweryUuid}/users`,
       method: "post",
-      data
+      data,
     });
     uid = response.uid;
     assert.strictEqual(response.status, "ok");
@@ -216,17 +244,17 @@ export default describe("user routes", function () {
     verifyUser(data);
   });
 
-  it("breweries/:breweryId/users POST - input validation", async function () {
-    const breweryId = api.user.breweries[0];
+  it("breweries/:breweryUuid/users POST - input validation", async function () {
+    const breweryUuid = api.user.breweries[0];
     const invalidData = {
       ...testData,
-      email: "invalid_email"
+      email: "invalid_email",
     };
     await expectInvalidInput(
       api.request({
-        url: `/breweries/${breweryId}/users`,
+        url: `/breweries/${breweryUuid}/users`,
         method: "post",
-        data: invalidData
+        data: invalidData,
       }),
       "invalid email"
     );
@@ -234,9 +262,9 @@ export default describe("user routes", function () {
     invalidData.email = void 0;
     await expectInvalidInput(
       api.request({
-        url: `/breweries/${breweryId}/users`,
+        url: `/breweries/${breweryUuid}/users`,
         method: "post",
-        data: invalidData
+        data: invalidData,
       }),
       "missing email"
     );
@@ -245,9 +273,9 @@ export default describe("user routes", function () {
     invalidData.password = 123456789;
     await expectInvalidInput(
       api.request({
-        url: `/breweries/${breweryId}/users`,
+        url: `/breweries/${breweryUuid}/users`,
         method: "post",
-        data: invalidData
+        data: invalidData,
       }),
       "invalid password"
     );
@@ -255,9 +283,9 @@ export default describe("user routes", function () {
     invalidData.password = "short";
     await expectInvalidInput(
       api.request({
-        url: `/breweries/${breweryId}/users`,
+        url: `/breweries/${breweryUuid}/users`,
         method: "post",
-        data: invalidData
+        data: invalidData,
       }),
       "invalid password"
     );
@@ -266,9 +294,9 @@ export default describe("user routes", function () {
     invalidData.role = void 0;
     await expectInvalidInput(
       api.request({
-        url: `/breweries/${breweryId}/users`,
+        url: `/breweries/${breweryUuid}/users`,
         method: "post",
-        data: invalidData
+        data: invalidData,
       }),
       "missing role"
     );
@@ -276,9 +304,9 @@ export default describe("user routes", function () {
     invalidData.role = "invalid";
     await expectInvalidInput(
       api.request({
-        url: `/breweries/${breweryId}/users`,
+        url: `/breweries/${breweryUuid}/users`,
         method: "post",
-        data: invalidData
+        data: invalidData,
       }),
       "invalid role"
     );
@@ -287,18 +315,18 @@ export default describe("user routes", function () {
     invalidData.displayName = 12346789;
     await expectInvalidInput(
       api.request({
-        url: `/breweries/${breweryId}/users`,
+        url: `/breweries/${breweryUuid}/users`,
         method: "post",
-        data: invalidData
+        data: invalidData,
       }),
       "invalid displayName"
     );
 
     invalidData.displayName = "<script>alert('!')</script>";
     await api.request({
-      url: `/breweries/${breweryId}/users`,
+      url: `/breweries/${breweryUuid}/users`,
       method: "post",
-      data: invalidData
+      data: invalidData,
     });
     const userData = await getUser({ email: invalidData.email });
     const sanitizedDisplayName = userData.displayName;
@@ -311,49 +339,48 @@ export default describe("user routes", function () {
   it("/admin/users/:uid DELETE", async function () {
     const response = await api.request({
       url: `admin/users/${uid}`,
-      method: "delete"
+      method: "delete",
     });
     assert.strictEqual(response.status, "ok");
     await expectError(getUser({ uid }), "not_found");
   });
 
-  it("breweries/:breweryId/users/:uid DELETE", async function () {
-    const [breweryId] = getRandomArrayMembers(await getExistingBreweryIds(), 1);
+  it("breweries/:breweryUuid/users/:uid DELETE", async function () {
     const data = {
       ...testData,
-      breweries: [breweryId],
-      email: `${randomString(6)}@spirithub.com`
-    }
+      breweries: [brewery1Uuid],
+      email: `${randomString(6)}@spirithub.com`,
+    };
     const { uid: newUid } = await api.request({
       url: "/admin/users",
       method: "post",
-      data: data
+      data: data,
     });
     const response = await api.request({
-      url: `/breweries/${breweryId}/users/${newUid}`,
-      method: "delete"
+      url: `/breweries/${brewery1Uuid}/users/${newUid}`,
+      method: "delete",
     });
 
     assert.strictEqual(response.status, "ok");
     await expectError(getUser({ uid: newUid }), "not_found");
   });
 
-  it("breweries/:breweryId/users/:uid DELETE - errors", async function () {
-    const breweryId = api.user.breweries[0];
-    const [wrongBrewery] = getRandomArrayMembers(await getExistingBreweryIds(), 1);
+  it("breweries/:breweryUuid/users/:uid DELETE - errors", async function () {
+    const breweryUuid = api.user.breweries[0];
+    const wrongBrewery = brewery2Uuid;
     const { uid: newUid } = await api.request({
       url: "/admin/users",
       method: "post",
       data: {
         ...testData,
         breweries: [wrongBrewery],
-        email: `${randomString(6)}@spirithub.com`
-      }
+        email: `${randomString(6)}@spirithub.com`,
+      },
     });
     await expectError(
       api.request({
-        url: `/breweries/${breweryId}/users/${newUid}`,
-        method: "delete"
+        url: `/breweries/${breweryUuid}/users/${newUid}`,
+        method: "delete",
       }),
       "unauthorized"
     );
@@ -364,5 +391,8 @@ export default describe("user routes", function () {
 
   after(async function () {
     await api.deleteUser();
+    for (const uuid of breweriesToDelete) {
+      await deleteBrewery(uuid);
+    }
   });
 });

@@ -1,5 +1,6 @@
 import db from "../services/db/index.js";
 import { toCamelCase, toSnakeCase } from "../utils/helpers.js";
+import {parse as uuidParse} from "uuid";
 
 const camelCaseObject = object => {
   const newObject = {};
@@ -15,6 +16,20 @@ const snakeCaseObject = object => {
     newObject[toSnakeCase(key)] = object[key];
   }
   return newObject;
+}
+
+export const convertUuidToBuffer = uuid => Buffer.from(uuidParse(uuid));
+
+export const convertObjectUUIDsToBuffers = object => {
+  const newObj = {};
+  for (const key in object) {
+    let value = object[key];
+    if (key.toLowerCase().includes("uuid")) {
+      value = Buffer.from(uuidParse(value));
+    }
+    newObj[key] = value;
+  }
+  return newObj;
 }
 
 // removes keys containing the substring "_key", changes Date objects to Unix timestamps and camelCases keys
@@ -54,27 +69,34 @@ export default class Table {
 
   async select (params) {
     await this.init();
-    const snakeCaseParams = snakeCaseObject(params);
+    const paramsWithBinaryUuids = convertObjectUUIDsToBuffers(params);
+    const snakeCaseParams = snakeCaseObject(paramsWithBinaryUuids);
     const results = await db.selectProm(this.tableName, this.columns, snakeCaseParams);
     return cleanResults(results);
   }
 
   async update (updates, params) {
     await this.init();
-    const snakeCaseParams = snakeCaseObject(params);
-    const snakeCaseUpdates = snakeCaseObject(updates);
+    const paramsWithBinaryUuids = convertObjectUUIDsToBuffers(params);
+    const snakeCaseParams = snakeCaseObject(paramsWithBinaryUuids);
+    const updatesWithBinaryUuids = convertObjectUUIDsToBuffers(updates);
+    const snakeCaseUpdates = snakeCaseObject(updatesWithBinaryUuids);
     return db.updateProm(this.tableName, this.columns, snakeCaseUpdates, snakeCaseParams);
   }
 
-  async insert (rows) {
+  async insert (rows, ignore = true) {
     await this.init();
-    const snakeCaseRows = rows.map(row => snakeCaseObject(row));
-    return db.insertProm(this.tableName, this.columns, snakeCaseRows);
+    const snakeCaseRows = rows.map(row => {
+      const rowWithBinaryUuids = convertObjectUUIDsToBuffers(row);
+      return snakeCaseObject(rowWithBinaryUuids);
+    });
+    return db.insertProm(this.tableName, this.columns, snakeCaseRows, ignore);
   }
 
   async delete (params) {
     await this.init();
-    const snakeCaseParams = snakeCaseObject(params);
+    const paramsWithBinaryUuids = convertObjectUUIDsToBuffers(params);
+    const snakeCaseParams = snakeCaseObject(paramsWithBinaryUuids);
     return db.deleteProm(this.tableName, this.columns, snakeCaseParams);
   }
 }

@@ -1,7 +1,10 @@
 import { Router } from "express";
 import testController from "../controllers/testController.js";
 import { getBreweries } from "../controllers/breweries.js";
-import { protectBreweryRoutes, protectAdminRoutes } from "../middleware/auth.js";
+import {
+  protectBreweryRoutes,
+  protectAdminRoutes,
+} from "../middleware/auth.js";
 // import {
 //   getAllInventory,
 //   getBreweryInventory,
@@ -13,22 +16,31 @@ import { protectBreweryRoutes, protectAdminRoutes } from "../middleware/auth.js"
 import {
   getBreweryUsers,
   createBreweryUser,
-  deleteBreweryUser
+  deleteBreweryUser,
 } from "../controllers/users.js";
+import {
+  getBrewhouses,
+  createBrewhouse,
+  updateBrewhouse,
+} from "../controllers/brewhouses.js";
 
 const router = Router();
 
 // breweries routes
 router.get("/", getBreweries);
 // router.get("/inventory", [protectAdminRoutes, getAllInventory]);
-router.use("/:breweryId/", protectBreweryRoutes);
-router.get("/:breweryId/test", testController);
-router.get("/:breweryId/users", getBreweryUsers);
-router.post("/:breweryId/users", createBreweryUser);
-router.delete("/:breweryId/users/:uid", deleteBreweryUser);
-// router.get("/:breweryId/inventory", getBreweryInventory);
-// router.post("/:breweryId/inventory", createBreweryInventory);
-// router.patch("/:breweryId/inventory/:inventoryId", updateBreweryInventory);
-// router.get("/:breweryId/inventoryChange", getInventoryChanges);
-// router.post("/:breweryId/inventoryChange", createInventoryChange);
+router.use("/:breweryUuid/", protectBreweryRoutes);
+router.get("/:breweryUuid/test", testController);
+router.get("/:breweryUuid/users", getBreweryUsers);
+router.post("/:breweryUuid/users", createBreweryUser);
+router.delete("/:breweryUuid/users/:uid", deleteBreweryUser);
+router.get("/:breweryUuid/brewhouses", getBrewhouses);
+router.post("/:breweryUuid/brewhouses", createBrewhouse);
+router.patch("/:breweryUuid/brewhouses/:brewhouseUuid", updateBrewhouse);
+// router.post("/:breweryUuid/brewhouses", createBrewhouse);
+// router.get("/:breweryUuid/inventory", getBreweryInventory);
+// router.post("/:breweryUuid/inventory", createBreweryInventory);
+// router.patch("/:breweryUuid/inventory/:inventoryId", updateBreweryInventory);
+// router.get("/:breweryUuid/inventoryChange", getInventoryChanges);
+// router.post("/:breweryUuid/inventoryChange", createInventoryChange);
 export default router;

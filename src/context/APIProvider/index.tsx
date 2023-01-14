@@ -27,6 +27,13 @@ const APIProvider = function (props: ChildProps) {
       { staleTime: 60 * 1000 * 10}
     ),
 
+    brewhouses: useQuery(
+      ["brewhouses", auth?.currentBrewery, auth?.accessToken],
+      new APIRequest({ baseURL: BREWERY_ROUTE, url: "/brewhouses", method: "get" })
+        .request,
+      { staleTime: 60 * 1000 * 10}
+    ),
+
     inventory: useQuery(
       ["inventory", auth?.currentBrewery, auth?.accessToken], 
       new APIRequest({ baseURL: BREWERY_ROUTE, url: "/inventory", method: "get" }).request,

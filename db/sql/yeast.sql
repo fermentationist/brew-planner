@@ -1,9 +1,9 @@
 CREATE TABLE IF NOT EXISTS yeast (
   yeast_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  yeast_id BINARY (16) NOT NULL UNIQUE,
+  yeast_uuid BINARY (16) NOT NULL UNIQUE,
   created_by VARCHAR (36) NOT NULL,
   version INT NOT NULL DEFAULT 1,
-  UNIQUE KEY (yeast_id), -- there can be only one version per yeast_id
+  UNIQUE KEY (yeast_uuid), -- there can be only one version per yeast_uuid
   name VARCHAR (100) NOT NULL,
   type ENUM ("Ale", "Lager", "Wheat", "Wine", "Champagne", "Kveik") NOT NULL,
   laboratory VARCHAR (100), -- name of the lab that produced the yeast
@@ -18,15 +18,15 @@ CREATE TABLE IF NOT EXISTS yeast (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-ALTER TABLE yeast ADD INDEX (yeast_id);
+ALTER TABLE yeast ADD INDEX (yeast_uuid);
 
 CREATE TABLE IF NOT EXISTS yeast_version (
   yeast_version_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  yeast_id BINARY (16) NOT NULL,
-  CONSTRAINT fk_yeast_version_yeast_id FOREIGN KEY (yeast_id) REFERENCES yeast (yeast_id), -- reference to current version
+  yeast_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_yeast_version_yeast_uuid FOREIGN KEY (yeast_uuid) REFERENCES yeast (yeast_uuid), -- reference to current version
   created_by VARCHAR (36) NOT NULL,
   version INT NOT NULL DEFAULT 1,
-  UNIQUE KEY (yeast_id),
+  UNIQUE KEY (yeast_uuid),
   name VARCHAR (100) NOT NULL,
   type ENUM ("Ale", "Lager", "Wheat", "Wine", "Champagne", "Kveik") NOT NULL,
   laboratory VARCHAR (100), -- name of the lab that produced the yeast
@@ -43,11 +43,11 @@ CREATE TABLE IF NOT EXISTS yeast_version (
 
 
 CREATE TABLE IF NOT EXISTS recipe_yeast (
-  yeast_id BINARY (16) NOT NULL,
+  yeast_uuid BINARY (16) NOT NULL,
   version INT NOT NULL,
-  recipe_id BINARY (16) NOT NULL,
-  CONSTRAINT fk_yeast_recipe_id FOREIGN KEY (recipe_id) REFERENCES recipe(recipe_id),
-  UNIQUE KEY (yeast_id, version, recipe_id),
+  recipe_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_yeast_recipe_uuid FOREIGN KEY (recipe_uuid) REFERENCES recipe(recipe_uuid),
+  UNIQUE KEY (yeast_uuid, version, recipe_uuid),
   form ENUM ("Liquid", "Dry", "Slant", "Culture") NOT NULL,
   volume DECIMAL (10, 4), -- volume in liters,
   weight DECIMAL (10, 6), -- weight in kilograms
@@ -73,8 +73,8 @@ CREATE TRIGGER before_insert_on_yeast
   BEFORE INSERT ON yeast
   FOR EACH ROW
   BEGIN
-    IF (NEW.yeast_id IS NULL) THEN
-      SET NEW.yeast_id = UUID_TO_BIN(UUID());
+    IF (NEW.yeast_uuid IS NULL) THEN
+      SET NEW.yeast_uuid = UUID_TO_BIN(UUID());
     END IF;
   END;
 
@@ -85,7 +85,7 @@ CREATE TRIGGER before_insert_on_recipe_yeast
   BEGIN
     DECLARE id_count INT;
     SELECT COUNT(*) INTO id_count FROM yeast_view
-    WHERE yeast_id = NEW.yeast_id AND version = NEW.version;
+    WHERE yeast_uuid = NEW.yeast_uuid AND version = NEW.version;
     IF (id_count < 1) THEN
       SIGNAL SQLSTATE "45000"
         SET MESSAGE_TEXT = "Invalid id and/or version";
@@ -97,7 +97,7 @@ CREATE TRIGGER before_update_on_yeast
   FOR EACH ROW
   BEGIN
     INSERT INTO yeast_version (
-      yeast_id,
+      yeast_uuid,
       created_by,
       version,
       name,
@@ -114,7 +114,7 @@ CREATE TRIGGER before_update_on_yeast
       created_at
     )
     VALUES (
-      OLD.yeast_id,
+      OLD.yeast_uuid,
       OLD.created_by,
       OLD.version,
       OLD.name,

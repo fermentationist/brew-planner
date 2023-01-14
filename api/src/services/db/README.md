@@ -2,22 +2,10 @@
 
 This MySQL database connector uses the "mysql" database driver for Node.js.
 
-## Installation
-
-To install from Github:
-`npm install --save https://github.com/BigFishCraftSpirits/mysql`
-
-After initial installation, it can be updated with:
-`npm update @spirithub/mysql`
-
-To install on remote server:
-`npm install https://<username>:<github token>@github.com/BigFishCraftSpirits/mysql`
-(Installing in this way will store your username and token in package.json, so be sure to discard this change to avoid committing credentials)
-
 ## Usage
 
 ```
-const initDB = require("@spirithub/mysql");
+const initDB = require("./path_to/lib/index.js");
 
 const dbConfig = {
   host: process.env.DB_HOST,

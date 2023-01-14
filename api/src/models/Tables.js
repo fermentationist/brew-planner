@@ -4,6 +4,7 @@ const Tables = {};
 
 const tableNames = [
   "brewery",
+  "brewhouse",
   "recipe"
 ];
 

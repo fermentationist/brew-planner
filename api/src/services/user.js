@@ -3,6 +3,8 @@ import {getAuth} from "firebase-admin/auth";
 import { randomString } from "../utils/helpers.js";
 import { createRequire } from "module";
 import { opError } from "../server/errors.js";
+import localCache from "./localCache/index.js";
+
 const require = createRequire(import.meta.url);
 const serviceAccount = require("../config/firebase-adminsdk-key.json"); // ES Modules can't import JSON for some reason
 
@@ -27,6 +29,7 @@ export const createUser = async ({email, password, role, breweries, displayName}
   const userRecord = await auth.createUser({email, password, displayName});
   await updateUser(userRecord.uid, {role, breweries} );
   console.log(`User ${email} (${userRecord.uid}) created.`);
+  localCache.invalidate("user");
   return userRecord;
 }
 
@@ -75,6 +78,7 @@ export const getAllUsers = async (nextPageToken) => {
 export const deleteUser = async uid => {
   await auth.deleteUser(uid);
   console.log(`User with uid ${uid} deleted.`);
+  localCache.invalidate("user");
   return true;
 }
 
@@ -88,6 +92,7 @@ export const updateUser = async (uid, newClaims, merge = true) => {
       ...newClaims
     }
   }
+  localCache.invalidate("user");
   return auth.setCustomUserClaims(uid, claims);
 }
 
@@ -96,3 +101,4 @@ export const generatePasswordResetLink = async email => {
   return resetLink;
 }
 
+export const isExistingUserAttribute = localCache.isExistingTableAttribute("user", getAllUsers);

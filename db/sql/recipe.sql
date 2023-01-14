@@ -1,10 +1,11 @@
 CREATE TABLE IF NOT EXISTS recipe (
   recipe_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  recipe_id BINARY (16) NOT NULL,
-  brewery_id BINARY (16) NOT NULL UNIQUE,
-  CONSTRAINT fk_brewery_id FOREIGN KEY (brewery_id) REFERENCES brewery (brewery_id),
+  recipe_uuid BINARY (16) NOT NULL,
+  brewery_uuid BINARY (16) NOT NULL UNIQUE,
+  CONSTRAINT fk_brewery_uuid FOREIGN KEY (brewery_uuid) REFERENCES brewery (brewery_uuid),
   name VARCHAR (100) NOT NULL,
-  UNIQUE KEY (brewery_id, name),
+  UNIQUE KEY (brewery_uuid, name),
+  type ENUM ("Extract", "Partial Mash", "All Grain") DEFAULT "All Grain",
   brewer VARCHAR (100),
   asst_brewer VARCHAR (100),
   batch_size DECIMAL (10, 4), -- liters
@@ -19,7 +20,7 @@ CREATE TABLE IF NOT EXISTS recipe (
   efficiency DECIMAL (5, 2), -- efficiency assumed by recipe - this decimal represents a whole number percentage, i.e. the value 75 represents an efficiency of 75%, or 0.75
   notes TEXT,
   taste_notes TEXT,
-  fermentation_stages INT,
+  fermentation_stages INT, -- number of fermentation stages used
   primary_age INT, -- in days
   primary_temp DECIMAL (5, 2), -- degrees Celcius
   secondary_age INT, -- in days
@@ -41,7 +42,7 @@ CREATE TABLE IF NOT EXISTS recipe (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-ALTER TABLE recipe ADD INDEX (recipe_id);
+ALTER TABLE recipe ADD INDEX (recipe_uuid);
 
 DROP TRIGGER IF EXISTS before_insert_on_recipe;
 
@@ -49,7 +50,7 @@ CREATE TRIGGER before_insert_on_recipe
   BEFORE INSERT ON recipe
   FOR EACH ROW
   BEGIN
-    IF (NEW.recipe_id IS NULL) THEN
-      SET NEW.recipe_id = UUID_TO_BIN(UUID());
+    IF (NEW.recipe_uuid IS NULL) THEN
+      SET NEW.recipe_uuid = UUID_TO_BIN(UUID());
     END IF;
   END;

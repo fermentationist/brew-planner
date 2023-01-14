@@ -1,6 +1,7 @@
 /* global describe, before, it, after */
 import db from "../index.js";
 import assert from "assert";
+import {randomInt, randomString} from "../../../utils/helpers.js";
 
 // Appending current timestamp to table name will help ensure we don't accidentally overwrite any existing tables
 const TEST_TABLE = process.env.TEST_TABLE_PREFIX + "_" + Date.now();
@@ -19,17 +20,6 @@ const stdoutSpy = (chunk, ...otherArgs) => {
 };
 
 // Utility functions
-const randomNum = (min, max) =>
-  Math.floor(Math.random() * (max - min + 1)) + min;
-
-const randomString = length => {
-  const chars = "1234567890abcdefghijklmnopqrstuvwxyz";
-  return Array(length)
-    .fill(null)
-    .map(() => chars[randomNum(0, chars.length - 1)])
-    .join("");
-};
-
 const randomTable = numRows => {
   const table = Array(numRows)
     .fill(null)
@@ -352,7 +342,7 @@ export default describe("services", () => {
       });
 
       it("insert - multiple", function (done) {
-        const testRows = Array(randomNum(2, 10))
+        const testRows = Array(randomInt(2, 10))
           .fill(null)
           .map(() => {
             return {
@@ -575,7 +565,7 @@ export default describe("services", () => {
       });
 
       it("replaceTable", function (done) {
-        const replacementTable = randomTable(randomNum(2, 10));
+        const replacementTable = randomTable(randomInt(2, 10));
         db.replaceTable(
           TEST_TABLE,
           ["message"],
@@ -621,7 +611,7 @@ export default describe("services", () => {
       });
 
       it("replaceTableProm", async function () {
-        const replacementTable = randomTable(randomNum(2, 10));
+        const replacementTable = randomTable(randomInt(2, 10));
         const results = await db.replaceTableProm(
           TEST_TABLE,
           ["message"],

@@ -1,9 +1,10 @@
 import Tables from "../models/Tables.js";
+import localCache from "./localCache/index.js";
 
-export const getBreweries = async breweryId => {
+export const getBreweries = async breweryUuid => {
   let breweries = [];
-  if (breweryId) {
-    breweries = await Tables.brewery.select({breweryId});
+  if (breweryUuid) {
+    breweries = await Tables.brewery.select({breweryUuid});
   } else {
     breweries = await Tables.brewery.select();
   }
@@ -11,11 +12,26 @@ export const getBreweries = async breweryId => {
 }
 
 export const createBrewery = async breweryData => {
+  const {breweryUuid} = breweryData;
   const {insertId} = await Tables.brewery.insert([breweryData]);
+  if (breweryUuid) { // If user passed a UUID for the new brewery
+    return breweryUuid;
+  }
   const [newBrewery] = await Tables.brewery.select({breweryKey: insertId});
-  return newBrewery.breweryId;
+  localCache.invalidate("brewery");
+  return newBrewery.breweryUuid;
 }
 
-export const deleteBrewery = () => {
-  
+export const updateBrewery = async (breweryUuid, breweryData) => {
+  const result = await Tables.brewery.update(breweryData, {breweryUuid});
+  localCache.invalidate("brewery");
+  return result;
 }
+
+export const deleteBrewery = async breweryUuid => {
+  const result = await Tables.brewery.delete({breweryUuid});
+  localCache.invalidate("brewery");
+  return result;
+}
+
+export const isExistingBreweryAttribute = localCache.isExistingTableAttribute("brewery", getBreweries);

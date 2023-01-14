@@ -1,9 +1,9 @@
 CREATE TABLE IF NOT EXISTS fermentable (
   fermentable_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  fermentable_id BINARY (16) NOT NULL UNIQUE,
+  fermentable_uuid BINARY (16) NOT NULL UNIQUE,
   created_by VARCHAR (36) NOT NULL,
   version INT NOT NULL DEFAULT 1,
-  UNIQUE KEY (fermentable_id), -- there can be only one version per fermentable_id
+  UNIQUE KEY (fermentable_uuid), -- there can be only one version per fermentable_id
   name VARCHAR (100) NOT NULL,
   type ENUM ("Grain", "Sugar", "Extract", "Dry Extract", "Adjunct"),
   yield DECIMAL (5, 2) NOT NULL, -- this decimal represents a whole number percentage, i.e. the value 33.33 represents a yield of 33.33%, or 0.3333
@@ -21,15 +21,15 @@ CREATE TABLE IF NOT EXISTS fermentable (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-ALTER TABLE fermentable ADD INDEX (fermentable_id);
+ALTER TABLE fermentable ADD INDEX (fermentable_uuid);
 
 CREATE TABLE IF NOT EXISTS fermentable_version (
   fermentable_version_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  fermentable_id BINARY (16) NOT NULL,
-  CONSTRAINT fk_fermentable_version_fermentable_id FOREIGN KEY (fermentable_id) REFERENCES fermentable (fermentable_id),
+  fermentable_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_fermentable_version_fermentable_uuid FOREIGN KEY (fermentable_uuid) REFERENCES fermentable (fermentable_uuid),
   created_by VARCHAR (36) NOT NULL,
   version INT NOT NULL,
-  UNIQUE KEY (fermentable_id), -- there can be only one version per fermentable_id
+  UNIQUE KEY (fermentable_uuid), -- there can be only one version per fermentable_uuid
   name VARCHAR (100) NOT NULL,
   type ENUM ("Grain", "Sugar", "Extract", "Dry Extract", "Adjunct"),
   yield DECIMAL (5, 2) NOT NULL, -- this decimal represents a whole number percentage, i.e. the value 33.33 represents a yield of 33.33%, or 0.3333
@@ -48,11 +48,11 @@ CREATE TABLE IF NOT EXISTS fermentable_version (
 );
 
 CREATE TABLE IF NOT EXISTS recipe_fermentable (
-  fermentable_id BINARY (16) NOT NULL,
+  fermentable_uuid BINARY (16) NOT NULL,
   version INT NOT NULL,
-  recipe_id BINARY (16) NOT NULL,
-  CONSTRAINT fk_fermentable_recipe_id FOREIGN KEY (recipe_id) REFERENCES recipe(recipe_id),
-  UNIQUE KEY (fermentable_id, version, recipe_id),
+  recipe_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_fermentable_recipe_uuid FOREIGN KEY (recipe_uuid) REFERENCES recipe(recipe_uuid),
+  UNIQUE KEY (fermentable_uuid, version, recipe_uuid),
   amount DECIMAL (10, 3), -- weight in kilograms
   mash BOOLEAN DEFAULT 1, -- whether or not the fermentable will be mashed
   added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -73,8 +73,8 @@ CREATE TRIGGER before_insert_on_fermentable
   BEFORE INSERT ON fermentable
   FOR EACH ROW
   BEGIN
-    IF (NEW.fermentable_id IS NULL) THEN
-      SET NEW.fermentable_id = UUID_TO_BIN(UUID());
+    IF (NEW.fermentable_uuid IS NULL) THEN
+      SET NEW.fermentable_uuid = UUID_TO_BIN(UUID());
     END IF;
   END;
 
@@ -85,7 +85,7 @@ CREATE TRIGGER before_insert_on_recipe_fermentable
   BEGIN
     DECLARE id_count INT;
     SELECT COUNT(*) INTO id_count FROM fermentable_view
-    WHERE fermentable_id = NEW.fermentable_id AND version = NEW.version;
+    WHERE fermentable_uuid = NEW.fermentable_uuid AND version = NEW.version;
     IF (id_count < 1) THEN
       SIGNAL SQLSTATE "45000"
         SET MESSAGE_TEXT = "Invalid id and/or version";
@@ -97,7 +97,7 @@ CREATE TRIGGER before_update_on_fermentable
   FOR EACH ROW
   BEGIN
     INSERT INTO fermentable_version (
-      fermentable_id,
+      fermentable_uuid,
       created_by,
       version,
       name,
@@ -117,7 +117,7 @@ CREATE TRIGGER before_update_on_fermentable
       created_at
     )
     VALUES (
-      OLD.fermentable_id,
+      OLD.fermentable_uuid,
       OLD.created_by,
       OLD.version,
       OLD.name,

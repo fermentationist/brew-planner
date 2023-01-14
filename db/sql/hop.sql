@@ -1,10 +1,10 @@
 CREATE TABLE IF NOT EXISTS hop (
   hop_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  hop_id BINARY (16) NOT NULL UNIQUE,
+  hop_uuid BINARY (16) NOT NULL UNIQUE,
   name VARCHAR (100) NOT NULL,
   created_by VARCHAR (36) NOT NULL,
   version INT NOT NULL DEFAULT 1,
-  UNIQUE KEY (hop_id),
+  UNIQUE KEY (hop_uuid),
   alpha DECIMAL (5, 2) NOT NULL, -- this decimal represents a whole number percentage, i.e. the value 5.5 represents an alpha acid level of 5.5%, or 0.055
   beta DECIMAL (5, 2), -- percentage
   form ENUM ("Pellet", "Plug", "Leaf"),
@@ -18,16 +18,16 @@ CREATE TABLE IF NOT EXISTS hop (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-ALTER TABLE hop ADD INDEX (hop_id);
+ALTER TABLE hop ADD INDEX (hop_uuid);
 
 CREATE TABLE IF NOT EXISTS hop_version (
   hop_version_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  hop_id BINARY (16) NOT NULL,
-  CONSTRAINT fk_hop_version_hop_id FOREIGN KEY (hop_id) REFERENCES hop (hop_id),
+  hop_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_hop_version_hop_uuid FOREIGN KEY (hop_uuid) REFERENCES hop (hop_uuid),
   name VARCHAR (100) NOT NULL,
   created_by VARCHAR (36) NOT NULL,
   version INT NOT NULL,
-  UNIQUE KEY (hop_id, version),
+  UNIQUE KEY (hop_uuid, version),
   alpha DECIMAL (5, 2) NOT NULL, -- this decimal represents a whole number percentage, i.e. the value 5.5 represents an alpha acid level of 5.5%, or 0.055
   beta DECIMAL (5, 2), -- percentage
   form ENUM ("Pellet", "Plug", "Leaf"),
@@ -42,14 +42,14 @@ CREATE TABLE IF NOT EXISTS hop_version (
 );
 
 CREATE TABLE IF NOT EXISTS recipe_hop (
-  hop_id  BINARY (16) NOT NULL,
+  hop_uuid  BINARY (16) NOT NULL,
   version INT NOT NULL,
-  recipe_id  BINARY (16) NOT NULL,
-  CONSTRAINT fk_hop_recipe_id FOREIGN KEY (recipe_id) REFERENCES recipe(recipe_id),
+  recipe_uuid  BINARY (16) NOT NULL,
+  CONSTRAINT fk_hop_recipe_uuid FOREIGN KEY (recipe_uuid) REFERENCES recipe(recipe_uuid),
   amount DECIMAL (10, 4), -- weight in kilograms
   `use` ENUM ("Mash", "First Wort", "Boil", "Aroma", "Dry Hop") NOT NULL,
   time INT NOT NULL, -- minutes
-  UNIQUE KEY (hop_id, version, recipe_id, `use`, time),
+  UNIQUE KEY (hop_uuid, version, recipe_uuid, `use`, time),
   added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -68,8 +68,8 @@ CREATE TRIGGER before_insert_on_hop
   BEFORE INSERT ON hop
   FOR EACH ROW
   BEGIN
-    IF (NEW.hop_id IS NULL) THEN
-      SET NEW.hop_id = UUID_TO_BIN(UUID());
+    IF (NEW.hop_uuid IS NULL) THEN
+      SET NEW.hop_uuid = UUID_TO_BIN(UUID());
     END IF;
   END;
 
@@ -80,7 +80,7 @@ CREATE TRIGGER before_insert_on_recipe_hop
   BEGIN
     DECLARE id_count INT;
     SELECT COUNT(*) INTO id_count FROM hop_view
-    WHERE hop_id = NEW.hop_id AND version = NEW.version;
+    WHERE hop_uuid = NEW.hop_uuid AND version = NEW.version;
     IF (id_count < 1) THEN
       SIGNAL SQLSTATE "45000"
         SET MESSAGE_TEXT = "Invalid id and/or version";
@@ -92,7 +92,7 @@ CREATE TRIGGER before_update_on_hop
   FOR EACH ROW
   BEGIN
     INSERT INTO hop_version (
-      hop_id,
+      hop_uuid,
       name,
       created_by,
       version,
@@ -108,7 +108,7 @@ CREATE TRIGGER before_update_on_hop
       myrcene
     )
     VALUES (
-      OLD.hop_id,
+      OLD.hop_uuid,
       OLD.name,
       OLD.created_by,
       OLD.version,

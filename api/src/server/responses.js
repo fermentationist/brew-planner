@@ -8,7 +8,7 @@ export const sendError = (res, error) => {
   const statusCode = error.httpCode || (isOp ? 400 : 500);
   const baseMessage = "Something has gone wrong with your request.";
   const longMessage =
-    baseMessage + " If the problem continues, contact help@spirithub.com.";
+    baseMessage + " If the problem continues, contact fermentationist@gmail.com.";
   const errorMessage = isOp
     ? error.message || baseMessage
     : TEST_MODE

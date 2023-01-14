@@ -12,7 +12,7 @@ CREATE PROCEDURE insert_test ()
     SELECT LAST_INSERT_ID() INTO breweryKey;
 
     INSERT INTO recipe (
-      brewery_id,
+      brewery_uuid,
       name,
       batch_size,
       og,
@@ -21,11 +21,11 @@ CREATE PROCEDURE insert_test ()
       fermentation_temp,
       strike_water_vol,
       strike_water_temp,
-      preboil_volume
+      boil_size
     )
     VALUES
     (
-      (SELECT brewery_id FROM brewery WHERE brewery_key = breweryKey),
+      (SELECT brewery_uuid FROM brewery WHERE brewery_key = breweryKey),
       "Test recipe",
       5.25,
       1.048,
@@ -37,13 +37,13 @@ CREATE PROCEDURE insert_test ()
       8.5
     );
     SELECT LAST_INSERT_ID() INTO recipeKey;
-    SELECT recipe_id FROM recipe WHERE recipe_key = recipeKey INTO recipeId;
+    SELECT recipe_uuid FROM recipe WHERE recipe_key = recipeKey INTO recipeId;
 
     INSERT INTO water (name, created_by, calcium) VALUES ("Test water", "Fermentationist", 35);
     SELECT LAST_INSERT_ID() INTO waterKey;
-    SELECT water_id FROM water WHERE water_key = waterKey INTO waterId;
+    SELECT water_uuid FROM water WHERE water_key = waterKey INTO waterId;
 
-    INSERT INTO recipe_water (water_id, version, recipe_id, amount) VALUES (waterId, 1, recipeId, 1000);
+    INSERT INTO recipe_water (water_uuid, version, recipe_uuid, amount) VALUES (waterId, 1, recipeId, 1000);
   END;
 
 CALL insert_test();

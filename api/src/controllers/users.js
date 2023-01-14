@@ -1,22 +1,21 @@
 import * as userService from "../services/user.js";
 import * as validate from "../middleware/input-validation.js";
-// import { breweryIdChecker } from "./breweries.js";
+import { rejectOnFalse } from "../utils/helpers.js";
+import { breweryUuidChecker, isExistingBreweryUuid } from "./breweries.js";
 
 //validation helpers
-// const isBreweryIdArray = async inputArray => {
-//   if (!Array.isArray(inputArray)) {
-//     return Promise.reject(false);
-//   }
-//   for (const id of inputArray) {
-//     const isValid = await breweryIdChecker(id);
-//     if (!isValid) {
-//       return Promise.reject(false);
-//     }
-//   }
-//   return Promise.resolve(true);
-// };
-
-const isBreweryIdArray = thisIsAPlaceholder => true; // replace this!!
+const uidChecker = input => userService.isExistingUserAttribute(input, "uid");
+export const isExistingUid = rejectOnFalse(uidChecker);
+const breweryUuidArrayChecker = async input => {
+  for (const uuid of input) {
+    const check = await breweryUuidChecker(uuid);
+    if (!check) {
+      return false;
+    }
+  }
+  return true;
+}
+const isBreweryUuidArray = rejectOnFalse(breweryUuidArrayChecker);
 const isAdminRole = input => userService.ALL_USER_ROLES.includes(input);
 const isManagerRole = input =>
   userService.MANAGER_ADMINISTERED_USER_ROLES.includes(input);
@@ -56,12 +55,12 @@ export const getUsers = async (req, res, next) => {
 
 
 const getBreweryUsersValidation = [
-  validate.param("breweryId").exists(opt).isString().isLength({ min: 2 }),
+  validate.param("breweryUuid").exists(opt).custom(isExistingBreweryUuid),
   validate.catchValidationErrors
 ];
 const getBreweryUsersFunction = async (req, res, next) => {
   try {
-    const allUsers = await userService.getBreweryUsers(req.params.breweryId);
+    const allUsers = await userService.getBreweryUsers(req.params.breweryUuid);
     return res.locals.sendResponse(res, { users: allUsers });
   } catch (error) {
     return next(
@@ -100,7 +99,7 @@ const createUserValidation = [
   validate.body("email").exists(opt).isEmail().normalizeEmail(),
   validate.body("password").optional(opt).isString().isLength({ min: 6 }),
   validate.body("role").exists(opt).isString().custom(isAdminRole),
-  validate.body("breweries").exists(opt).isArray().custom(isBreweryIdArray),
+  validate.body("breweries").exists(opt).isArray().custom(isBreweryUuidArray),
   validate
     .body("displayName")
     .optional()
@@ -141,9 +140,9 @@ export const createUser = [createUserValidation, createUserFunction];
  */
 
 const patchUserValidation = [
-  validate.param("uid").exists(opt).isString(),
+  validate.param("uid").exists(opt).isString().custom(isExistingUid),
   validate.body("role").optional(opt).isString().custom(isAdminRole),
-  validate.body("breweries").optional(opt).isArray().custom(isBreweryIdArray),
+  validate.body("breweries").optional(opt).isArray().custom(isBreweryUuidArray),
   validate.catchValidationErrors
 ];
 const patchUserFunction = async (req, res, next) => {
@@ -179,7 +178,7 @@ export const patchUser = [patchUserValidation, patchUserFunction];
 
 
 const createBreweryUserValidation = [
-  validate.param("breweryId").exists(opt).isString().isLength({ min: 2 }),
+  validate.param("breweryUuid").exists(opt).custom(isExistingBreweryUuid),
   validate.body("email").exists(opt).isEmail(),
   validate.body("password").optional(opt).isString().isLength({ min: 6 }),
   validate.body("role").exists(opt).isString().custom(isManagerRole),
@@ -193,7 +192,7 @@ const createBreweryUserValidation = [
 const createBreweryUserFunction = async (req, res, next) => {
   const data = {
     ...validate.cleanRequestBody(req),
-    breweries: [req.params.breweryId]
+    breweries: [req.params.breweryUuid]
   };
   try {
     const { uid } = await userService.createUser(data);
@@ -225,7 +224,7 @@ export const createBreweryUser = [
  * @apiUse successResponse
  */
 const deleteUserValidation = [
-  validate.param("uid").exists(opt).isString(),
+  validate.param("uid").exists(opt).isString().custom(isExistingUid),
   validate.catchValidationErrors
 ];
 const deleteUserFunction = async (req, res, next) => {
@@ -247,7 +246,7 @@ export const deleteUser = [deleteUserValidation, deleteUserFunction];
 
 const deleteBreweryUserValidation = [
   validate
-    .param("breweryId")
+    .param("breweryUuid")
     .exists(opt)
     .isString({ min: 2 })
     .customSanitizer(validate.xssSanitize),
@@ -258,7 +257,7 @@ const deleteBreweryUserFunction = async (req, res, next) => {
   const uid = req.params.uid;
   try {
     const user = await userService.getUser({ uid });
-    if (user?.customClaims?.breweries?.includes(req.params.breweryId)) {
+    if (user?.customClaims?.breweries?.includes(req.params.breweryUuid)) {
       await userService.deleteUser(uid);
       return res.locals.sendResponse(res);
     } else {

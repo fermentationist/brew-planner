@@ -1,9 +1,9 @@
 CREATE TABLE IF NOT EXISTS misc (
   misc_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  misc_id BINARY (16) NOT NULL UNIQUE,
+  misc_uuid BINARY (16) NOT NULL UNIQUE,
   created_by VARCHAR (36) NOT NULL,
   version INT NOT NULL DEFAULT 1,
-  UNIQUE KEY (misc_id), -- there can be only one version per misc_id
+  UNIQUE KEY (misc_uuid), -- there can be only one version per misc_id
   name VARCHAR (100) NOT NULL,
   type ENUM ("Spice", "Fining", "Water Agent", "Herb", "Flavor", "Other") NOT NULL,
   use_for TEXT, -- recommended use
@@ -11,15 +11,15 @@ CREATE TABLE IF NOT EXISTS misc (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-ALTER TABLE misc ADD INDEX (misc_id);
+ALTER TABLE misc ADD INDEX (misc_uuid);
 
 CREATE TABLE IF NOT EXISTS misc_version (
   misc_version_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  misc_id BINARY (16) NOT NULL,
-  CONSTRAINT fk_misc_version_misc_id FOREIGN KEY (misc_id) REFERENCES misc (misc_id), -- reference to current version
+  misc_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_misc_version_misc_uuid FOREIGN KEY (misc_uuid) REFERENCES misc (misc_uuid), -- reference to current version
   created_by VARCHAR (36) NOT NULL,
   version INT NOT NULL,
-  UNIQUE KEY (misc_id, version),
+  UNIQUE KEY (misc_uuid, version),
   name VARCHAR (100) NOT NULL,
   type ENUM ("Spice", "Fining", "Water Agent", "Herb", "Flavor", "Other") NOT NULL,
   use_for TEXT, -- recommended use
@@ -28,12 +28,12 @@ CREATE TABLE IF NOT EXISTS misc_version (
 );
 
 CREATE TABLE IF NOT EXISTS recipe_misc (
-  misc_id BINARY (16) NOT NULL,
+  misc_uuid BINARY (16) NOT NULL,
   version INT NOT NULL,
-  recipe_id BINARY (16) NOT NULL,
-  CONSTRAINT fk_misc_recipe_id FOREIGN KEY (recipe_id) REFERENCES recipe(recipe_id),
+  recipe_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_misc_recipe_uuid FOREIGN KEY (recipe_uuid) REFERENCES recipe(recipe_uuid),
   `use` ENUM ("Boil", "Mash", "Primary", "Secondary", "Bottling") NOT NULL,
-  UNIQUE KEY (misc_id, version, recipe_id, `use`),
+  UNIQUE KEY (misc_uuid, version, recipe_uuid, `use`),
   time INT NOT NULL, -- minutes
   volume DECIMAL (10, 6), -- volume in liters
   weight DECIMAL (10, 6), -- weight in kilograms
@@ -56,8 +56,8 @@ CREATE TRIGGER before_insert_on_misc
   BEFORE INSERT ON misc
   FOR EACH ROW
   BEGIN
-    IF (NEW.misc_id IS NULL) THEN
-      SET NEW.misc_id = UUID_TO_BIN(UUID());
+    IF (NEW.misc_uuid IS NULL) THEN
+      SET NEW.misc_uuid = UUID_TO_BIN(UUID());
     END IF;
   END;
 
@@ -68,7 +68,7 @@ CREATE TRIGGER before_insert_on_recipe_misc
   BEGIN
     DECLARE id_count INT;
     SELECT COUNT(*) INTO id_count FROM misc_view
-    WHERE misc_id = NEW.misc_id AND version = NEW.version;
+    WHERE misc_uuid = NEW.misc_uuid AND version = NEW.version;
     IF (id_count < 1) THEN
       SIGNAL SQLSTATE "45000"
         SET MESSAGE_TEXT = "Invalid id and/or version";
@@ -80,7 +80,7 @@ CREATE TRIGGER before_update_on_misc
   FOR EACH ROW
   BEGIN
     INSERT INTO misc_version (
-      misc_id,
+      misc_uuid,
       created_by,
       version,
       name,
@@ -90,7 +90,7 @@ CREATE TRIGGER before_update_on_misc
       created_at
     )
     VALUES (
-      OLD.misc_id,
+      OLD.misc_uuid,
       OLD.created_by,
       OLD.version,
       OLD.name,

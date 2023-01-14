@@ -30,8 +30,8 @@ export const protectBreweryRoutes = (req, res, next) => {
   if (res.locals.user.role === "admin") {
     return next();
   }
-  const breweryId = req.params.breweryId;
-  if (res.locals.user.breweries.includes(breweryId)) {
+  const breweryUuid = req.params.breweryUuid;
+  if (res.locals.user.breweries.includes(breweryUuid)) {
     return next();
   }
   return next(opError("You are not authorized to access this brewery", {name: "forbidden", httpCode: 403}));

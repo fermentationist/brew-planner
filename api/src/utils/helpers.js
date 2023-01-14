@@ -1,6 +1,6 @@
 //test helpers
 
-export const randomNum = (min, max, exclude = []) => {
+export const randomInt = (min, max, exclude = []) => {
   let output = Math.floor(Math.random() * (max - min + 1)) + min;
   while (exclude.includes(output)) {
     output = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -8,11 +8,19 @@ export const randomNum = (min, max, exclude = []) => {
   return output;
 };
 
+export const randomFloat = (min, max, decimalPlaces, exclude=[]) => {
+  let output = Math.floor(((Math.random() * (max - min + 1)) + min) * (10 ** decimalPlaces)) / (10 ** decimalPlaces);
+  while (exclude.includes(output) || output > max || output < min) {
+    output = Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  return output;
+}
+
 export const getRandomArrayMembers = (array, num) => {
   const arrayCopy = [...array];
   const outputArray = [];
   for (let i = 0; i < num; i++) {
-    const randomIndex = randomNum(0, arrayCopy.length - 1);
+    const randomIndex = randomInt(0, arrayCopy.length - 1);
     const item = arrayCopy.splice(randomIndex, 1);
     outputArray.push(...item);
   }
@@ -26,7 +34,7 @@ export const randomString = (length, lettersOnly = false) => {
   }
   return Array(length)
     .fill(null)
-    .map(() => chars[randomNum(0, chars.length - 1)])
+    .map(() => chars[randomInt(0, chars.length - 1)])
     .join("");
 };
 
@@ -121,7 +129,7 @@ export const rejectOnFalse = fn => {
 }
 
 export default {
-  randomNum,
+  randomInt,
   getRandomArrayMembers,
   useTimeout,
   randomString,

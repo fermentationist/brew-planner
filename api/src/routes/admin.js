@@ -9,14 +9,9 @@ import {
 } from "../controllers/users.js";
 import {
   createBrewery,
-  // updateBrewery,
-  // deleteBrewery
+  updateBrewery,
+  deleteBrewery
 } from "../controllers/breweries.js";
-// import {
-//   createVariant,
-//   updateVariant,
-//   deleteVariant
-// } from "../controllers/variants.js";
 
 const router = Router();
 
@@ -28,9 +23,6 @@ router.post("/users", createUser);
 router.patch("/users/:uid", patchUser);
 router.delete("/users/:uid", deleteUser);
 router.post("/breweries", createBrewery);
-// router.patch("/breweries/:breweryId", updateBrewery);
-// router.delete("/breweries/:breweryId", deleteBrewery);
-// router.post("/variants", createVariant);
-// router.patch("/variants/:sku", updateVariant);
-// router.delete("/variants/:sku", deleteVariant);
+router.patch("/breweries/:breweryUuid", updateBrewery);
+router.delete("/breweries/:breweryUuid", deleteBrewery);
 export default router;

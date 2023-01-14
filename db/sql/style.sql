@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS style (
   style_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  style_id BINARY (16) NOT NULL UNIQUE,
+  style_uuid BINARY (16) NOT NULL UNIQUE,
   created_by VARCHAR(36) NOT NULL,
-  UNIQUE KEY (style_id),
+  UNIQUE KEY (style_uuid),
   name VARCHAR (100),
   category VARCHAR (100),
   category_number VARCHAR (4),
@@ -27,13 +27,13 @@ CREATE TABLE IF NOT EXISTS style (
   examples TEXT -- commercial examples
 );
 
-ALTER TABLE style ADD INDEX (style_id);
+ALTER TABLE style ADD INDEX (style_uuid);
 
 CREATE TABLE IF NOT EXISTS recipe_style (
-  style_id BINARY (16) NOT NULL UNIQUE,
-  recipe_id BINARY (16) NOT NULL,
-  CONSTRAINT fk_style_recipe_id FOREIGN KEY (recipe_id) REFERENCES recipe (recipe_id),
-  UNIQUE KEY (style_id, recipe_id)
+  style_uuid BINARY (16) NOT NULL UNIQUE,
+  recipe_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_style_recipe_uuid FOREIGN KEY (recipe_uuid) REFERENCES recipe (recipe_uuid),
+  UNIQUE KEY (style_uuid, recipe_uuid)
 );
 
 DROP TRIGGER IF EXISTS before_insert_on_style;
@@ -42,7 +42,7 @@ CREATE TRIGGER before_insert_on_style
   BEFORE INSERT ON style
   FOR EACH ROW
   BEGIN
-    IF (NEW.style_id IS NULL) THEN
-      SET NEW.style_id = UUID_TO_BIN(UUID());
+    IF (NEW.style_uuid IS NULL) THEN
+      SET NEW.style_uuid = UUID_TO_BIN(UUID());
     END IF;
   END;

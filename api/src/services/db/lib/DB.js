@@ -19,9 +19,9 @@ const formWhere = function (exactAttributes, queryParams) {
   };
 };
 
-const insertion = function (tablename, rows = [], attrs = []) {
+const insertion = function (tablename, rows = [], attrs = [], ignore = true) {
   //Returning formatted sql string and values for insertion of attributes <attrs> of <rows> into <tablename>
-  let sqlString = "INSERT IGNORE INTO " + tablename;
+  let sqlString = `INSERT ${ignore ? "IGNORE" : ""} INTO ${tablename}`;
   let join = "(";
   let valueString = "VALUES";
   let dupString = "ON DUPLICATE KEY UPDATE ";
@@ -219,12 +219,12 @@ class DB {
             error.sqlState === "23000"
           ) {
             return callback(
-              new errors.OperationalError(error.sqlMessage, {
+              new OperationalError(error.sqlMessage, {
                 sqlState: error.sqlState,
               })
             );
           } else {
-            return callback(new errors.ProgramError(error.sqlMessage));
+            return callback(new ProgramError(error.sqlMessage));
           }
         }
         return callback(error, results, fields);
@@ -256,17 +256,17 @@ class DB {
     });
   }
 
-  insert(tablename, attributes, rows, callback) {
+  insert(tablename, attributes, rows, callback, ignore = true) {
     //Inserting the <attributes> of <rows> into <tablename>
-    const insertObj = insertion(tablename, rows, attributes);
+    const insertObj = insertion(tablename, rows, attributes, ignore);
     const sqlString = insertObj.sqlString;
     const values = insertObj.values;
     this.query(sqlString, values, callback);
   }
 
-  insertProm(tablename, attributes, rows) {
+  insertProm(tablename, attributes, rows, ignore = true) {
     //Inserting the <attributes> of <rows> into <tablename> with a promise
-    const insertObj = insertion(tablename, rows, attributes);
+    const insertObj = insertion(tablename, rows, attributes, ignore);
     const sqlString = insertObj.sqlString;
     const values = insertObj.values;
     return this.queryProm(sqlString, values);

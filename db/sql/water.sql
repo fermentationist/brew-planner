@@ -1,9 +1,9 @@
 CREATE TABLE IF NOT EXISTS water (
   water_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  water_id BINARY (16) NOT NULL UNIQUE,
+  water_uuid BINARY (16) NOT NULL UNIQUE,
   created_by VARCHAR(36) NOT NULL,
   version INT NOT NULL DEFAULT 1,
-  UNIQUE KEY (water_id), -- there can be only one version per water_id
+  UNIQUE KEY (water_uuid), -- there can be only one version per water_uuid
   name VARCHAR (100) NOT NULL,
   calcium DECIMAL (6, 2) DEFAULT 0, -- parts per million
   bicarbonate DECIMAL (6, 2) DEFAULT 0, -- parts per million
@@ -16,16 +16,16 @@ CREATE TABLE IF NOT EXISTS water (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-ALTER TABLE water ADD INDEX (water_id);
+ALTER TABLE water ADD INDEX (water_uuid);
 
 -- do not insert into this table directly, it is used to store old versions of water profiles, and entries are created by trigger when the water table is updated
 CREATE TABLE IF NOT EXISTS water_version (
   water_version_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  water_id BINARY (16) NOT NULL,
-  CONSTRAINT fk_water_version_water_id FOREIGN KEY (water_id) REFERENCES water (water_id), -- reference to current version
+  water_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_water_version_water_uuid FOREIGN KEY (water_uuid) REFERENCES water (water_uuid), -- reference to current version
   created_by VARCHAR(36) NOT NULL,
   version INT NOT NULL,
-  UNIQUE KEY (water_id, version),
+  UNIQUE KEY (water_uuid, version),
   name VARCHAR (100) NOT NULL,
   calcium DECIMAL (6, 2), -- parts per million
   bicarbonate DECIMAL (6, 2), -- parts per million
@@ -39,11 +39,11 @@ CREATE TABLE IF NOT EXISTS water_version (
 );
 
 CREATE TABLE IF NOT EXISTS recipe_water (
-  water_id BINARY (16) NOT NULL,
+  water_uuid BINARY (16) NOT NULL,
   version INT NOT NULL,
-  recipe_id BINARY (16) NOT NULL,
-  CONSTRAINT fk_water_recipe_id FOREIGN KEY (recipe_id) REFERENCES recipe(recipe_id),
-  UNIQUE KEY (water_id, version, recipe_id),
+  recipe_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_water_recipe_uuid FOREIGN KEY (recipe_uuid) REFERENCES recipe(recipe_uuid),
+  UNIQUE KEY (water_uuid, version, recipe_uuid),
   amount DECIMAL (10, 6) NOT NULL, -- volume in liters
   added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -63,8 +63,8 @@ CREATE TRIGGER before_insert_on_water
   BEFORE INSERT ON water
   FOR EACH ROW
   BEGIN
-    IF (NEW.water_id IS NULL) THEN
-      SET NEW.water_id = UUID_TO_BIN(UUID());
+    IF (NEW.water_uuid IS NULL) THEN
+      SET NEW.water_uuid = UUID_TO_BIN(UUID());
     END IF;
   END;
 
@@ -75,7 +75,7 @@ CREATE TRIGGER before_insert_on_recipe_water
   BEGIN
     DECLARE id_count INT;
     SELECT COUNT(*) INTO id_count FROM water_view
-    WHERE water_id = NEW.water_id AND version = NEW.version;
+    WHERE water_uuid = NEW.water_uuid AND version = NEW.version;
     IF (id_count < 1) THEN
       SIGNAL SQLSTATE "45000"
         SET MESSAGE_TEXT = "Invalid id and/or version";
@@ -87,7 +87,7 @@ CREATE TRIGGER before_update_on_water
   FOR EACH ROW
   BEGIN
     INSERT INTO water_version (
-      water_id,
+      water_uuid,
       version,
       created_by,
       name,
@@ -101,7 +101,7 @@ CREATE TRIGGER before_update_on_water
       notes
     )
     VALUES (
-      OLD.water_id,
+      OLD.water_uuid,
       OLD.version,
       OLD.created_by,
       OLD.name,

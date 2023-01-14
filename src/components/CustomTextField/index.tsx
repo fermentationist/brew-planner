@@ -60,6 +60,7 @@ const CustomTextField = forwardRef(
         type={props.type || "text"}
         pattern={/\d/}
         label={props.internalLabel}
+        id={props.name}
         defaultValue={props.defaultValue}
         value={props.value}
         inputRef={forwardedRef}
