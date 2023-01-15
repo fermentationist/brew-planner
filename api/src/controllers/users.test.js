@@ -9,9 +9,9 @@ import {
   expectError,
   expectInvalidInput,
 } from "../../test/testHelpers.js";
+import localCache from "../services/localCache/index.js";
 
 // utility functions
-
 const createBrewery = createEntityFactory("brewery");
 const deleteBrewery = deleteEntityFactory("brewery");
 
@@ -36,6 +36,7 @@ const verifyUser = async ({ ...testData }) => {
   }
 };
 
+// TESTS
 export default describe("user routes", function () {
   const api = new TestAPI();
   let uid = null;
@@ -65,9 +66,10 @@ export default describe("user routes", function () {
       password: null,
       role: "user",
       breweries: [brewery1Uuid],
-      displayName: "Test User",
+      displayName: `Test User ${randomString(6, true)}`,
     };
     breweriesToDelete.push(brewery1Uuid, brewery2Uuid);
+    localCache.invalidate("brewery");
   });
 
   it("/admin/users GET", async function () {

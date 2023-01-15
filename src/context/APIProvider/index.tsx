@@ -34,30 +34,6 @@ const APIProvider = function (props: ChildProps) {
       { staleTime: 60 * 1000 * 10}
     ),
 
-    inventory: useQuery(
-      ["inventory", auth?.currentBrewery, auth?.accessToken], 
-      new APIRequest({ baseURL: BREWERY_ROUTE, url: "/inventory", method: "get" }).request,
-      { staleTime: 60 * 1000}
-    ),
-
-    variants: useQuery(
-      ["variants", auth?.accessToken],
-      new APIRequest({ baseURL: API_URL, url: "/variants", method: "get"}).request,
-      { staleTime: 60 * 1000 * 5}
-    ),
-
-    orders: useQuery(
-      ["orders", auth?.accessToken],
-      new APIRequest({ baseURL: API_URL, url: "/admin/orders", method: "get"}).request,
-      { staleTime: 60 * 1000}
-    ),
-
-    shipments: useQuery(
-      ["shipments", auth?.accessToken, auth?.currentBrewery],
-      new APIRequest({ baseURL: BREWERY_ROUTE, url: "/shipments", method: "get"}).request,
-      { staleTime: 60 * 1000}
-    ),
-
     randomID: Math.floor(Math.random() * 10000000000)
   };
 

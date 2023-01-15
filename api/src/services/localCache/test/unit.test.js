@@ -68,7 +68,7 @@ describe("localCache", () => {
     localCache.put(someKey, someValue, { expirationTime: 500 });
     const beforeExpiry = await localCache.get(someKey);
     assert.strictEqual(beforeExpiry, someValue);
-    await sleep(500);
+    await sleep(501);
     const afterExpiry = await localCache.get(someKey);
     assert.strictEqual(afterExpiry, null);
     localCache.clear();
@@ -79,7 +79,7 @@ describe("localCache", () => {
     localCache.put(someKey, someValue, { expirationTime: 500, updateFn });
     const beforeExpiry = await localCache.get(someKey);
     assert.strictEqual(beforeExpiry, someValue);
-    await sleep(500);
+    await sleep(501);
     const afterExpiry = await localCache.get(someKey);
     assert.strictEqual(afterExpiry, someOtherValue);
     localCache.clear();

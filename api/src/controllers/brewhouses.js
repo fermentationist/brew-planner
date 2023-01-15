@@ -15,7 +15,7 @@ const isExistingBrewhouseUuid = rejectOnFalse(brewhouseUuidChecker);
 
 // getBrewhouses
 /**
- * @api {get} breweries/:breweryId/brewhouses Get brewhouses
+ * @api {get} breweries/:breweryUuid/brewhouses Get brewhouses
  * @apiName GetBrewhouses
  * @apiGroup Brewhouses
  * @apiUse authHeader
