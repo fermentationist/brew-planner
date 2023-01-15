@@ -37,7 +37,7 @@ export default class TestAPI {
   }
 
   async signInAsNewUser({
-    email = `${randomString(6)}@spirithub.com`,
+    email = `${randomString(6)}@example.com`,
     password = randomString(10),
     role = "user",
     breweries = []

@@ -1,4 +1,4 @@
-# @spirithub/mysql
+# mysql connector
 
 This MySQL database connector uses the "mysql" database driver for Node.js.
 

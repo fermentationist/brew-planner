@@ -17,7 +17,10 @@
     "start": "PROD_MODE=true\nexport PROD_MODE\npnpm run build\nforever start -o console_log.txt -e console_err.txt ./build/server/server.js",
     "stop": "forever stop build/server/server.js\n./save_log.sh",
     "restart": "forever stop build/server/server.js\n./save_log.sh\nPROD_MODE=true\nexport PROD_MODE\npnpm run build\nforever start -o console_log.txt -e console_err.txt ./build/server/server.js",
-    "test": "mocha --recursive './api/src/**/*test.js' './api/test/*test.js' -grep $1"
+    "test": "mocha --recursive './api/src/**/*test.js' './api/test/*test.js' -grep $1",
+    "lint": "npx eslint -c .eslintrc.cjs '**/*'",
+    "unit-test": "mocha --recursive './api/src/**/*test.js' -g $1",
+    "int-test": "mocha --recursive './api/test/*test.js' -g $1"
   },
   "dependencies": {
     "@emotion/react": "^11.9.3",
@@ -38,6 +41,7 @@
     "ip": "^1.1.8",
     "jspdf": "^2.5.1",
     "module": "^1.2.5",
+    "morgan": "^1.10.0",
     "mui-datatables": "^4.2.2",
     "mysql2": "^2.3.3",
     "node-mysql-deadlock-retries": "^2.0.5",

@@ -1,7 +1,7 @@
 import "dotenv/config";
 
 const DEFAULT_CACHE_EXPIRATION_TIME =
-  process.env.DEFAULT_CACHE_EXPIRATION_TIME || 1000 * 60 * 15;
+  process.env.DEFAULT_CACHE_EXPIRATION_TIME || 1000 * 60 * 60;
 
 export default class LocalCache {
   constructor () {
@@ -14,7 +14,6 @@ export default class LocalCache {
       if (Date.now() >= entry.expires) {
         if (entry.updateFn) {
           return entry.updateFn().then((freshData) => {
-            console.log("updateFn called for key:", key);
             this.put(key, freshData, {
               updateFn: entry.updateFn,
               expirationTime: entry.expirationTime,
@@ -78,7 +77,6 @@ export default class LocalCache {
         ? Object.keys(tableData).length
         : true);
     if (!dataExists) {
-      console.log(`key *${key}* not found in getOrFetch. fetching...`)
       const data = await updateFn();
       this.put(key, data, {
         updateFn,

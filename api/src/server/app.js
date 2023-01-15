@@ -5,8 +5,7 @@ import cors from "cors";
 import { parse } from "qs";
 import { fileURLToPath } from "url";
 import path, { dirname } from "path";
-// import initLogger from "@spirithub/logger";
-// import loggerConfig from "../config/loggerConfig.js";
+import morgan from "morgan";
 import router from "../routes/index.js";
 import { sendResponse, sendError } from "./responses.js";
 import errorHandler from "../middleware/error-handler.js";
@@ -22,9 +21,9 @@ const PORT = process.env.SERVER_PORT;
 
 const filename = fileURLToPath(import.meta.url);
 const dirName = dirname(filename);
-// const logger = initLogger(loggerConfig);
+const logger = morgan("dev");
 
-// app.use(logger);
+app.use(logger);
 
 const corsOptions = {
   origin: true,

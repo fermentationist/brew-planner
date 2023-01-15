@@ -22,6 +22,7 @@ import {
   getBrewhouses,
   createBrewhouse,
   updateBrewhouse,
+  deleteBrewhouse
 } from "../controllers/brewhouses.js";
 
 const router = Router();
@@ -37,6 +38,7 @@ router.delete("/:breweryUuid/users/:uid", deleteBreweryUser);
 router.get("/:breweryUuid/brewhouses", getBrewhouses);
 router.post("/:breweryUuid/brewhouses", createBrewhouse);
 router.patch("/:breweryUuid/brewhouses/:brewhouseUuid", updateBrewhouse);
+router.delete("/:breweryUuid/brewhouses/:brewhouseUuid", deleteBrewhouse);
 // router.post("/:breweryUuid/brewhouses", createBrewhouse);
 // router.get("/:breweryUuid/inventory", getBreweryInventory);
 // router.post("/:breweryUuid/inventory", createBreweryInventory);

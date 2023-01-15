@@ -61,7 +61,7 @@ export default describe("user routes", function () {
     };
     brewery2Uuid = await createBrewery(brewery2Data);
     testData = {
-      email: `${randomString(6)}@spirithub.com`,
+      email: `${randomString(6)}@example.com`,
       password: null,
       role: "user",
       breweries: [brewery1Uuid],
@@ -116,7 +116,7 @@ export default describe("user routes", function () {
       api.request({ url: "/admin/users", method: "post", data: invalidData }),
       "missing email"
     );
-    invalidData.email = `${randomString(6)}@spirithub.com`;
+    invalidData.email = `${randomString(6)}@example.com`;
 
     invalidData.password = 123456789;
     await expectInvalidInput(
@@ -229,7 +229,7 @@ export default describe("user routes", function () {
     const breweryUuid = api.user.breweries[0];
     const data = {
       ...testData,
-      email: `${randomString(6)}@spirithub.com`,
+      email: `${randomString(6)}@example.com`,
       breweries: [breweryUuid],
     };
     const response = await api.request({
@@ -268,7 +268,7 @@ export default describe("user routes", function () {
       }),
       "missing email"
     );
-    invalidData.email = `${randomString(6)}@spirithub.com`;
+    invalidData.email = `${randomString(6)}@example.com`;
 
     invalidData.password = 123456789;
     await expectInvalidInput(
@@ -349,7 +349,7 @@ export default describe("user routes", function () {
     const data = {
       ...testData,
       breweries: [brewery1Uuid],
-      email: `${randomString(6)}@spirithub.com`,
+      email: `${randomString(6)}@example.com`,
     };
     const { uid: newUid } = await api.request({
       url: "/admin/users",
@@ -374,7 +374,7 @@ export default describe("user routes", function () {
       data: {
         ...testData,
         breweries: [wrongBrewery],
-        email: `${randomString(6)}@spirithub.com`,
+        email: `${randomString(6)}@example.com`,
       },
     });
     await expectError(

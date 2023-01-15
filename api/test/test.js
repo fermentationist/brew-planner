@@ -26,10 +26,10 @@ export default describe("typecasting", () => {
   it("TINYINT are typecast as boolean", async () => {
     const name = "Test Brewery " + randomString(4);
     const isPrivate = false;
-    const breweryId = await createBrewery({ name, is_private: isPrivate });
-    const brewery = await getBrewery(breweryId);
+    const breweryUuid = await createBrewery({ name, is_private: isPrivate });
+    const [brewery] = await getBrewery(breweryUuid);
     assert.strictEqual(brewery.is_private, false);
-    breweriesToDelete.push(breweryId);
+    breweriesToDelete.push(breweryUuid);
   });
 
   after(async () => {
