@@ -298,7 +298,7 @@ export default describe("brewhouse routes", function () {
     assert(!uuids.includes(brewhouseUuid));
   });
 
-  it("/breweries/:breweryId/brewhouses/:brewhouseId DELETE - input validation", async () => {
+  it("/breweries/:breweryUuid/brewhouses/:brewhouseId DELETE - input validation", async () => {
     const [validBreweryUuid] = userBreweries;
     const validBrewhouseUuid = brewhousesToDelete[brewhousesToDelete.length - 1];
 

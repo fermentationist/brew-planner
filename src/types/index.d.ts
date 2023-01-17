@@ -10,10 +10,10 @@ export interface AuthObject {
     uid: string;
     displayName?: string;
     role: string;
-    breweries: number[];
+    breweries: string[];
   };
   loaded: boolean;
-  currentBrewery?: number;
+  currentBrewery?: string;
   accessToken: string;
   tokenExpiration: number;
   refresh?: () => void;
@@ -52,69 +52,11 @@ export interface APIError {
 
 export interface BreweryData {
   name: string;
-  breweryId: number;
+  breweryUuid: string;
   street?: string;
   unit?: string;
   city?: string;
   state?: string;
   zip?: string;
   country?: string;
-}
-
-export interface InventoryEntry {
-  inventory: {
-    inventoryId: string;
-    available: number;
-    allocated: number;
-    price: number;
-    addedAt: number;
-  };
-  brewery: {
-    breweryId: string;
-    name: string;
-    addedAt: number;
-    address?: {
-      street?: string;
-      unit?: string;
-      city?: string;
-      state?: string;
-      country?: string;
-    };
-  };
-  variant: ProductVariant;
-}
-
-export interface ProductVariant {
-  sku: string;
-  fullname: string;
-  variantName: string;
-  productName: string;
-  brandName: string;
-  upc?: string;
-  length?: number;
-  width?: number;
-  height?: number;
-  weight?: number;
-  addedAt: number;
-}
-
-export interface CustomerOrder {
-  orderId: string;
-  email: string;
-  placedAt: number;
-  isRefunded: boolean;
-  subtotal: number;
-  tax: number;
-  shippingFee: number;
-  total: number;
-  billingUnit?: string;
-  billingStreet?: string;
-  billingCity?: string;
-  billingState?: string;
-  billingZip?: string;
-  billingCountry?: string;
-  salesChannel: {
-    name: string;
-    salesChannelId: string;
-  };
 }

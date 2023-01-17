@@ -7,6 +7,8 @@ import useAlert from "../../hooks/useAlert";
 import DataTable, { columnOptions } from "../../components/DataTable";
 import Page from "../../components/Page";
 import withLoadingSpinner from "../../hoc/withLoadingSpinner";
+import BrewhouseModal from "./BrewhouseModal";
+import useGlobalState from "../../hooks/useGlobalState.ts";
 
 const Brewhouses = ({
   doneLoading,
@@ -17,8 +19,10 @@ const Brewhouses = ({
 }) => {
   const [tableData, setTableData] = useState([]);
   const [showBrewhouseModal, setShowBrewhouseModal] = useState(false);
+  const [mode, setMode] = useState("create");
   const { data: brewhouseData, loading, error, refresh } = useAPI("brewhouse");
   const { alertError } = useAlert();
+  const [globalState] = useGlobalState();
   useEffect(() => {
     if (!loading) {
       if (brewhouseData) {
@@ -54,12 +58,17 @@ const Brewhouses = ({
   ];
   return (
     <Page>
-      <Tooltip title="Add User">
+      <Tooltip title="Add Brewhouse">
         <IconButton onClick={addBrewhouse}>
           <AddIcon />
         </IconButton>
       </Tooltip>
       <DataTable data={tableData} columns={columns} />
+      <BrewhouseModal
+        showModal={showBrewhouseModal}
+        closeModal={() => setShowBrewhouseModal(false)}
+        mode={mode}
+      />
     </Page>
   );
 };

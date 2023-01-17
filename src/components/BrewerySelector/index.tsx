@@ -35,11 +35,11 @@ const BrewerySelector = ({
       if (data) {
         const allBreweries = data.data?.breweries;
         const allowedBreweries = allBreweries.filter((brewery: BreweryData) => {
-          return auth?.user?.role === "admin" || auth?.user?.breweries.includes(brewery.breweryId)
+          return auth?.user?.role === "admin" || auth?.user?.breweries.includes(brewery.breweryUuid)
         });
         setBreweriesData(allowedBreweries);
         const [currentBrewery] = allowedBreweries.filter(
-          (brewery: BreweryData) => brewery.breweryId === auth?.currentBrewery
+          (brewery: BreweryData) => brewery.breweryUuid === auth?.currentBrewery
         );
         console.log("currentBrewery?.name:", currentBrewery?.name);
         setSelectedBrewery(currentBrewery?.name);
@@ -64,7 +64,7 @@ const BrewerySelector = ({
       setConfirmedBrewery(selectedBrewery);
       const [brewery] = breweriesData.filter(brewery => brewery.name === selectedBrewery);
       setShowDialog(false);
-      return fn(brewery?.breweryId);
+      return fn(brewery?.breweryUuid);
     }
   };
 

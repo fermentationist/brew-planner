@@ -1,4 +1,5 @@
-import {getHoursRemaining, getMinutesRemaining} from "./index.js";
+import {getHoursRemaining, getMinutesRemaining} from "./index.jsx";
+import {test, expect} from "vitest";
 
 test("getHoursRemaining(Date.now()) is zero", () => {
     const now = Date.now();

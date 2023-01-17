@@ -50,12 +50,12 @@ export const getUser = async ({uid, email}) => {
   throw opError("getUser requires uid or email");
 }
 
-export const getBreweryUsers = async (breweryId) => {
-  if (!breweryId) {
-    throw "getBreweryUsers requires breweryId";
+export const getBreweryUsers = async (breweryUuid) => {
+  if (!breweryUuid) {
+    throw "getBreweryUsers requires breweryUuid";
   }
   const allUsers = await getAllUsers();
-  const breweryUsers = allUsers.filter(userRecord => userRecord.customClaims?.breweries?.includes(breweryId));
+  const breweryUsers = allUsers.filter(userRecord => userRecord.customClaims?.breweries?.includes(breweryUuid));
   return breweryUsers;
 }
 

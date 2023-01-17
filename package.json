@@ -17,10 +17,12 @@
     "start": "PROD_MODE=true\nexport PROD_MODE\npnpm run build\nforever start -o console_log.txt -e console_err.txt ./build/server/server.js",
     "stop": "forever stop build/server/server.js\n./save_log.sh",
     "restart": "forever stop build/server/server.js\n./save_log.sh\nPROD_MODE=true\nexport PROD_MODE\npnpm run build\nforever start -o console_log.txt -e console_err.txt ./build/server/server.js",
-    "test": "mocha --recursive './api/src/**/*test.js' './api/test/*test.js' -grep $1",
+    "api-test": "mocha --recursive './api/src/**/*test.js' './api/test/*test.js' -grep $1",
+    "test": "mocha --recursive './api/src/**/*test.js' './api/test/*test.js' './testBuild/**/*test.ts' -grep $1",
     "lint": "npx eslint -c .eslintrc.cjs '**/*'",
     "unit-test": "mocha --recursive './api/src/**/*test.js' -g $1",
-    "int-test": "mocha --recursive './api/test/*test.js' -g $1"
+    "int-test": "mocha --recursive './api/test/*test.js' -g $1",
+    "client-test": "vitest --dir ./src/"
   },
   "dependencies": {
     "@emotion/react": "^11.9.3",
@@ -31,6 +33,7 @@
     "@mui/styled-engine-sc": "^5.8.0",
     "@tanstack/react-query": "^4.0.8",
     "axios": "^0.27.2",
+    "convert-units": "^2.3.4",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",
@@ -81,7 +84,8 @@
     "npm-run-all": "^4.1.5",
     "typescript": "^4.7.4",
     "vite": "^2.9.9",
-    "vite-plugin-eslint": "^1.6.1"
+    "vite-plugin-eslint": "^1.6.1",
+    "vitest": "^0.27.1"
   },
   "pnpm": {
     "overrides": {

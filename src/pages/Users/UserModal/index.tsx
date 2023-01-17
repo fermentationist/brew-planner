@@ -51,7 +51,7 @@ const UserModal = ({
       name: "breweries",
       child: (
         <UserBreweriesSelector
-          defaultSelected={(data?.breweries || []).map((brewery: any) => brewery?.breweryId || null)}
+          defaultSelected={(data?.breweries || []).map((brewery: any) => brewery?.breweryUuid || null)}
           callback={x => x}
         />
       ),

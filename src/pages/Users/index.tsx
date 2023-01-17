@@ -48,14 +48,14 @@ const Users = function ({
         let usersArray = usersData.data.users;
         if (breweriesData){
           const breweriesMap = breweriesData.data.breweries.reduce((map: any, brewery: BreweryData) => {
-            if (!Object.hasOwn(map, brewery.breweryId)) {
-              map[brewery.breweryId] = brewery;
+            if (!Object.hasOwn(map, brewery.breweryUuid)) {
+              map[brewery.breweryUuid] = brewery;
             }
             return map;
           }, {});
           usersArray = usersArray.map((user: UserData) => {
-            const breweries = user.customClaims?.breweries.map((breweryId: string) => {
-              return breweriesMap[breweryId];
+            const breweries = user.customClaims?.breweries.map((breweryUuid: string) => {
+              return breweriesMap[breweryUuid];
             })
             user.breweries = breweries;
             return user;

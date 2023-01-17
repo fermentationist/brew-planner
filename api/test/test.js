@@ -33,8 +33,8 @@ export default describe("typecasting", () => {
   });
 
   after(async () => {
-    for (const breweryId of breweriesToDelete) {
-      await deleteBrewery(breweryId);
+    for (const breweryUuid of breweriesToDelete) {
+      await deleteBrewery(breweryUuid);
     }
   });
 });

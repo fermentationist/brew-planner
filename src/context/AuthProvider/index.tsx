@@ -55,7 +55,6 @@ const AuthProvider = function (props: ChildProps) {
   };
 
   useEffect(() => {
-    console.log("authProvider useEffect called");
     const tokenExpired =
       tokenRefresh ||
       (authState.tokenExpiration && Date.now() > authState.tokenExpiration)
@@ -70,7 +69,6 @@ const AuthProvider = function (props: ChildProps) {
     }
     // was using firebaseAuth.onAuthStateChanged
     const removeListener = firebaseAuth.onIdTokenChanged((authUser: any) => {
-      console.log("onIdTokenChanged listener called, authUser =", authUser);
       if (!authUser) {
         resetAuth();
       } else {

@@ -10,7 +10,6 @@ const APIProvider = function (props: ChildProps) {
   const { auth } = useAuth();
   const { BREWERY_ROUTE } = useAPI();
   const queryClient = useQueryClient();
-
   const apiRequests = {
 
     // API Requests

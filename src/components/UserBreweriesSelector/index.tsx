@@ -35,7 +35,7 @@ const UserBreweriesSelector = ({
   const breweryColumns = [
     {
       label: "",
-      name: "breweryId",
+      name: "breweryUuid",
       options: {
         display: false
       }
@@ -50,7 +50,7 @@ const UserBreweriesSelector = ({
     <StyledDualTableMultiSelector // TODO: Fix TS error caused by use of withDeepMemo in export of DualTableMultiSelector
       selectedOptions={defaultSelected}
       allOptions={allBreweries}
-      optionKey="breweryId"
+      optionKey="breweryUuid"
       callback={callback}
       columns={breweryColumns}
       title="Authorized Brewery"

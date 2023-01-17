@@ -7,6 +7,9 @@ export default defineConfig(({ command, mode }) => {
   const { SERVER_PORT, DEV_SERVER_PORT } = loadEnv(mode, process.cwd(), "");
   return {
     plugins: [eslint(), react()],
+    define: {
+      global: {}
+    },
     build: {
       outDir: "./build/client",
       sourceMap: true
