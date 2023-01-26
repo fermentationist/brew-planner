@@ -1,4 +1,8 @@
-export default {
+const unitDefaults: {[field: string]: {
+  type?: string;
+  default: string;
+  canonical: string;
+}} = {
   batchSize: {
     type: "volume",
     default: "gal",
@@ -70,3 +74,5 @@ export default {
     canonical: null
   },
 }
+
+export default unitDefaults;

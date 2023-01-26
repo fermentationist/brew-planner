@@ -1,7 +1,7 @@
 import axios from "axios";
 import storage from "./storage";
 import { opError } from "./errors";
-const { getStorage } = storage("shRetail");
+const { getStorage } = storage("brewPlanner");
 
 export const API_URL = import.meta.env.VITE_API_URL;
 

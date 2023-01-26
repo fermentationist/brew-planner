@@ -9,7 +9,7 @@ import {
 import { AuthObject, ChildProps } from "../../types";
 import firebaseConfig from "../../config/firebaseConfig";
 import storage from "../../utils/storage";
-const { setStorage, getStorage } = storage("shRetail");
+const { setStorage, getStorage } = storage("brewPlanner");
 
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);

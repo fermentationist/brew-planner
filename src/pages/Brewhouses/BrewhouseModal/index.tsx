@@ -1,118 +1,177 @@
-import {useEffect} from "react";
-import FormModal, { InputParams } from "../../../components/FormModal";
-import {v1 as createUuid} from "uuid";
-import useConvert from "../../../hooks/useConvert";
-import useGlobalState from "../../../hooks/useGlobalState";
+import FormModal, { FormInputOptions } from "../../../components/FormModal";
 
 const BrewhouseModal = ({
   showModal,
   closeModal,
   mode = "create",
-  data
+  data,
 }: {
   showModal: boolean;
   closeModal: () => void;
   mode: "create" | "edit";
   data?: any;
 }) => {
-  const {applyUnitConversionsToInputList} = useConvert();
-  const [globalState, setGlobalState] = useGlobalState();
-  useEffect(() => {
-    setGlobalState({
-      ...globalState,
-      preferredUnits: {
-        ...globalState.preferredUnits,
-        tunSpecificHeat: "J/kg*C"
-      }
-    })
-  }, []);
-  const onSubmit = payload => console.log("onSubmit:", payload);
-  
+  const required = { required: true };
   const requiredMessage = { required: "required field" };
-  const formInputs: InputParams[] = [
+  const formInputs: FormInputOptions[] = [
     {
       name: "name",
       label: "Name",
       defaultValue: data?.name,
-      validation: {required: true},
+      validation: required,
       errorMessages: requiredMessage,
       width: "250px",
-      convert: false
+      convert: false,
     },
     {
-      name: "batchSize", 
+      name: "batchSize",
       label: "Batch Volume",
-      type: "number",
-      step: "0.01",
-      defaultValue: data?.batchSize,
-      validation: {required: true},
+      type: "withUnits",
+      defaultValue: data?.batchSize || 10,
+      validation: required,
       errorMessages: requiredMessage,
       width: "250px",
-      convert: true
+      convert: true,
+      callback: x => console.log("x",x) || x
     },
     {
-      name: "tunVolume", 
+      name: "kettleVol",
+      label: "Kettle Volume",
+      type: "withUnits",
+      defaultValue: data?.kettleVol || 1,
+      validation: required,
+      errorMessages: requiredMessage,
+      width: "250px",
+      convert: true,
+    },
+    {
+      name: "tunVolume",
       label: "Mash Tun Volume",
-      type: "number",
-      step: "0.01",
-      defaultValue: data?.tunVolume,
-      validation: {required: true},
+      type: "withUnits",
+      defaultValue: data?.tunVolume || 1,
+      validation: required,
       errorMessages: requiredMessage,
       width: "250px",
-      convert: true
+      convert: true,
     },
     {
-      name: "tunWeight", 
+      name: "tunWeight",
       label: "Mash Tun Weight",
-      type: "number",
-      step: "0.01",
-      defaultValue: data?.tunWeight,
-      validation: {required: true},
+      type: "withUnits",
+      defaultValue: data?.tunWeight || 1,
+      validation: required,
       errorMessages: requiredMessage,
       width: "250px",
-      convert: true
+      convert: true,
     },
     {
-      name: "tunLoss", 
-      label: "Mash Tun Loss Volume",
-      type: "number",
-      step: "0.01",
-      defaultValue: data?.tunLoss || 0,
+      name: "tunLoss",
+      label: "Mash Tun Loss",
+      type: "withUnits",
+      defaultValue: data?.tunLoss || 1,
       width: "250px",
-      convert: true
+      convert: true,
     },
     {
-      name: "tunSpecificHeat", 
+      name: "tunSpecificHeat",
       label: "Mash Tun Specific Heat",
-      type: "number",
-      step: "0.01",
-      defaultValue: data?.tunSpecificHeat,
-      validation: {required: true},
+      type: "withUnits",
+      defaultValue: data?.tunSpecificHeat || 1,
+      validation: required,
       errorMessages: requiredMessage,
       width: "250px",
-      convert: true
-    }
-//     "breweryUuid"
-// "brewhouseUuid"
-// "createdBy"
-// "batchSize"
-// "tunVolume"
-// "tunWeight"
-// "tunLoss"
-// "tunSpecificHeat"
-// "lauterDeadspace"
-// "topUpWater"
-// "trubChillerLoss"
-// "evaporationRate"
-// "kettleVol"
-// "miscLoss"
-// "extractEfficiency"
-// "grainAbsorptionRate"
-// "hopUtilization"
+      convert: true,
+    },
+    {
+      name: "lauterDeadspace",
+      label: "Lauter Tun Loss",
+      type: "withUnits",
+      defaultValue: data?.lauterDeadspace || 1,
+      width: "250px",
+      convert: true,
+    },
+    {
+      name: "topUpWater",
+      label: "Top Up Water",
+      type: "withUnits",
+      defaultValue: data?.topUpWater || 1,
+      width: "250px",
+      convert: true,
+    },
+    {
+      name: "trubChillerLoss",
+      label: "Post Boil Loss",
+      type: "withUnits",
+      defaultValue: data?.trubChillerLoss || 1,
+      width: "250px",
+      convert: true,
+    },
+    {
+      name: "evaporationRate",
+      label: "Evaporation Rate",
+      type: "withUnits",
+      defaultValue: data?.evaporationRate || 1,
+      validation: required,
+      errorMessages: requiredMessage,
+      width: "250px",
+      convert: true,
+    },
+    {
+      name: "miscLoss",
+      label: "Miscellaneous Loss",
+      type: "withUnits",
+      defaultValue: data?.miscLoss || 1,
+      width: "250px",
+      convert: true,
+    },
+    {
+      name: "extractEfficiency",
+      label: "Extract Efficiency (%)",
+      type: "number",
+      step: "0.01",
+      defaultValue: data?.extractEfficiency || 1,
+      validation: { required: true, min: 0, max: 100 },
+      errorMessages: {
+        ...requiredMessage,
+      min: "The minimum allowed value is 0",
+      max: "The maximum allowed value is 100"
+    },
+      width: "250px",
+      callback: (x) => Number(x),
+    },
+
+    //     "breweryUuid"
+    // "brewhouseUuid"
+    // "createdBy"
+    // "batchSize"
+    // "tunVolume"
+    // "tunWeight"
+    // "tunLoss"
+    // "tunSpecificHeat"
+    // "lauterDeadspace"
+    // "topUpWater"
+    // "trubChillerLoss"
+    // "evaporationRate"
+    // "kettleVol"
+    // "miscLoss"
+    // "extractEfficiency"
+    // "grainAbsorptionRate"
+    // "hopUtilization"
   ];
 
-  const formInputsWithConversions = applyUnitConversionsToInputList(formInputs);
-  console.log("formInputsWithConversions", formInputsWithConversions)
+  // useEffect(() => {
+  //   const formInputsWithConversions = applyUnitConversionsToInputList(inputs);
+  //   console.log("formInputsWithConversions", formInputsWithConversions)
+  //   setFormInputs(formInputsWithConversions);
+  // }, [refreshNum]);
+
+  const onSubmit = (payload) => console.log("onSubmit:", payload);
+
+  // const refresh = () => {
+  //   console.log("refresh called");
+  //   setRefreshNum(Math.random());
+  // };
+
   return (
     <FormModal
       showModal={showModal}
@@ -121,7 +180,8 @@ const BrewhouseModal = ({
       mode={mode}
       formId="brewhouseForm"
       onSubmit={onSubmit}
-      inputs={formInputsWithConversions}
+      inputs={formInputs}
+      // refresh={refresh}
     />
   );
 };

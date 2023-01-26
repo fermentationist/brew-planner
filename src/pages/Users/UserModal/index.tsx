@@ -1,5 +1,5 @@
 import { memo } from "react";
-import FormModal, { InputParams } from "../../../components/FormModal";
+import FormModal, { FormInputOptions } from "../../../components/FormModal";
 import UserBreweriesSelector from "../../../components/UserBreweriesSelector";
 
 const UserModal = ({
@@ -17,7 +17,7 @@ const UserModal = ({
   isAdmin?: boolean;
   onSubmit: (formData: any) => void;
 }) => {
-  const formInputs: InputParams[] = [
+  const formInputs: FormInputOptions[] = [
     {
       name: "email",
       label: "Email",
@@ -36,7 +36,7 @@ const UserModal = ({
     }
   ];
 
-  const adminInputs: InputParams[] = [
+  const adminInputs: FormInputOptions[] = [
     {
       name: "role",
       label: "Role",

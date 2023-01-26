@@ -11,6 +11,21 @@ import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import useTriggeredEffect from "../../hooks/useTriggeredEffect";
 
+
+export interface CustomAutocompleteProps {
+  label?: string;
+  name?: string;
+  options: any[];
+  callback?: (newValue: any) => void;
+  defaultValue?: string | number;
+  getOptionLabel?: (option: any) => string;
+  restricted?: boolean;
+  className?: string;
+  onKeyDown?: KeyboardEventHandler<HTMLElement>;
+  optionKey?: string;
+  width?: string;
+}
+
 const CustomAutocomplete = forwardRef(
   (
     {
@@ -25,19 +40,7 @@ const CustomAutocomplete = forwardRef(
       onKeyDown,
       optionKey,
       width
-    }: {
-      label?: string;
-      name?: string;
-      options: any[];
-      callback?: (newValue: any) => void;
-      defaultValue?: string | number;
-      getOptionLabel?: (option: any) => string;
-      restricted?: boolean;
-      className?: string;
-      onKeyDown?: KeyboardEventHandler<HTMLElement>;
-      optionKey?: string;
-      width?: string;
-    },
+    }: CustomAutocompleteProps,
     forwardedRef: Ref<any>
   ) => {
     const [value, setValue] = useState(defaultValue || null);
@@ -52,7 +55,7 @@ const CustomAutocomplete = forwardRef(
       }
     }, [options, optionKey, restricted]);
 
-    const onInput: ReactEventHandler<HTMLDivElement> = event => {
+    const onInput: ReactEventHandler<HTMLInputElement> = event => {
       const target = event.target as HTMLInputElement;
       const newValue = target.value;
       setValue(newValue);

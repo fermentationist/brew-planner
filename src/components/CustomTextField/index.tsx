@@ -3,7 +3,7 @@ import {
   Ref,
   ReactEventHandler,
   FocusEventHandler,
-  ChangeEventHandler
+  SyntheticEvent,
 } from "react";
 import TextField from "@mui/material/TextField";
 import styled from "styled-components";
@@ -25,13 +25,17 @@ export interface CustomTextFieldProps {
   onChange?: ReactEventHandler;
   onInput?: ReactEventHandler;
   onKeyDown?: ReactEventHandler;
+  onWheel?: ReactEventHandler;
   ref?: Ref<any>;
   defaultValue?: string | number;
   value?: string | number;
   className?: string;
-  errorMessages?: string | {[key: string]: any};
+  id?: string;
+  errorMessages?: string | { [key: string]: any };
   step?: string;
   min?: string;
+  pattern?: RegExp;
+  callback?: (value: string) => any;
 }
 
 const CustomLabel = styled.label`
@@ -42,13 +46,13 @@ const CustomInput = muiStyled(TextField)<{
   marginoverride?: string;
   width?: string;
 }>`
-  margin: ${props => props.marginoverride || "1 em"};
-  width: ${props => props.width || "250px"};
+  margin: ${(props) => props.marginoverride || "1 em"};
+  width: ${(props) => props.width || "250px"};
 `;
 
 const Container = styled.div<{ flexDirection?: string }>`
   display: flex;
-  flex-direction: ${props => props.flexDirection || "column"};
+  flex-direction: ${(props) => props.flexDirection || "column"};
 `;
 
 const CustomTextField = forwardRef(
@@ -58,25 +62,30 @@ const CustomTextField = forwardRef(
         width={props.width}
         marginoverride={props.margin}
         type={props.type || "text"}
-        pattern={/\d/}
         label={props.internalLabel}
-        id={props.name}
+        id={props.id || props.name}
         defaultValue={props.defaultValue}
         value={props.value}
         inputRef={forwardedRef}
         inputProps={{
           onBlur: props.onBlur,
           onFocus: props.onFocus,
-          onChange: props.onChange,
+          onChange: (event: SyntheticEvent) => {
+            const target = event.target as HTMLInputElement;
+            props.callback && props.callback(target.value);
+            return props.onChange(event);
+          },
           onInput: props.onInput,
           onKeyDown: props.onKeyDown,
-          step: props.step || "1",
-          min: props.min
+          onWheel: props.onWheel,
+          step: props.step || "any",
+          min: props.min,
+          pattern: props.pattern,
         }}
         className={props.className || ""}
-        {...(props.register && props.register(props.name, props.validation))}
       />
     );
+
     return (
       <>
         {props.label ? (

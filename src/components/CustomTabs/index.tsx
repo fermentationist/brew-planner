@@ -38,7 +38,7 @@ const CustomTabs = ({
   tabsList: TabsData[];
   tabsGroupName?: string;
 }) => {
-  const { getStorage, setStorage } = storage("shRetail");
+  const { getStorage, setStorage } = storage("brewPlanner");
   const lastTab = getStorage(`${tabsGroupName}.currentTab`);
   const [currentTab, setCurrentTab] = useState(lastTab || 0);
   const onTabChange = (event: ChangeEvent, tabNumber: number) => {

@@ -1,4 +1,4 @@
-const initStorage = (namespace = "shRetail") => {
+const initStorage = (namespace = "brewPlanner") => {
   const storageObj = {
     getStorage: (key: string) => {
       const stringifiedData = localStorage.getItem(`${namespace}.${key}`) || null;

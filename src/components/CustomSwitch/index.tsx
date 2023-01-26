@@ -2,6 +2,17 @@ import { forwardRef, Ref, useState } from "react";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 
+
+export interface CustomSwitchProps {
+  label?: string;
+  name?: string;
+  type?: string;
+  defaultChecked?: boolean;
+  size?: "small" | "medium";
+  labelPlacement?: "bottom" | "top" | "end" | "start";
+  callback?: (val: any) => void;
+}
+
 const CustomSwitch = forwardRef(
   (
     {
@@ -12,15 +23,7 @@ const CustomSwitch = forwardRef(
       size,
       labelPlacement,
       callback
-    }:{
-      label?: string;
-      name?: string;
-      type?: string;
-      defaultChecked?: boolean;
-      size?: "small" | "medium";
-      labelPlacement?: "bottom" | "top" | "end" | "start";
-      callback?: (val: any) => void;
-    },
+    }: CustomSwitchProps,
     forwardedRef: Ref
   ) => {
     const [checked, setChecked] = useState(defaultChecked);

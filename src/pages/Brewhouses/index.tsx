@@ -64,11 +64,15 @@ const Brewhouses = ({
         </IconButton>
       </Tooltip>
       <DataTable data={tableData} columns={columns} />
-      <BrewhouseModal
-        showModal={showBrewhouseModal}
-        closeModal={() => setShowBrewhouseModal(false)}
-        mode={mode}
-      />
+      {
+        showBrewhouseModal ? (
+          <BrewhouseModal
+            showModal={showBrewhouseModal}
+            closeModal={() => setShowBrewhouseModal(false)}
+            mode={mode}
+          />
+        ) : null
+      }
     </Page>
   );
 };

@@ -251,7 +251,12 @@ export default describe("useConvert", () => {
   });
 
   it("applyUnitConversionsToInputList", () => {
-    const result = applyUnitConversionsToInputList(formInputs);
-    console.log("result:", result);
+    const inputsWithUnitConversions = applyUnitConversionsToInputList(formInputs);
+    console.log("inputsWithUnitConversions:", inputsWithUnitConversions);
+    for (const input of inputsWithUnitConversions) {
+      if (input.convert) {
+        assert(Array.isArray(input.unitSelections));
+      }
+    }
   })
 });

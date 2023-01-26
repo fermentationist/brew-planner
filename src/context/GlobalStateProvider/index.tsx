@@ -3,7 +3,7 @@ import storage from "../../utils/storage";
 export const GlobalStateContext = createContext([{}, (): null => null]);
 
 const GlobalStateProvider = function (props: PropsWithChildren<any>) {
-  const {getStorage, setStorage} = storage("shRetail");
+  const {getStorage, setStorage} = storage("brewPlanner");
   const initialState = getStorage("globalState") || {};
   const [globalState, setState] = useState(initialState);
   const setGlobalState = (newState: any) => {
