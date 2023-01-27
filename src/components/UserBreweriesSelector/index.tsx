@@ -14,7 +14,7 @@ const UserBreweriesSelector = ({
   className
 }: {
   defaultSelected: any[];
-  callback: (val: any[]) => void;
+  callback: (val: any[]) => any;
   className?: string;
 }) => {
   const [allBreweries, setAllBreweries] = useState([]);

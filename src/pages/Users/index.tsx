@@ -131,6 +131,7 @@ const Users = function ({
   };
 
   const onUserModalFormSubmit = async (formData: any) => {
+    console.log("user formData:", formData);
     const { resetLink } = await createOrUpdateUser(formData);
     console.log("new user password reset link:", resetLink);
     if (resetLink) {

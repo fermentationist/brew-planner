@@ -96,7 +96,7 @@ export const getBreweryUsers = [getBreweryUsersValidation, getBreweryUsersFuncti
  */
 
 const createUserValidation = [
-  validate.body("email").exists(opt).isEmail().normalizeEmail(),
+  validate.body("email").exists(opt).isEmail(),
   validate.body("password").optional(opt).isString().isLength({ min: 6 }),
   validate.body("role").exists(opt).isString().custom(isAdminRole),
   validate.body("breweries").exists(opt).isArray().custom(isBreweryUuidArray),

@@ -26,7 +26,8 @@ const UserModal = ({
       errorMessages: {
         required: "required field"
       },
-      width: "250px"
+      width: "250px",
+      transform: x => x && x.toLowerCase()
     },
     {
       name: "displayName",
@@ -49,14 +50,12 @@ const UserModal = ({
     },
     {
       name: "breweries",
-      child: (
-        <UserBreweriesSelector
-          defaultSelected={(data?.breweries || []).map((brewery: any) => brewery?.breweryUuid || null)}
-          callback={x => x}
-        />
-      ),
-      defaultValue: data?.customClaims?.breweries,
-      callback: x => x
+      component: UserBreweriesSelector,
+      componentProps: {
+        defaultSelected: (data?.breweries || []).map((brewery: any) => brewery?.breweryUuid || null)
+      },
+      defaultValue: (data?.breweries || []).map((brewery: any) => brewery?.breweryUuid || null),
+      callback: (x => console.log("x in breweries callback:", x) || x)
     }
   ];
 

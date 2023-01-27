@@ -1,4 +1,4 @@
-import MUIDataTable, { MUIDataTableOptions } from "mui-datatables";
+import MUIDataTable, { MUIDataTableOptions, MUIDataTableColumn, MUIDataTableColumnOptions, MUIDataTableMeta } from "mui-datatables";
 import { styled as muiStyled } from "@mui/material/styles";
 import IconButton from "@mui/material/IconButton";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -30,7 +30,7 @@ export interface MetaObject {
 
 interface DataTableProps {
   data: any[];
-  columns: any[];
+  columns: MUIDataTableColumn[];
   title?: string;
   width?: string;
   options?: {
@@ -58,7 +58,7 @@ const DataTable = ({
   data: { [key: string]: any }[];
   columns: any[];
   title?: string;
-  options?: { [key: string]: any };
+  options?: Record<string, any>;
   width?: string;
   refresh?: () => void;
   className?: string;
@@ -163,14 +163,14 @@ const expandField = (key: string, value: any): any[] => {
   return [newKey, newValue];
 };
 
-export const columnOptions = (() => {
+export const columnOptions = ((): Record<string, MUIDataTableColumnOptions> => {
   const options = {
     sortThirdClickReset: true
   };
   const labelDataOptions = {
     ...options,
     download: false,
-    customBodyRender: (labelData: string, meta) => {
+    customBodyRender: (labelData: string, meta: MUIDataTableMeta) => {
       if (!labelData) {
         return null;
       }
@@ -227,12 +227,20 @@ export const columnOptions = (() => {
       return typeof value === "number" ? `$${value.toFixed(2)}` : `$${value}`;
     }
   };
+  const actionOptions = {
+    empty: true,
+    filter: false,
+    searchable: false,
+    sort: false
+  }
+
   return {
     options,
     dateOptions,
     booleanOptions,
     moneyOptions,
     externalLabelOptions,
-    labelDataOptions
+    labelDataOptions,
+    actionOptions
   };
 })();

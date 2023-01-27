@@ -16,7 +16,7 @@ const propsAreEqual = (prevProps: any, nextProps: any) => {
   return true;
 }
 
-const withDeepMemo = (WrappedComponent: ComponentType): ComponentType => {
+const withDeepMemo = (WrappedComponent: ComponentType<any>): ComponentType<any> => {
   return memo(WrappedComponent, propsAreEqual);
 }
 

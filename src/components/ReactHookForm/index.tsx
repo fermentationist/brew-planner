@@ -3,14 +3,19 @@ import React, {
   BaseSyntheticEvent,
   useRef,
   createElement,
-  ChangeEvent
+  ChangeEvent,
+  FunctionComponent,
+  ComponentPropsWithoutRef
 } from "react";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
-import CustomTextField, { CustomTextFieldProps } from "../CustomTextField";import CustomNumberField, {CustomNumberFieldProps} from "../CustomNumberField";
-import CustomTextFieldWithUnits, {
-  CustomTextFieldWithUnitsProps,
-} from "../CustomTextFieldWithUnits";
+import CustomTextField, { CustomTextFieldProps } from "../CustomTextField";
+import CustomNumberField, {
+  CustomNumberFieldProps,
+} from "../CustomNumberField";
+import CustomNumberFieldWithUnits, {
+  CustomNumberFieldWithUnitsProps,
+} from "../CustomNumberFieldWithUnits";
 import CustomAutocomplete, {
   CustomAutocompleteProps,
 } from "../CustomAutocomplete";
@@ -19,12 +24,12 @@ import FormError from "../FormError";
 import { ChildProps } from "../../types";
 import { FormInputOptions } from "../FormModal";
 
-const COMPONENT_TYPES = {
+const COMPONENT_TYPES: Record<string, FunctionComponent> = {
   text: CustomTextField,
   number: CustomNumberField,
   select: CustomAutocomplete,
   switch: CustomSwitch,
-  withUnits: CustomTextFieldWithUnits,
+  numberWithUnits: CustomNumberFieldWithUnits,
 };
 
 export interface FormProps extends ChildProps {
@@ -39,35 +44,36 @@ const Container = styled.div`
 
 const Form = function (props: FormProps) {
   const getDefaultValues = (inputs: FormInputOptions[]) => {
-    return inputs.reduce((map, input) => {
-      if (input.defaultChecked ?? input.defaultValue) {
-        map[input.name] = input.defaultChecked ?? input.defaultValue;
-      }
+    return inputs.reduce((map: Record<string, any>, input) => {
+      map[input.name] = input.defaultChecked ?? input.defaultValue ?? input.value;
       return map;
     }, {});
   };
+
+  const defaultValues = getDefaultValues(props.inputs);
+  const callbackValuesRef = useRef(defaultValues);
   const {
     handleSubmit,
     register,
     formState,
     setValue: setInputValue,
     trigger,
-  } = useForm({
-    defaultValues: getDefaultValues(props.inputs),
-  });
+  } = useForm({ defaultValues });
 
-  const callbackValuesRef = useRef(getDefaultValues(props.inputs));
-
-  const callbackWrapper = (cb: (val: any) => any, inputName: string) => {
+  const callbackWrapper = (
+    cb: (val: any) => any,
+    inputName: string,
+    transformFn?: (val: any) => any
+  ) => {
     return (value: any) => {
-      console.log("value in callbackWrapper:", value);
-      setInputValue(inputName, value);
+      const transformedValue = transformFn ? transformFn(value) : value;
+      setInputValue(inputName, transformedValue);
       const newValues = {
         ...callbackValuesRef.current,
-        [inputName]: value,
+        [inputName]: transformedValue,
       };
       callbackValuesRef.current = newValues;
-      return cb(value);
+      return cb(transformedValue);
     };
   };
 
@@ -84,25 +90,37 @@ const Form = function (props: FormProps) {
     };
   };
 
-type ComponentProps = CustomAutocompleteProps | CustomSwitchProps | CustomTextFieldWithUnitsProps | CustomTextFieldProps
+  type ComponentProps =
+    | CustomAutocompleteProps
+    | CustomSwitchProps
+    | CustomNumberFieldWithUnitsProps
+    | CustomTextFieldProps
+    | CustomNumberFieldProps;
 
-  const getProps = (
-    input: FormInputOptions
-  ): ComponentProps => {
+  const getProps = (input: FormInputOptions): ComponentProps => {
     let componentProps: ComponentProps = {
       name: input.name,
-      type: input.type === "withUnits" ? "number" : (input.type || "text"),
+      type: input.type || "text",
       internalLabel: input.label || input.name,
       step: input.step,
       width: input.width,
-      defaultValue: input.defaultValue,
-      callback: callbackWrapper(input.callback || ((x: any) => x), input.name),
+      defaultValue:
+        input.defaultValue,// || (input.type.includes("number") ? 0 : ""),
+      callback: callbackWrapper(
+        input.callback || ((x: any) => x),
+        input.name,
+        input.transform
+      ),
     };
 
     switch (input.type) {
       case "select":
-        componentProps.options = input.selectOptions;
-        componentProps.restricted = input.selectRestricted;
+        componentProps = {
+          ...componentProps,
+          options: input.selectOptions,
+          restricted: input.selectRestricted,
+          label: input.label ?? input.name
+        } as CustomAutocompleteProps;
         break;
 
       case "switch":
@@ -110,14 +128,34 @@ type ComponentProps = CustomAutocompleteProps | CustomSwitchProps | CustomTextFi
           name: input.name,
           label: input.label,
           defaultChecked: input.defaultChecked ?? input.defaultValue,
-          callback:
-            callbackWrapper(input.callback || ((x: any) => x), input.name),
+          callback: callbackWrapper(
+            input.callback || ((x: any) => x),
+            input.name,
+            input.transform
+          ),
           labelPlacement: "end",
-        };
+        }  as CustomSwitchProps;
         break;
 
-      case "withUnits":
-        componentProps.type = "number";
+      case "number":
+        componentProps = {
+          ...componentProps,
+          callback: (val: string) => {
+            return callbackWrapper(
+              input.callback || ((x: any) => x),
+              input.name,
+              input.transform
+            )(Number(val))
+          }
+        } as CustomNumberFieldProps;
+        break;
+
+      case "numberWithUnits":
+        componentProps = {
+          ...componentProps,
+          maxDecPlaces: input.maxDecPlaces,
+          convertOnUnitChange: input.convertOnUnitChange
+        } as CustomNumberFieldWithUnitsProps;
         break;
     }
     return componentProps;
@@ -150,16 +188,23 @@ type ComponentProps = CustomAutocompleteProps | CustomSwitchProps | CustomTextFi
               return onChange(event);
             },
           };
-          if (input.type !== "withUnits") {
+          if (!["numberWithUnits", "number"].includes(input.type)) {
             allProps.ref = ref;
           }
           return (
             <Container key={input.name}>
-              {input.child
-                ? input.child
-                : createElement(
+              {input.component
+                ? createElement<any>(input.component, {
+                    callback: callbackWrapper(
+                      input.callback || ((x: any) => x),
+                      input.name,
+                      input.transform
+                    ),
+                    ...(input.componentProps || {}),
+                  } as ComponentPropsWithoutRef<any>)
+                : createElement<any>(
                     COMPONENT_TYPES[input.type] || CustomTextField,
-                    allProps
+                    allProps as ComponentPropsWithoutRef<any>
                   )}
               <FormError
                 formErrors={formState.errors}

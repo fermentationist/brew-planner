@@ -1,7 +1,7 @@
+/* eslint-disable */
 import { describe, it, assert, expect } from "vitest";
 import convert from "convert-units";
-import volume from "convert-units/lib/definitions/volume.js";
-import unitDefaults from "../config/unitDefaults.ts";
+import unitDefaults from "../config/unitDefaults";
 
 // const convert = configureMeasurements(volume);
 

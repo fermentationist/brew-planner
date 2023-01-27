@@ -1,4 +1,4 @@
-import { Ref, useState, useCallback, ChangeEvent} from "react";
+import { Ref, useState, useCallback, ChangeEvent, FunctionComponent} from "react";
 import CustomDialog from "../CustomDialog";
 import ReactHookForm from "../ReactHookForm";
 import MuiButton from "@mui/lab/LoadingButton";
@@ -10,6 +10,7 @@ export interface FormInputOptions {
   type?: string; // type of input, i.e. "text", "password", "select" or "switch"
   defaultValue?: any;
   defaultChecked?: boolean;
+  value?: any;
   selectOptions?: any[]; // options to be used if the input is a select (CustomAutocomplete) element
   callback?: (val: any) => any; // for inputs like "select"
   selectRestricted?: boolean;
@@ -21,13 +22,15 @@ export interface FormInputOptions {
   };
   width?: string;
   ref?: Ref<any>;
-  child?: JSX.Element;
+  component?: FunctionComponent;
+  componentProps?: Record<string, any>;
   step?: string;
-  convert?: boolean;
   unitSelections?: {[key: string]: string[]};
   unit?: string;
-  convertFn?: (value: string | number) => number;
+  transform?: (value: any) => any;
   onChange?: (event: ChangeEvent) => void;
+  convertOnUnitChange?: boolean; // applies to "numberWithUnit" inputs
+  maxDecPlaces?: number; // will call toFixed(maxDecPlaces) on value
 }
 
 const Button = muiStyled(MuiButton)`

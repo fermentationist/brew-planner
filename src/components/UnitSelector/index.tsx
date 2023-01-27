@@ -2,19 +2,23 @@ import { useEffect, useState, memo } from "react";
 import MenuItem from "@mui/material/MenuItem";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 
+export interface UnitSelectorProps {
+  selections: {[key: string]: string[]};
+  defaultUnit: string;
+  callback?: (val: any) => any;
+  setPreferredUnit: (unit: string) => void;
+  parseUnit: (unit: string) => string[][];
+  className?: string;
+}
+
 const UnitSelector = ({
   selections,
   defaultUnit,
   callback,
   setPreferredUnit,
-  parseUnit
-}: {
-  selections: {[key: string]: string[]};
-  defaultUnit: string;
-  callback: () => any;
-  setPreferredUnit: (unit: string) => void;
-  parseUnit: (unit: string) => string[][];
-}) => {
+  parseUnit,
+  className
+}: UnitSelectorProps) => {
   const [initialParts, intialOperators] = parseUnit(defaultUnit);
   const [unitParts, setUnitParts] = useState(initialParts);
   const [operators, setOperators] = useState(intialOperators);
@@ -39,7 +43,7 @@ const UnitSelector = ({
     );
     setPreferredUnit(newCompoundUnit);
     setDropdownState(newDropdownState);
-    return callback();
+    callback && callback(newCompoundUnit);
   };
   return (
     <>
@@ -50,6 +54,7 @@ const UnitSelector = ({
                 <Select
                   value={dropdownState[partIndex]}
                   onChange={onUnitChange.bind(null, partIndex)}
+                  className={className}
                 >
                   {selections[part]?.map((selection, index) => {
                     return (

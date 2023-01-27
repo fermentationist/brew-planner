@@ -4,12 +4,10 @@ import {
   useState,
   KeyboardEventHandler,
   useEffect,
-  ChangeEvent,
   ReactEventHandler
 } from "react";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
-import useTriggeredEffect from "../../hooks/useTriggeredEffect";
 
 
 export interface CustomAutocompleteProps {
@@ -24,6 +22,7 @@ export interface CustomAutocompleteProps {
   onKeyDown?: KeyboardEventHandler<HTMLElement>;
   optionKey?: string;
   width?: string;
+  ref?: Ref<any>;
 }
 
 const CustomAutocomplete = forwardRef(

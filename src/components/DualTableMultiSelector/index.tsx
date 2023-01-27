@@ -57,12 +57,12 @@ const StyledSimpleTable = styled(SimpleTable)`
   }
 `;
 
-interface DualTableMultiSelectorProps {
+export interface DualTableMultiSelectorProps {
   allOptions: any[];
-  selectedOptions: any[];
+  selectedOptions?: any[];
   optionKey: string;
   columns: any[];
-  callback: (selection: any[]) => void;
+  callback: (selection: any[]) => any;
   width?: string;
   title?: string;
   pluralTitle?: string;
@@ -72,7 +72,7 @@ interface DualTableMultiSelectorProps {
 const DualTableMultiSelector = ({
   allOptions,
   optionKey, // the key of the option object that will be used in the callback array, i.e. if using "breweryUuid" as the optionKey, the component will return an array of breweryUuids when the callback is triggered
-  selectedOptions, // an array of [optionKey] values
+  selectedOptions = [], // an array of [optionKey] values
   columns, // columns to display in the tables
   callback, // callback to be called with the user's selection
   width,

@@ -15,10 +15,12 @@ const useConvertUnits = () => {
   const getPreferredOrDefaultUnit = (field: string) => globalState?.preferredUnits?.[field] || unitDefaults[field]?.default;
 
   const createConvertFunction =
-    (target: "canonical" | "preferred", preferredUnitParam: string = null) => (field: string, stringOrNumber: string | number) => {
+    (target: "canonical" | "preferred", preferredUnitParam?: string) => (field: string, stringOrNumber: string | number) => {
+      if (!field || !(stringOrNumber ?? false)) {
+        return {value: void 0, unit: field};
+      }
       const value = Number(stringOrNumber);
       const canonicalTarget = target === "canonical";
-      console.log("canonicalTarget:", canonicalTarget);
       const canonicalUnit = unitDefaults[field]?.canonical;
       const preferredUnit = preferredUnitParam ||
         getPreferredOrDefaultUnit(field);
@@ -30,9 +32,7 @@ const useConvertUnits = () => {
       }
       const [canonicalParts] = parseUnit(canonicalUnit);
       const [preferredParts, operations] = parseUnit(preferredUnit);
-      console.log("preferredParts:", preferredParts);
       const sourceUnitParts = canonicalTarget ? preferredParts : canonicalParts;
-      console.log("sourceUnitParts:", sourceUnitParts);
       const targetUnitParts = canonicalTarget ? canonicalParts : preferredParts;
       const result = sourceUnitParts.reduce(
         (output: number, part: string, index: number) => {
@@ -56,11 +56,9 @@ const useConvertUnits = () => {
           }
           if (index === 0) {
             output = convert(output).from(part).to(targetUnit);
-            if (canonicalUnit) console.log(`convert from ${part} to ${targetUnit}:`, output);
           } else {
             const operation = operations.shift();
             const operand = convert(1).from(part).to(targetUnit);
-            if (canonicalUnit) console.log(`convert from ${part} to ${targetUnit}:`, output);
             switch (operation) {
               case "*":
                 output = output * operand;
@@ -76,7 +74,6 @@ const useConvertUnits = () => {
         },
         value
       );
-      if (canonicalTarget) console.log("result:", result);
       return {
         value: result,
         unit: canonicalTarget ? canonicalUnit : preferredUnit,
@@ -101,18 +98,6 @@ const useConvertUnits = () => {
     return selections;
   };
 
-  const getConversionFunction = (inputName: string, preferredUnitParam: string  = null) => {
-    const preferredUnit = preferredUnitParam ||
-        globalState?.preferredUnits?.[inputName] || unitDefaults[inputName]?.default;
-    console.log("creating function to convert to canonical from", preferredUnit);
-    const conversionFunction =  (x: string | number) => {
-      const convertToCanonicalUnit = createConvertFunction("canonical", preferredUnit);
-      console.log("calling conversionFunction to convert to canonical from", preferredUnit)
-      return convertToCanonicalUnit(inputName, x)?.value;
-    }
-    return conversionFunction;
-  }
-
   const setPreferredUnit = (field: string, unit: string) => {
     setGlobalState({
       ...globalState,
@@ -125,8 +110,8 @@ const useConvertUnits = () => {
 
   return {
     parseUnit: useCallback(parseUnit, []),
+    createConvertFunction,
     convertToPreferredUnit,
-    getConversionFunction,
     getPreferredOrDefaultUnit,
     getAltUnitSelections,
     setPreferredUnit,

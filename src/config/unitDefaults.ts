@@ -73,6 +73,10 @@ const unitDefaults: {[field: string]: {
     default: null,
     canonical: null
   },
+  controlledNumberWithUnitsTest: {
+    default: "gal",
+    canonical: "l"
+  }
 }
 
 export default unitDefaults;

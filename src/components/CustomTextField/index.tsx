@@ -36,6 +36,7 @@ export interface CustomTextFieldProps {
   min?: string;
   pattern?: RegExp;
   callback?: (value: string) => any;
+  disabled?: boolean;
 }
 
 const CustomLabel = styled.label`
@@ -73,7 +74,7 @@ const CustomTextField = forwardRef(
           onChange: (event: SyntheticEvent) => {
             const target = event.target as HTMLInputElement;
             props.callback && props.callback(target.value);
-            return props.onChange(event);
+            return props.onChange && props.onChange(event);
           },
           onInput: props.onInput,
           onKeyDown: props.onKeyDown,
@@ -81,6 +82,7 @@ const CustomTextField = forwardRef(
           step: props.step || "any",
           min: props.min,
           pattern: props.pattern,
+          disabled: props.disabled
         }}
         className={props.className || ""}
       />

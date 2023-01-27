@@ -20,7 +20,9 @@ const useAPI = (apiName?: string) => {
     refetchAll: api.refetchAll,
     invalidateAll: api.invalidateAll,
     queryClient: api.queryClient,
-    BREWERY_ROUTE
+    BREWERY_ROUTE,
+    APIRequest,
+    API_URL
   }
   return output;
 }
