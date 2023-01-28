@@ -2,12 +2,12 @@
 import admin from "firebase-admin";
 import {getAuth} from "firebase-admin/auth";
 import { randomString } from "../utils/helpers.js";
-import { createRequire } from "module";
+// import { createRequire } from "module";
 import { opError } from "../server/errors.js";
 import localCache from "./localCache/index.js";
-
-const require = createRequire(import.meta.url);
-const serviceAccount = require("../config/firebase-adminsdk-key.json"); // ES Modules can't import JSON for some reason
+import serviceAccount from "../config/firebase-adminsdk-key.json" assert {type: "json"};
+// const require = createRequire(import.meta.url);
+// const serviceAccount = require("../config/firebase-adminsdk-key.json"); // ES Modules can't import JSON for some reason
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
