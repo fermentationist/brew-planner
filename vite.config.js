@@ -8,7 +8,7 @@ export default defineConfig(({ command, mode }) => {
   return {
     plugins: [eslint(), react()],
     define: {
-      global: "global"
+      global: process.env.NODE_ENV === "production" ? "global" : {}
     },
     build: {
       outDir: "./build/client",

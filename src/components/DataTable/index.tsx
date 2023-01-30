@@ -4,9 +4,8 @@ import IconButton from "@mui/material/IconButton";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import TrueIcon from "@mui/icons-material/Check";
 import FalseIcon from "@mui/icons-material/Close";
-import LabelIcon from "@mui/icons-material/StickyNote2";
+import EditIcon from "@mui/icons-material/Edit";
 import Tooltip from "@mui/material/Tooltip";
-import LabelPopper from "../LabelPopper";
 import DatePopper from "../DatePopper";
 
 let cols: any[] = [];
@@ -103,6 +102,8 @@ const DataTable = ({
 
 export default DataTable;
 
+export type DataTableColumn = MUIDataTableColumn;
+
 // getColumnIndex:
 // rowData is returned by mui-datatables as an array of column values, without any keys. This function takes in the column name and returns the index of that column for use with rowData array
 export const getColumnIndex = (columnName: string) => {
@@ -111,7 +112,7 @@ export const getColumnIndex = (columnName: string) => {
 };
 
 // getRowData:
-// rowData is returned by mui-datatables as an array of column values, without any keys. This function transforms the rowData array into an object that uses the column names as keys
+// rowData is returned by mui-datatables as an array of column values, without any keys. This function transforms the rowData array into an object that uses the column names as keys.
 export const getRowData = (dataArray: any[]) => {
   const columnNames = cols.map(column => column.name);
   const rowData = columnNames.reduce((map, name, index) => {
@@ -163,40 +164,12 @@ const expandField = (key: string, value: any): any[] => {
   return [newKey, newValue];
 };
 
-export const columnOptions = ((): Record<string, MUIDataTableColumnOptions> => {
-  const options = {
-    sortThirdClickReset: true
-  };
-  const labelDataOptions = {
-    ...options,
-    download: false,
-    customBodyRender: (labelData: string, meta: MUIDataTableMeta) => {
-      if (!labelData) {
-        return null;
-      }
-      const rowData = getRowData(meta.rowData);
-      return (
-        <LabelPopper labelData={labelData} labelFileType={rowData.shipment.labelFileType} />
-      );
-    }
-  };
-  const externalLabelOptions = {
-    ...options,
-    download: false,
-    customBodyRender: (labelUrl: string) => {
-      if (!labelUrl) {
-        return null;
-      }
-      return (
-        <Tooltip title="view label">
-          <IconButton onClick={() => window.open(labelUrl, "_blank")}>
-            <LabelIcon />
-          </IconButton>
-        </Tooltip>
-      );
-    }
-  };
+export type CreateRenderButtonOptionsFunction = ((...args: any) => MUIDataTableColumnOptions);
+
+export const columnOptions = ((): Record<string, any> => {
+  const options = { sortThirdClickReset: true };
   const dateOptions = {
+    ...options,
     customBodyRender: (value: number) => {
       if (!value) {
         return null;
@@ -205,10 +178,10 @@ export const columnOptions = ((): Record<string, MUIDataTableColumnOptions> => {
       return (
         <DatePopper date={newDate} />
       );
-    },
-    ...options
-  };
+    }
+  } ;
   const booleanOptions = {
+    ...options,
     customBodyRender: (value: boolean) => {
       return value ? (
         <Tooltip title="true">
@@ -219,28 +192,55 @@ export const columnOptions = ((): Record<string, MUIDataTableColumnOptions> => {
           <FalseIcon />
         </Tooltip>
       );
-    },
-    ...options
+    }
   };
   const moneyOptions = {
+    ...options,
     customBodyRender: (value: number | string) => {
-      return typeof value === "number" ? `$${value.toFixed(2)}` : `$${value}`;
+      const currencyFormatter = new Intl.NumberFormat("en-US", {style: "currency", currency: "USD"})
+      return currencyFormatter.format(Number(value));
     }
   };
   const actionOptions = {
     empty: true,
     filter: false,
     searchable: false,
-    sort: false
-  }
+    sort: false,
+    download: false,
+    viewColumns: false
+  };
+
+  const rowDataOptions = {
+    display: "excluded",
+    download: false,
+    filter: false,
+    sort: false,
+  };
+
+  const createRenderEditButtonOptions = (tooltipText: string, callback: (rowData: any) => void) => {
+    return {
+      customBodyRender: (value: any, meta: MUIDataTableMeta) => {
+        return (
+          <Tooltip title={tooltipText}>
+            <IconButton
+              onClick={callback.bind(null, getRowData(meta.rowData))}
+            >
+              <EditIcon />
+            </IconButton>
+          </Tooltip>
+        );
+      },
+      ...actionOptions,
+    }
+  };
 
   return {
     options,
     dateOptions,
     booleanOptions,
     moneyOptions,
-    externalLabelOptions,
-    labelDataOptions,
-    actionOptions
+    actionOptions,
+    rowDataOptions,
+    createRenderEditButtonOptions
   };
 })();

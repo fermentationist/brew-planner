@@ -1,5 +1,5 @@
 import convert from "convert-units";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import useGlobalState from "./useGlobalState";
 import unitDefaults from "../config/unitDefaults";
 
@@ -8,22 +8,28 @@ const useConvertUnits = () => {
 
   const parseUnit = (unit: string) => {
     const units = unit.split(/[/*]/g);
-    const operators = unit.split(/\w+/g).filter((x) => x);
+    const operators = unit.split(/\w+/g).filter((x) => ["/", "*"].includes(x));
     return [units, operators];
   };
 
-  const getPreferredOrDefaultUnit = (field: string) => globalState?.preferredUnits?.[field] || unitDefaults[field]?.default;
+  const getPreferredOrDefaultUnit = (field: string) =>
+    globalState?.preferredUnits?.[field] || unitDefaults[field]?.default;
 
   const createConvertFunction =
-    (target: "canonical" | "preferred", preferredUnitParam?: string) => (field: string, stringOrNumber: string | number) => {
-      if (!field || !(stringOrNumber ?? false)) {
-        return {value: void 0, unit: field};
-      }
-      const value = Number(stringOrNumber);
+    (target: "canonical" | "preferred", preferredUnitParam?: string) =>
+    (field: string, stringOrNumber: string | number) => {
+      const value = (stringOrNumber ?? "") && Number(stringOrNumber) as number | "";
       const canonicalTarget = target === "canonical";
       const canonicalUnit = unitDefaults[field]?.canonical;
-      const preferredUnit = preferredUnitParam ||
-        getPreferredOrDefaultUnit(field);
+      const preferredUnit =
+        preferredUnitParam || getPreferredOrDefaultUnit(field);
+      if (!field || !(stringOrNumber ?? false)) {
+        // (stringOrNumber ?? false) allows for stringOrNumber to be 0
+        return {
+          value,
+          unit: canonicalTarget ? canonicalUnit : preferredUnit,
+        };
+      }
       if (!canonicalUnit) {
         return { value, unit: null };
       }
@@ -87,38 +93,53 @@ const useConvertUnits = () => {
     const safeUnits = units.map((unitPart) =>
       unitPart.toLowerCase() === "cal" ? "J" : unitPart
     );
-    const selections = units.reduce((map: {[key: string]: string[]}, unit, index) => {
-      const possibilities = convert().from(safeUnits[index]).possibilities();
-      if (possibilities.includes("J") || safeUnits[index] === "J") {
-        possibilities.push("cal");
-      }
-      map[unit] = [unit, ...possibilities];
-      return map;
-    }, {});
+    const selections = units.reduce(
+      (map: Record<string, string[]>, unit, index) => {
+        const possibilities = convert().from(safeUnits[index]).possibilities();
+        if (possibilities.includes("J") || safeUnits[index] === "J") {
+          possibilities.push("cal");
+        }
+        map[unit] = Array.from(new Set([unit, ...possibilities]));
+        return map;
+      },
+      {}
+    );
     return selections;
   };
 
   const setPreferredUnit = (field: string, unit: string) => {
-    setGlobalState({
-      ...globalState,
-      preferredUnits: {
-        ...globalState.preferredUnits,
-        [field]: unit
+    // return
+    setGlobalState((prevState: any) => {
+      const newState = {
+        ...prevState,
+        preferredUnits: {
+          ...(prevState.preferredUnits || {}),
+          [field]: unit
+        }
       }
-    })
-  }
-
-  return {
-    parseUnit: useCallback(parseUnit, []),
-    createConvertFunction,
-    convertToPreferredUnit,
-    getPreferredOrDefaultUnit,
-    getAltUnitSelections,
-    setPreferredUnit,
-    unitDefaults,
-    preferredUnits: globalState?.preferredUnits,
-
+      return newState;
+    });
   };
+
+  const memoizedParseUnit = useCallback(parseUnit, []);
+  const memoizedCreateConvertFunction = useCallback(createConvertFunction, []);
+  const memoizedConvertToPreferredUnit = useCallback(convertToPreferredUnit, [globalState?.preferredUnits]);
+  const memoizedGetPreferredOrDefaultUnit = useCallback(getPreferredOrDefaultUnit, []);
+  const memoizedGetAltUnitSelections = useCallback(getAltUnitSelections, []);
+  const memoizedSetPreferredUnit = useCallback(setPreferredUnit, []);
+  const memoizedUnitDefaults = useMemo(() => unitDefaults, []);
+  const memoizedPreferredUnits = useMemo(() => globalState?.preferredUnits, [globalState?.preferredUnits]);
+
+  return useMemo(() => ({
+    parseUnit: memoizedParseUnit,
+    createConvertFunction: memoizedCreateConvertFunction,
+    convertToPreferredUnit: memoizedConvertToPreferredUnit,
+    getPreferredOrDefaultUnit: memoizedGetPreferredOrDefaultUnit,
+    getAltUnitSelections: memoizedGetAltUnitSelections,
+    setPreferredUnit: memoizedSetPreferredUnit,
+    unitDefaults: memoizedUnitDefaults,
+    preferredUnits: memoizedPreferredUnits,
+  }), [memoizedPreferredUnits]);
 };
 
 export default useConvertUnits;

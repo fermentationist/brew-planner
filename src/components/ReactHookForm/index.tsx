@@ -5,7 +5,8 @@ import React, {
   createElement,
   ChangeEvent,
   FunctionComponent,
-  ComponentPropsWithoutRef
+  ComponentPropsWithoutRef,
+  memo
 } from "react";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
@@ -43,15 +44,15 @@ const Container = styled.div`
 `;
 
 const Form = function (props: FormProps) {
-  const getDefaultValues = (inputs: FormInputOptions[]) => {
+  const getDefaultValues = (inputs: FormInputOptions[], excludeControlled = false) => {
     return inputs.reduce((map: Record<string, any>, input) => {
-      map[input.name] = input.defaultChecked ?? input.defaultValue ?? input.value;
+      map[input.name] = excludeControlled && input.type === "numberWithUnits" ? void 0 : input.defaultChecked ?? input.defaultValue ?? input.value;
       return map;
     }, {});
   };
 
-  const defaultValues = getDefaultValues(props.inputs);
-  const callbackValuesRef = useRef(defaultValues);
+  const defaultValues = getDefaultValues(props.inputs, true);
+  const callbackValuesRef = useRef(getDefaultValues(props.inputs));
   const {
     handleSubmit,
     register,
@@ -65,9 +66,11 @@ const Form = function (props: FormProps) {
     inputName: string,
     transformFn?: (val: any) => any
   ) => {
-    return (value: any) => {
+    return (value: any, callRHFSetValueFn = true) => {
       const transformedValue = transformFn ? transformFn(value) : value;
-      setInputValue(inputName, transformedValue);
+      if (callRHFSetValueFn) {
+        setInputValue(inputName, transformedValue);
+      }
       const newValues = {
         ...callbackValuesRef.current,
         [inputName]: transformedValue,
@@ -79,8 +82,6 @@ const Form = function (props: FormProps) {
 
   const onSubmitWrapper = (onSubmitFn: (val: any) => any) => {
     return (partialFormData: any) => {
-      console.log("partialFormData:", partialFormData);
-      console.log("callbackValuesRef.current:", callbackValuesRef.current);
       const formData = {
         ...partialFormData,
         ...callbackValuesRef.current,
@@ -105,7 +106,7 @@ const Form = function (props: FormProps) {
       step: input.step,
       width: input.width,
       defaultValue:
-        input.defaultValue,// || (input.type.includes("number") ? 0 : ""),
+        input.defaultValue ?? "",
       callback: callbackWrapper(
         input.callback || ((x: any) => x),
         input.name,
@@ -154,7 +155,9 @@ const Form = function (props: FormProps) {
         componentProps = {
           ...componentProps,
           maxDecPlaces: input.maxDecPlaces,
-          convertOnUnitChange: input.convertOnUnitChange
+          convertOnUnitChange: input.convertOnUnitChange,
+          defaultValue: input.convertOnUnitChange ? void 0 : input.defaultValue,
+          value: input.convertOnUnitChange ? input.defaultValue ?? input.value : void 0
         } as CustomNumberFieldWithUnitsProps;
         break;
     }
@@ -175,6 +178,7 @@ const Form = function (props: FormProps) {
           );
           const allProps = {
             ...inputProps,
+            ref,
             onBlur,
             onChange: (event: ChangeEvent) => {
               const target = event.target as HTMLInputElement;
@@ -188,9 +192,7 @@ const Form = function (props: FormProps) {
               return onChange(event);
             },
           };
-          if (!["numberWithUnits", "number"].includes(input.type)) {
-            allProps.ref = ref;
-          }
+          
           return (
             <Container key={input.name}>
               {input.component
@@ -220,4 +222,4 @@ const Form = function (props: FormProps) {
   );
 };
 
-export default Form;
+export default memo(Form, () => true);

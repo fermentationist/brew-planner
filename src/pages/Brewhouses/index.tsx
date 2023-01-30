@@ -5,14 +5,17 @@ import Tooltip from "@mui/material/Tooltip";
 import useAPI from "../../hooks/useAPI";
 import useAlert from "../../hooks/useAlert";
 import useAuth from "../../hooks/useAuth";
-import DataTable, { columnOptions } from "../../components/DataTable";
+import DataTable, {
+  columnOptions,
+} from "../../components/DataTable";
 import Page from "../../components/Page";
 import withLoadingSpinner from "../../hoc/withLoadingSpinner";
-import BrewhouseModal, {BrewhouseForm} from "./BrewhouseModal";
+import BrewhouseModal, { BrewhouseForm } from "./BrewhouseModal";
 import { APIError } from "../../types";
 
 export interface BrewhouseData extends Required<BrewhouseForm> {
   brewhouseUuid: string;
+  data?: BrewhouseData;
 }
 
 type Mode = "create" | "edit";
@@ -26,17 +29,32 @@ const Brewhouses = ({
 }) => {
   const [tableData, setTableData] = useState([]);
   const [showBrewhouseModal, setShowBrewhouseModal] = useState(false);
-  const [mode, setMode]: [mode: Mode, setMode: Dispatch<SetStateAction<Mode>>] = useState("create" as Mode);
+  const [mode, setMode]: [mode: Mode, setMode: Dispatch<SetStateAction<Mode>>] =
+    useState("create" as Mode);
   const [modalData, setModalData] = useState(null);
-  const { data: brewhousesData, loading, error, refetch: refresh, BREWERY_ROUTE, APIRequest } = useAPI("brewhouses");
+  const {
+    data: brewhousesData,
+    loading,
+    error,
+    refetch: refresh,
+    BREWERY_ROUTE,
+    APIRequest,
+  } = useAPI("brewhouses");
   const { alertError, alertErrorProm } = useAlert();
-  const {auth} = useAuth();
+  const { auth } = useAuth();
 
   useEffect(() => {
     if (!loading) {
       if (brewhousesData) {
         console.log("brewhousesData:", brewhousesData.data?.brewhouses);
-        setTableData(brewhousesData.data?.brewhouses);
+        const dataWithNestedRowData = brewhousesData.data?.brewhouses?.map(
+          (row: BrewhouseData) => {
+            const rowCopy = { ...row };
+            rowCopy.data = { ...row };
+            return rowCopy;
+          }
+        );
+        setTableData(dataWithNestedRowData);
       }
       if (error) {
         console.error(error);
@@ -50,24 +68,29 @@ const Brewhouses = ({
     setShowBrewhouseModal(true);
     setMode("create" as Mode);
     setModalData(null);
-  }
+  };
 
   const editBrewhouse = (rowData: BrewhouseData) => {
+    console.log("rowData:", rowData?.data);
+    setModalData(rowData?.data ?? rowData);
     setShowBrewhouseModal(true);
     setMode("edit" as Mode);
-    setModalData(rowData);
-  }
+  };
 
   const createOrUpdateBrewhouse = async (formData: BrewhouseForm) => {
     console.log("formData:", formData);
     const editMode = mode === "edit";
-    const reqBody = editMode ? formData : {...formData, createdBy: auth?.user?.uid}
-    const url = editMode ? "/brewhouses/" + modalData.brewhouseUuid : "/brewhouses";
+    const reqBody = editMode
+      ? formData
+      : { ...formData, createdBy: auth?.user?.uid };
+    const url = editMode
+      ? "/brewhouses/" + modalData.brewhouseUuid
+      : "/brewhouses";
     const apiReq = new APIRequest({
       baseURL: BREWERY_ROUTE,
       url,
       method: editMode ? "patch" : "post",
-      data: reqBody
+      data: reqBody,
     });
     const response = await apiReq.request().catch(async (error: APIError) => {
       await alertErrorProm(error);
@@ -75,30 +98,29 @@ const Brewhouses = ({
     console.log("response:", response);
     refresh();
     setShowBrewhouseModal(false);
-  }
-
-  const options = {
-    sortThirdClickReset: true,
   };
+
   const columns = [
     {
       label: "Name",
       name: "name",
-      options,
+      options: columnOptions.options
     },
     {
       label: "Date created",
-      name: "created_at",
+      name: "createdAt",
       options: columnOptions.dateOptions,
     },
     {
-      name: "editRow",
-      options: {
-        ...columnOptions.actionOptions
-      }
+      name: "",
+      options: columnOptions.createRenderEditButtonOptions("edit brewhouse", editBrewhouse),
+    },
+    {
+      name: "data",
+      options: columnOptions.rowDataOptions
     }
   ];
-  console.log("columns:", columns)
+  console.log("columns:", columns);
   return (
     <Page>
       <Tooltip title="Add Brewhouse">
@@ -106,18 +128,16 @@ const Brewhouses = ({
           <AddIcon />
         </IconButton>
       </Tooltip>
-      <DataTable data={tableData} columns={columns} refresh={refresh}/>
-      {
-        showBrewhouseModal ? (
-          <BrewhouseModal
-            showModal={showBrewhouseModal}
-            closeModal={() => setShowBrewhouseModal(false)}
-            mode={mode}
-            data={modalData}
-            onSubmit={createOrUpdateBrewhouse}
-          />
-        ) : null
-      }
+      <DataTable data={tableData} columns={columns} refresh={refresh} />
+      {showBrewhouseModal ? (
+        <BrewhouseModal
+          showModal={showBrewhouseModal}
+          closeModal={() => setShowBrewhouseModal(false)}
+          mode={mode}
+          data={modalData}
+          onSubmit={createOrUpdateBrewhouse}
+        />
+      ) : null}
     </Page>
   );
 };

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Page from "../../components/Page";
 import UserModal from "./UserModal";
-import DataTable, { getRowData } from "../../components/DataTable";
+import DataTable, { columnOptions, getRowData } from "../../components/DataTable";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import EditIcon from "@mui/icons-material/Edit";
@@ -131,7 +131,6 @@ const Users = function ({
   };
 
   const onUserModalFormSubmit = async (formData: any) => {
-    console.log("user formData:", formData);
     const { resetLink } = await createOrUpdateUser(formData);
     console.log("new user password reset link:", resetLink);
     if (resetLink) {
@@ -185,29 +184,27 @@ const Users = function ({
       });
     return response?.data;
   };
-  const options = {
-    sortThirdClickReset: true
-  };
+  
   const sharedColumns = [
     {
       label: "UID",
       name: "uid",
-      options
+      options: columnOptions.options
     },
     {
       label: "Name",
       name: "displayName",
-      options
+      options: columnOptions.options
     },
     {
       label: "Email",
       name: "email",
-      options
+      options: columnOptions.options
     },
     {
       label: "Role",
       name: "customClaims.role",
-      options
+      options: columnOptions.options
     },
     {
       label: "Breweries",
@@ -224,28 +221,14 @@ const Users = function ({
             </Tooltip>
           )});
         },
-        searchable: false,
-        ...options
+        ...columnOptions.options
       }
     }
   ];
 
   const editColumn = {
     name: "",
-    options: {
-      customBodyRender: (value: any, meta: any) => {
-        return (
-          <Tooltip title="edit user">
-            <IconButton onClick={editUser.bind(null, getRowData(meta.rowData))}>
-              <EditIcon />
-            </IconButton>
-          </Tooltip>
-        );
-      },
-      sort: false,
-      searchable: false,
-      ...options
-    }
+    options: columnOptions.createRenderEditButtonOptions("edit user", editUser)
   };
 
   // only admin users should be shown the edit button

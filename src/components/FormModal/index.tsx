@@ -1,4 +1,4 @@
-import { Ref, useState, useCallback, ChangeEvent, FunctionComponent} from "react";
+import { Ref, useState, useCallback, ChangeEvent, FunctionComponent, memo} from "react";
 import CustomDialog from "../CustomDialog";
 import ReactHookForm from "../ReactHookForm";
 import MuiButton from "@mui/lab/LoadingButton";
@@ -91,4 +91,4 @@ const FormModal = ({
   );
 };
 
-export default FormModal;
+export default memo(FormModal, () => true);

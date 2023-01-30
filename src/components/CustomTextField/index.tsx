@@ -4,6 +4,7 @@ import {
   ReactEventHandler,
   FocusEventHandler,
   SyntheticEvent,
+  memo,
 } from "react";
 import TextField from "@mui/material/TextField";
 import styled from "styled-components";
@@ -12,7 +13,7 @@ import { styled as muiStyled } from "@mui/material/styles";
 
 export interface CustomTextFieldProps {
   name: string;
-  register?: UseFormRegister<any>;
+  // register?: UseFormRegister<any>;
   label?: string;
   type?: string;
   margin?: string;
@@ -103,4 +104,7 @@ const CustomTextField = forwardRef(
   }
 );
 
+// export default memo(CustomTextField, (prevProps, nextProps) => {
+//   return prevProps.value === nextProps.value;
+// });
 export default CustomTextField;

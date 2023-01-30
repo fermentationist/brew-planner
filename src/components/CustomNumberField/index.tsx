@@ -1,8 +1,11 @@
-import {forwardRef, Ref, WheelEvent} from "react";
+import { forwardRef, Ref, WheelEvent } from "react";
 import CustomTextField, { CustomTextFieldProps } from "../CustomTextField";
 import styled from "styled-components";
 
-export type CustomNumberFieldProps = Omit<CustomTextFieldProps, "type">
+export type CustomNumberFieldProps = Omit<
+  CustomTextFieldProps,
+  "type" | "defaultValue"
+> & { defaultValue?: number | "" };
 
 const StyledNumberField = styled(CustomTextField)`
   /* These styles hide the up/down buttons in number inputs */
@@ -20,22 +23,23 @@ const StyledNumberField = styled(CustomTextField)`
   }
 `;
 
-const CustomNumberField = forwardRef((props: CustomNumberFieldProps, forwardedRef: Ref<any>) => {
-  const preventScrollingInNumberInput = (event: WheelEvent) => {
-    const target = event.target as HTMLInputElement;
-    target.blur();
-    return false;
-  };
+const CustomNumberField = forwardRef(
+  (props: CustomNumberFieldProps, forwardedRef: Ref<any>) => {
+    const preventScrollingInNumberInput = (event: WheelEvent) => {
+      const target = event.target as HTMLInputElement;
+      target.blur();
+      return false;
+    };
 
-  return (
-    <StyledNumberField
-      type= "number"
-      onWheel={preventScrollingInNumberInput}
-      ref={forwardedRef}
-      {...props}
-    />
-  )
-
-});
+    return (
+      <StyledNumberField
+        type="number"
+        onWheel={preventScrollingInNumberInput}
+        ref={forwardedRef}
+        {...props}
+      />
+    );
+  }
+);
 
 export default CustomNumberField;

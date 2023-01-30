@@ -42,6 +42,7 @@ const SettingsMenu = ({ closeDrawer }: { closeDrawer: () => void }) => {
   };
 
   const toggleDarkMode = () => {
+    console.log("globalState:", globalState)
     setGlobalState({
       ...globalState,
       theme: globalState.theme === "dark" ? "light" : "dark"
@@ -55,9 +56,9 @@ const SettingsMenu = ({ closeDrawer }: { closeDrawer: () => void }) => {
     });
   };
 
-  const callChangeBrewery = async (breweryId: string) => {
+  const callChangeBrewery = async (breweryUuid: string) => {
     setBrewerySelectorIsLoading(true);
-    changeBrewery(breweryId);
+    changeBrewery(breweryUuid);
     setBrewerySelectorIsLoading(false);
   };
 

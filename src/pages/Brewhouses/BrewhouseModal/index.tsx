@@ -47,7 +47,7 @@ const BrewhouseModal = ({
       name: "batchSize",
       label: "Batch Volume",
       type: "numberWithUnits",
-      convertOnUnitChange: true,
+      convertOnUnitChange: false,
       defaultValue: data?.batchSize,
       validation: required,
       errorMessages: requiredMessage,
