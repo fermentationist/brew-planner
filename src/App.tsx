@@ -12,6 +12,7 @@ import AlertStateProvider from "./context/AlertStateProvider";
 import APIProvider from "./context/APIProvider";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import queryClientConfig from "./config/queryClientConfig";
+import { memo } from "react";
 const queryClient = new QueryClient(queryClientConfig);
 
 
@@ -56,4 +57,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default memo(App, () => true);

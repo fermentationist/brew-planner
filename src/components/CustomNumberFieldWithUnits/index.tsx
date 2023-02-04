@@ -11,6 +11,7 @@ export interface CustomNumberFieldWithUnitsProps
   callback?: (value: any, callRHFSetValueFn?: boolean) => any;
   convertOnUnitChange?: boolean;
   maxDecPlaces?: number;
+  preferredUnitKey?: string;
 }
 
 // split into an inner and an outer component. The inner component is memoized to prevent it from re-rendering, unless the preferredUnit for the specific field is updated in globalState
@@ -23,9 +24,9 @@ const CustomNumberFieldWithUnits = forwardRef(
       parseUnit,
       getAltUnitSelections,
     } = useConvertUnits();
-
+    console.log("props in CustomNumberFieldWithUnits:", props)
     const { value: initialDefaultValue, unit: initialDefaultUnit } =
-      convertToPreferredUnit(props.name, props.defaultValue ?? props.value);
+      convertToPreferredUnit(props.name, props.defaultValue ?? props.value, props.preferredUnitKey);
     const memoizedInitialDefaultValue = useMemo(() => {
       return initialDefaultValue && (props.maxDecPlaces ?? null)
         ? Number(Number(initialDefaultValue).toFixed(props.maxDecPlaces))
@@ -51,7 +52,8 @@ const CustomNumberFieldWithUnits = forwardRef(
       const target = event.target as HTMLInputElement;
       const value = Number(target.value);
       const convertFn = createConvertFunction("canonical", unitRef?.current);
-      const { value: convertedValue } = convertFn(props.name, value);
+      console.log("props.preferredUnitKey in callOnChange:", props.preferredUnitKey)
+      const { value: convertedValue } = convertFn(props.name, value, props.preferredUnitKey);
       const newValue =
         props.maxDecPlaces ?? null
           ? Number(Number(convertedValue).toFixed(props.maxDecPlaces))
@@ -63,19 +65,22 @@ const CustomNumberFieldWithUnits = forwardRef(
     };
 
     const callSetPreferredUnit = (unit: string) => {
+      console.log("props.preferredUnitKey in callSetPreferredUnit:", props.preferredUnitKey)
       const prevUnitToCanonical = createConvertFunction(
         "canonical",
-        unitRef.current // previous unit
+        unitRef.current // previous unit    
       );
       const { value: canonicalValue } = prevUnitToCanonical(
         props.name,
-        valueRef.current
+        valueRef.current,
+        props.preferredUnitKey
       );
       if (props.convertOnUnitChange) {
         const canonicalToNewUnit = createConvertFunction("preferred", unit);
         const { value: convertedValue } = canonicalToNewUnit(
           props.name,
-          canonicalValue
+          canonicalValue,
+          props.preferredUnitKey
         );
         const newConvertedValue =
           convertedValue && (props.maxDecPlaces ?? null)
@@ -87,10 +92,11 @@ const CustomNumberFieldWithUnits = forwardRef(
       const newUnitToCanonical = createConvertFunction("canonical", unit);
       const { value: updatedCanonicalValue } = newUnitToCanonical(
         props.name,
-        valueRef.current
+        valueRef.current,
+        props.preferredUnitKey
       );
       unitRef.current = unit; // update with new unit
-      setPreferredUnit(props.name, unit);
+      setPreferredUnit(props.name, unit, props.preferredUnitKey);
       const newCanonicalValue =
         updatedCanonicalValue && (props.maxDecPlaces ?? null)
           ? Number(Number(updatedCanonicalValue).toFixed(props.maxDecPlaces))

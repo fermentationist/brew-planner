@@ -52,3 +52,48 @@ export const parseQueryString = (queriesToRetrieve: string[], fullQueryString: s
     trimmedRemainder
   ];
 }
+
+export const stringDiff = (strA: string, strB: string) => {
+  if (!strA) {
+    return strB;
+  }
+  if (!strB) {
+    return strA;
+  }
+  const [longer, shorter] = strA.length > strB.length ? [strA, strB] : [strB, strA];
+  const diff = longer.split("").reduce((diffArray: string[], char, index) => {
+    if (char !== shorter[index]) {
+      diffArray[index] = char;
+    }
+    return diffArray;
+  }, Array(longer.length).fill(""));
+  return diff.join("");
+}
+
+// to time execution of synchronous functions
+export const timeFunction = (fn: (() => any), ...args: any) => {
+  const start = Date.now();
+  const result = fn(...args);
+  const end = Date.now();
+  return [end - start, result];
+}
+
+// this function will only stringify functions, and objects with functions occurring at the root level of the object. More deeply nested functions will be converted to null.
+export const stringifyObjectWithFunctions = (obj: Record<string, any>) => {
+  return JSON.stringify(obj, (key: string, value: any) => {
+    if (typeof value === "function") {
+      return String(value);
+    }
+    return value;
+  })
+}
+
+// without the second argument, which is either an array of string keys or the string "all", this function has no way to know which strings to evaluate as functions, and which to leave as strings.
+export const parseObjectWithFunctions = (jsonString: string, keysToParseAsFunctions: string[] | "all") => {
+  return JSON.parse(jsonString, (key: string, value: any) => {
+    if (keysToParseAsFunctions === "all" || keysToParseAsFunctions.includes(key)) {
+      return eval(value);
+    }
+    return value;
+  })
+}

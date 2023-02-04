@@ -1,31 +1,24 @@
-import { useState, useEffect, SetStateAction, Dispatch } from "react";
+import { useState, useEffect, SetStateAction, Dispatch, memo, useMemo } from "react";
 import IconButton from "@mui/material/IconButton";
 import AddIcon from "@mui/icons-material/AddCircle";
 import Tooltip from "@mui/material/Tooltip";
 import useAPI from "../../hooks/useAPI";
 import useAlert from "../../hooks/useAlert";
 import useAuth from "../../hooks/useAuth";
-import DataTable, {
-  columnOptions,
-} from "../../components/DataTable";
+import useConvertUnits from "../../hooks/useConvertUnits";
+import useCreateColumnsWithUnitConversion from "../../hooks/useCreateColumnsWithUnitConversion";
+import DataTable, { columnOptions } from "../../components/DataTable";
 import Page from "../../components/Page";
 import withLoadingSpinner from "../../hoc/withLoadingSpinner";
-import BrewhouseModal, { BrewhouseForm } from "./BrewhouseModal";
-import { APIError } from "../../types";
-
-export interface BrewhouseData extends Required<BrewhouseForm> {
-  brewhouseUuid: string;
-  data?: BrewhouseData;
-}
+import BrewhouseModal, { brewhouseInputs } from "./BrewhouseModal";
+import { APIError, BrewhouseData } from "../../types";
 
 type Mode = "create" | "edit";
 
 const Brewhouses = ({
-  doneLoading,
-  startLoading,
+  doneLoading
 }: {
   doneLoading: () => void;
-  startLoading: () => void;
 }) => {
   const [tableData, setTableData] = useState([]);
   const [showBrewhouseModal, setShowBrewhouseModal] = useState(false);
@@ -34,17 +27,22 @@ const Brewhouses = ({
   const [modalData, setModalData] = useState(null);
   const {
     data: brewhousesData,
-    loading,
+    isLoading,
     error,
     refetch: refresh,
     BREWERY_ROUTE,
     APIRequest,
+    enable: enableBrewhouseQuery
   } = useAPI("brewhouses");
   const { alertError, alertErrorProm } = useAlert();
   const { auth } = useAuth();
-
+  const {generateColumnsFromInputs} = useCreateColumnsWithUnitConversion();
+  const {renameNewPreferredUnits} = useConvertUnits();
   useEffect(() => {
-    if (!loading) {
+    if (isLoading && !brewhousesData) {
+      enableBrewhouseQuery();
+    }
+    if (!isLoading) {
       if (brewhousesData) {
         console.log("brewhousesData:", brewhousesData.data?.brewhouses);
         const dataWithNestedRowData = brewhousesData.data?.brewhouses?.map(
@@ -62,7 +60,7 @@ const Brewhouses = ({
       }
       doneLoading();
     }
-  }, [brewhousesData, loading, error, doneLoading, alertError]);
+  }, [brewhousesData, isLoading, error, doneLoading, alertError, enableBrewhouseQuery]);
 
   const addBrewhouse = () => {
     setShowBrewhouseModal(true);
@@ -71,13 +69,12 @@ const Brewhouses = ({
   };
 
   const editBrewhouse = (rowData: BrewhouseData) => {
-    console.log("rowData:", rowData?.data);
     setModalData(rowData?.data ?? rowData);
-    setShowBrewhouseModal(true);
     setMode("edit" as Mode);
+    setShowBrewhouseModal(true);
   };
 
-  const createOrUpdateBrewhouse = async (formData: BrewhouseForm) => {
+  const createOrUpdateBrewhouse = async (formData: BrewhouseData) => {
     console.log("formData:", formData);
     const editMode = mode === "edit";
     const reqBody = editMode
@@ -96,31 +93,35 @@ const Brewhouses = ({
       await alertErrorProm(error);
     });
     console.log("response:", response);
+    !editMode && renameNewPreferredUnits(response.data?.brewhouseUuid);
     refresh();
     setShowBrewhouseModal(false);
   };
 
+  const generatedColumns = generateColumnsFromInputs(brewhouseInputs);
+
   const columns = [
     {
-      label: "Name",
-      name: "name",
-      options: columnOptions.options
+      title: "Brewhouse ID",
+      name: "brewhouseUuid",
+      options: {
+        ...columnOptions.options,
+        display: false
+      }
     },
-    {
-      label: "Date created",
-      name: "createdAt",
-      options: columnOptions.dateOptions,
-    },
-    {
-      name: "",
-      options: columnOptions.createRenderEditButtonOptions("edit brewhouse", editBrewhouse),
-    },
+    ...generatedColumns,
     {
       name: "data",
       options: columnOptions.rowDataOptions
-    }
-  ];
-  console.log("columns:", columns);
+    },
+    {
+      name: "",
+      options: columnOptions.createRenderEditButtonOptions(
+        "edit brewhouse",
+        editBrewhouse
+      ),
+    },
+  ]
   return (
     <Page>
       <Tooltip title="Add Brewhouse">
@@ -142,4 +143,4 @@ const Brewhouses = ({
   );
 };
 
-export default withLoadingSpinner(Brewhouses);
+export default withLoadingSpinner(memo(Brewhouses, () => true));

@@ -60,3 +60,34 @@ export interface BreweryData {
   zip?: string;
   country?: string;
 }
+
+export interface BrewhouseData {
+  name: string;
+  brewhouseUuid: string;
+  batchSize: number;
+  kettleVol: number;
+  tunVolume: number;
+  tunWeight: number;
+  tunLoss?: number;
+  tunSpecificHeat: number;
+  lauterDeadspace?: number;
+  topUpWater?: number;
+  trubChillerLoss?: number;
+  evaporationRate: number;
+  miscLoss?: number;
+  extractEfficiency: number;
+  grainAbsorptionRate: number;
+  hopUtilization: number;
+  data?: BrewhouseData;
+}
+
+export interface UserData {
+  uid: string;
+  displayName?: string;
+  email: string;
+  customClaims: {
+    role: string;
+    breweries?: string[];
+  };
+  breweries?: BreweryData[]
+}

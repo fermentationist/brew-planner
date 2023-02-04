@@ -58,7 +58,7 @@ const Form = function (props: FormProps) {
     register,
     formState,
     setValue: setInputValue,
-    trigger,
+    trigger: triggerFormValidation,
   } = useForm({ defaultValues });
 
   const callbackWrapper = (
@@ -99,6 +99,7 @@ const Form = function (props: FormProps) {
     | CustomNumberFieldProps;
 
   const getProps = (input: FormInputOptions): ComponentProps => {
+    // given the input object, return the correct props for the type of component that it prescribes
     let componentProps: ComponentProps = {
       name: input.name,
       type: input.type || "text",
@@ -156,8 +157,9 @@ const Form = function (props: FormProps) {
           ...componentProps,
           maxDecPlaces: input.maxDecPlaces,
           convertOnUnitChange: input.convertOnUnitChange,
-          defaultValue: input.convertOnUnitChange ? void 0 : input.defaultValue,
-          value: input.convertOnUnitChange ? input.defaultValue ?? input.value : void 0
+          defaultValue: input.convertOnUnitChange ? void 0 : input.defaultValue, // defaultValue must be undefined if convertOnUnitChange, because it will then be a controlled input
+          value: input.convertOnUnitChange ? input.defaultValue ?? input.value : void 0, // value must be undefined if not convertOnUnitChange, because it will then be an uncontrolled input
+          preferredUnitKey: input.preferredUnitKey
         } as CustomNumberFieldWithUnitsProps;
         break;
     }
@@ -170,6 +172,7 @@ const Form = function (props: FormProps) {
       id={props.formId}
     >
       <Stack>
+        {/* loop through list of inputs and create the specified input components */}
         {props.inputs.map((input: FormInputOptions) => {
           const inputProps = getProps(input);
           const { ref, onChange, onBlur } = register(
@@ -187,13 +190,14 @@ const Form = function (props: FormProps) {
               setInputValue(input.name, value);
               input.onChange && input.onChange(event);
               if (Object.keys(formState.errors).length) {
-                trigger(); // re-validate form
+                triggerFormValidation(); // if there are currently validation errors, re-validate form
               }
               return onChange(event);
             },
           };
           
           return (
+            // creating the input component that was defined in the input object
             <Container key={input.name}>
               {input.component
                 ? createElement<any>(input.component, {

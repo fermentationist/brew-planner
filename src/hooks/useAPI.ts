@@ -1,31 +1,53 @@
-import { useContext } from "react";
+import { useContext, useMemo, useRef } from "react";
 import { APIContext } from "../context/APIProvider";
-import * as ApiRequest from "../utils/APIRequest";
-import useAuth from "./useAuth";
 
-// re-exported from this file for convenience
-export const APIRequest = ApiRequest.default;
-export const API_URL = ApiRequest.API_URL;
-
-const useAPI = (apiName?: string) => {
-  const { auth } = useAuth();
+const useAPI = (apisToInclude?: string | string[]) => {
+  /* 
+  if invoked without arguments, will return an object with all registered API queries
+  if invoked with a string, will return the API query corresponding to that name
+  if invoked with an array, will return multiple API queries
+  */
+  const memoizedOutputRef = useRef(null);
   const api = useContext(APIContext);
-  console.log("useAPI called:", api)
-  const apiRequest = api[apiName] || api;
-  const BREWERY_ROUTE = `${API_URL}/breweries/${auth?.currentBrewery}`;
+  let apiRequests = api;
+  if (Array.isArray(apisToInclude)) {
+    apiRequests = apisToInclude.reduce((map: Record<string, any>, apiName) => {
+      map[apiName] = api[apiName];
+      return map;
+    }, {});
+
+  } else if (apisToInclude) {
+    apiRequests = api[apisToInclude];
+  }
+
+  
+  const memoizeAPIData: any = (objToMemoize: any) => {
+    const getDepString = (obj: any) => {
+      const objCopy = {...obj};
+      delete objCopy.queryClient; // queryClient it is circular
+      return JSON.stringify(objCopy);
+    }
+    const oldDeps = getDepString(memoizedOutputRef.current);
+    const newDeps = getDepString(objToMemoize);
+    if(oldDeps === newDeps) {
+      return memoizedOutputRef.current;
+    }
+    memoizedOutputRef.current = objToMemoize;
+    return objToMemoize;
+  }
 
   const output = {
-    ...apiRequest,
+    ...apiRequests,
     resetAPI: api.resetAPI,
     refetchAll: api.refetchAll,
     invalidateAll: api.invalidateAll,
     queryClient: api.queryClient,
-    BREWERY_ROUTE,
-    APIRequest,
-    API_URL
+    BREWERY_ROUTE: api.BREWERY_ROUTE,
+    CURRENT_BREWERY: api.CURRENT_BREWERY,
+    API_URL: api.API_URL,
+    APIRequest: api.APIRequest,
   }
-  return output;
+  return memoizeAPIData(output);
 }
 
 export default useAPI;
-

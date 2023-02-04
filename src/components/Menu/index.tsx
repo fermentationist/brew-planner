@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import Divider from "@mui/material/Divider";
@@ -146,4 +146,4 @@ const Menu = ({menuItems, nested}: MenuProps) => {
   );
 };
 
-export default Menu;
+export default memo(Menu, () => true);

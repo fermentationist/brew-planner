@@ -1,29 +1,16 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import Page from "../../components/Page";
 import UserModal from "./UserModal";
-import DataTable, { columnOptions, getRowData } from "../../components/DataTable";
+import DataTable, { columnOptions } from "../../components/DataTable";
 import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/AddCircle";
 import Tooltip from "@mui/material/Tooltip";
 import useAlert from "../../hooks/useAlert";
 import useAuth from "../../hooks/useAuth";
 import useConfirm from "../../hooks/useConfirm";
 import withLoadingSpinner from "../../hoc/withLoadingSpinner";
-import useAPI, { APIRequest } from "../../hooks/useAPI";
-import { APIError, BreweryData } from "../../types";
-
-export interface UserData {
-  uid: string;
-  displayName?: string;
-  email: string;
-  customClaims: {
-    role: string;
-    breweries?: string[];
-  };
-  breweries?: BreweryData[]
-}
+import useAPI from "../../hooks/useAPI";
+import { APIError, BreweryData, UserData } from "../../types";
 
 const Users = function ({
   startLoading,
@@ -32,6 +19,7 @@ const Users = function ({
   startLoading: () => void;
   doneLoading: () => void;
 }) {
+  console.log("\nloading Users\n")
   const [tableData, setTableData] = useState([]);
   const [showUserModal, setShowUserModal] = useState(false);
   const [mode, setMode] = useState("create" as "create" | "edit");
@@ -39,37 +27,43 @@ const Users = function ({
   const { auth, sendPasswordResetEmail } = useAuth();
   const { callAlert, alertError, alertErrorProm } = useAlert();
   const { confirmDelete, confirm } = useConfirm();
-  const { isLoading: loadingUsers, data: usersData, error: usersError, refetch: refresh } = useAPI("users");
-  const { isLoading: loadingBreweries, data: breweriesData, error: breweriesError} = useAPI("breweries");
-
+  const {users: usersQuery, breweries: breweriesQuery, APIRequest} = useAPI(["users", "breweries"]);
+  
   useEffect(() => {
-    if (!loadingUsers && !loadingBreweries) {
-      if (usersData) {
-        let usersArray = usersData.data.users;
-        if (breweriesData){
-          const breweriesMap = breweriesData.data.breweries.reduce((map: any, brewery: BreweryData) => {
-            if (!Object.hasOwn(map, brewery.breweryUuid)) {
-              map[brewery.breweryUuid] = brewery;
-            }
-            return map;
-          }, {});
-          usersArray = usersArray.map((user: UserData) => {
-            const breweries = user.customClaims?.breweries.map((breweryUuid: string) => {
-              return breweriesMap[breweryUuid];
+    if (usersQuery && breweriesQuery) {
+      if (usersQuery.isLoading || breweriesQuery.isLoading) {
+        console.log("enabling users and breweries")
+        usersQuery.enable();
+        breweriesQuery.enable();
+      }
+      if (!usersQuery.isLoading && !breweriesQuery.isLoading) {
+        if (usersQuery.data) {
+          let usersArray = usersQuery.data.data.users;
+          if (breweriesQuery.data){
+            const breweriesMap = breweriesQuery.data.data.breweries.reduce((map: any, brewery: BreweryData) => {
+              if (!Object.hasOwn(map, brewery.breweryUuid)) {
+                map[brewery.breweryUuid] = brewery;
+              }
+              return map;
+            }, {});
+            usersArray = usersArray.map((user: UserData) => {
+              const breweries = user.customClaims?.breweries.map((breweryUuid: string) => {
+                return breweriesMap[breweryUuid];
+              })
+              user.breweries = breweries;
+              return user;
             })
-            user.breweries = breweries;
-            return user;
-          })
+          }
+          setTableData(usersArray);
         }
-        setTableData(usersArray);
+        if (usersQuery.error) {
+          console.error(usersQuery.error);
+          alertError(usersQuery.error);
+        }
+        doneLoading();
       }
-      if (usersError) {
-        console.error(usersError);
-        alertError(usersError);
-      }
-      doneLoading();
     }
-  }, [usersData, usersError, loadingUsers, doneLoading, alertError]);
+  }, [usersQuery?.isLoading, usersQuery?.data, usersQuery?.error, doneLoading, alertError, breweriesQuery?.isLoading, breweriesQuery?.data]);
 
   const editUser = (rowData: UserData) => {
     setUserData(rowData);
@@ -95,7 +89,7 @@ const Users = function ({
       });
       return;
     }
-    return deleteUser.request().catch(async error => await alertErrorProm(error));
+    return deleteUser.request().catch(async (error: APIError) => await alertErrorProm(error));
   };
 
   const deleteRows = async (rowsDeleted: any) => {
@@ -126,7 +120,7 @@ const Users = function ({
       console.log("attempting to delete user:", uid);
       await deleteSingleUser(uid);
     }
-    refresh();
+    usersQuery.refresh();
     doneLoading();
   };
 
@@ -154,7 +148,7 @@ const Users = function ({
         });
       }
     }
-    refresh();
+    usersQuery.refresh();
     setShowUserModal(false);
   };
 
@@ -252,7 +246,7 @@ const Users = function ({
           selectableRowsHeader: true,
           onRowsDelete: deleteRows
         }}
-        refresh={refresh}
+        refresh={usersQuery?.refetch}
       />
       {showUserModal ? (
         <UserModal
@@ -268,4 +262,4 @@ const Users = function ({
   );
 };
 
-export default withLoadingSpinner(Users);
+export default withLoadingSpinner(memo(Users, () => true));

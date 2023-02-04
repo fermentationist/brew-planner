@@ -6,23 +6,21 @@ import unitDefaults from "../config/unitDefaults";
 const useConvertUnits = () => {
   const [globalState, setGlobalState] = useGlobalState();
 
-  const parseUnit = (unit: string) => {
+  const parseUnit = useCallback((unit: string) => {
     const units = unit.split(/[/*]/g);
     const operators = unit.split(/\w+/g).filter((x) => ["/", "*"].includes(x));
     return [units, operators];
-  };
+  }, []);
 
-  const getPreferredOrDefaultUnit = (field: string) =>
-    globalState?.preferredUnits?.[field] || unitDefaults[field]?.default;
+  const getPreferredOrDefaultUnit = useCallback((field: string, preferredUnitKey?: string) => (preferredUnitKey ? globalState?.preferredUnits?.[preferredUnitKey]?.[field] : globalState?.preferredUnits?.[field]) || unitDefaults[field]?.default, [globalState]);
 
-  const createConvertFunction =
-    (target: "canonical" | "preferred", preferredUnitParam?: string) =>
-    (field: string, stringOrNumber: string | number) => {
+  const createConvertFunction = (target: "canonical" | "preferred", preferredUnitParam?: string) =>
+    (field: string, stringOrNumber: string | number, preferredUnitKey?: string) => {
       const value = (stringOrNumber ?? "") && Number(stringOrNumber) as number | "";
       const canonicalTarget = target === "canonical";
       const canonicalUnit = unitDefaults[field]?.canonical;
       const preferredUnit =
-        preferredUnitParam || getPreferredOrDefaultUnit(field);
+        preferredUnitParam || getPreferredOrDefaultUnit(field, preferredUnitKey);
       if (!field || !(stringOrNumber ?? false)) {
         // (stringOrNumber ?? false) allows for stringOrNumber to be 0
         return {
@@ -88,7 +86,7 @@ const useConvertUnits = () => {
 
   const convertToPreferredUnit = createConvertFunction("preferred");
 
-  const getAltUnitSelections = (unit: string) => {
+  const getAltUnitSelections = useCallback((unit: string) => {
     const [units] = parseUnit(unit);
     const safeUnits = units.map((unitPart) =>
       unitPart.toLowerCase() === "cal" ? "J" : unitPart
@@ -105,41 +103,77 @@ const useConvertUnits = () => {
       {}
     );
     return selections;
-  };
+  }, [parseUnit]);
 
-  const setPreferredUnit = (field: string, unit: string) => {
-    // return
+  const setPreferredUnit = useCallback((field: string, unit: string, preferredUnitKey?: string) => {
+    setGlobalState((prevState: any) => {
+      let newState;
+      if (preferredUnitKey) {
+        newState = {
+          ...prevState,
+          preferredUnits: {
+            ...(prevState.preferredUnits || {}),
+            [preferredUnitKey]: {
+              ...(prevState.preferredUnits?.[preferredUnitKey] || {}),
+              [field]: unit
+            }
+          }
+        }
+      } else {
+        newState = {
+          ...prevState,
+          preferredUnits: {
+            ...(prevState.preferredUnits || {}),
+            [field]: unit
+          }
+        }
+      }
+      console.log("\n\nnewState:", newState)
+      console.log("\n")
+      return newState;
+    });
+  }, [setGlobalState]);
+
+  const renameNewPreferredUnits = useCallback((key: string) => {
     setGlobalState((prevState: any) => {
       const newState = {
         ...prevState,
         preferredUnits: {
           ...(prevState.preferredUnits || {}),
-          [field]: unit
+          [key]: prevState.preferredUnits?.temp
+
         }
       }
+      newState.preferredUnits.temp && delete newState.preferredUnits.temp;
       return newState;
-    });
-  };
+    })
+  }, [setGlobalState]);
 
-  const memoizedParseUnit = useCallback(parseUnit, []);
-  const memoizedCreateConvertFunction = useCallback(createConvertFunction, []);
-  const memoizedConvertToPreferredUnit = useCallback(convertToPreferredUnit, [globalState?.preferredUnits]);
-  const memoizedGetPreferredOrDefaultUnit = useCallback(getPreferredOrDefaultUnit, []);
-  const memoizedGetAltUnitSelections = useCallback(getAltUnitSelections, []);
-  const memoizedSetPreferredUnit = useCallback(setPreferredUnit, []);
-  const memoizedUnitDefaults = useMemo(() => unitDefaults, []);
   const memoizedPreferredUnits = useMemo(() => globalState?.preferredUnits, [globalState?.preferredUnits]);
 
-  return useMemo(() => ({
-    parseUnit: memoizedParseUnit,
-    createConvertFunction: memoizedCreateConvertFunction,
-    convertToPreferredUnit: memoizedConvertToPreferredUnit,
-    getPreferredOrDefaultUnit: memoizedGetPreferredOrDefaultUnit,
-    getAltUnitSelections: memoizedGetAltUnitSelections,
-    setPreferredUnit: memoizedSetPreferredUnit,
-    unitDefaults: memoizedUnitDefaults,
+//   return useMemo(() => ({
+//     parseUnit,
+//     createConvertFunction,
+//     convertToPreferredUnit,
+//     getPreferredOrDefaultUnit,
+//     getAltUnitSelections,
+//     setPreferredUnit,
+//     unitDefaults,
+//     preferredUnits: memoizedPreferredUnits,
+//   }), [parseUnit, createConvertFunction, convertToPreferredUnit, getPreferredOrDefaultUnit, getAltUnitSelections, setPreferredUnit, memoizedPreferredUnits]);
+// };
+
+  return {
+    parseUnit,
+    createConvertFunction,
+    convertToPreferredUnit,
+    getPreferredOrDefaultUnit,
+    getAltUnitSelections,
+    setPreferredUnit,
+    renameNewPreferredUnits,
+    unitDefaults,
     preferredUnits: memoizedPreferredUnits,
-  }), [memoizedPreferredUnits]);
+  };
 };
 
 export default useConvertUnits;

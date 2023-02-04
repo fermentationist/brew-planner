@@ -1,4 +1,5 @@
-import { config } from "dotenv";
+/* global process, console */
+import "dotenv/config";
 import express from "express";
 import ip from "ip";
 import cors from "cors";
@@ -11,7 +12,6 @@ import { sendResponse, sendError } from "./responses.js";
 import errorHandler from "../middleware/error-handler.js";
 import { opError, inputError } from "./errors.js";
 
-config();
 const app = express();
 
 const TEST_MODE = process.env.TEST_MODE === "false" ? false : true;

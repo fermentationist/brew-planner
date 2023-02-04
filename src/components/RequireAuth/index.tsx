@@ -2,6 +2,7 @@ import { useLocation, Navigate, Outlet } from "react-router-dom";
 import Page from "../Page";
 import StyledSpinner from "../styled/StyledSpinner";
 import useAuth from "../../hooks/useAuth";
+import { memo } from "react";
 
 export interface RequireAuthProps {
   allowedRoles: (string | number)[];
@@ -31,4 +32,4 @@ const RequireAuth = function ({ allowedRoles }: RequireAuthProps) {
   return <Navigate to="/login" state={{ from: location }} replace />; 
 };
 
-export default RequireAuth;
+export default memo(RequireAuth, (prevProps, nextProps) => prevProps.allowedRoles === nextProps.allowedRoles);

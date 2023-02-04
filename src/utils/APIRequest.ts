@@ -35,7 +35,7 @@ export default class APIRequest {
 
     const requestConfig = {
       ...this.config,
-      baseURL: this.config.baseURL || (authState?.user?.role === "admin"
+      baseURL: this.config.baseURL ?? (authState?.user?.role === "admin"
           ? `${API_URL}/admin`
           : `${API_URL}/breweries/${authState?.currentBrewery}`),
       headers: {
@@ -59,6 +59,7 @@ export default class APIRequest {
         return response;
       })
       .catch(error => {
+        console.error("ERROR in APIRequest:", error);
         if (requestConfig?.signal?.aborted) {
           // ignore "CanceledError"
           console.log("pending request aborted by client:", requestConfig);
@@ -66,6 +67,11 @@ export default class APIRequest {
           let errorOutput = opError("Request failed", { name: "bad request" });
           const realError = error.response?.data?.error;
           if (realError) {
+            if (error.response.data.error.message.toLowerCase().includes("invalid token")) {
+              console.log("\ntry to renew token?\n");
+              // ignore invalid token errors
+              return;
+            }
             errorOutput = opError(realError.message, {
               name: realError.name,
               status: error.response.status

@@ -76,26 +76,26 @@ export const getBrewhouses = [getBrewhousesValidation, getBrewhousesFunction];
 const createBrewhouseValidation = [
   validate
     .body("name")
-    .exists(opt)
+    .exists()
     .isString()
     .isLength({ min: 1, max: 100 })
     .customSanitizer(validate.xssSanitize),
   validate.param("breweryUuid").exists(opt).custom(isExistingBreweryUuid),
   validate.body("brewhouseUuid").optional(opt).isUUID(1),
   validate.body("createdBy").exists(opt).isString().custom(isExistingUid),
-  validate.body("batchSize").exists(opt).isNumeric().not().isString(),
-  validate.body("tunVolume").exists(opt).isNumeric().not().isString(),
-  validate.body("tunWeight").exists(opt).isNumeric().not().isString(),
+  validate.body("batchSize").exists().isNumeric().not().isString(),
+  validate.body("tunVolume").exists().isNumeric().not().isString(),
+  validate.body("tunWeight").exists().isNumeric().not().isString(),
   validate.body("tunLoss").optional().isNumeric().not().isString(),
   validate.body("tunSpecificHeat").exists().isNumeric().not().isString(),
   validate.body("lauterDeadspace").optional().isNumeric().not().isString(),
   validate.body("topUpWater").optional().isNumeric().not().isString(),
   validate.body("trubChillerLoss").optional().isNumeric().not().isString(),
   validate.body("evaporationRate").exists().isNumeric().not().isString(),
-  validate.body("kettleVol").exists(opt).isNumeric().not().isString(),
+  validate.body("kettleVol").exists().isNumeric().not().isString(),
   validate.body("miscLoss").optional().isNumeric().not().isString(),
-  validate.body("extractEfficiency").exists(opt).isNumeric().not().isString(),
-  validate.body("grainAbsorptionRate").exists(opt).isNumeric().not().isString(),
+  validate.body("extractEfficiency").exists().isNumeric().not().isString(),
+  validate.body("grainAbsorptionRate").exists().isNumeric().not().isString(),
   validate.body("hopUtilization").exists().isNumeric().not().isString(),
   validate.catchValidationErrors,
 ];

@@ -1,4 +1,4 @@
-import { useContext, useMemo, useCallback } from "react";
+import { useContext, useCallback } from "react";
 import { AuthContext } from "../context/AuthProvider";
 import { AuthObject } from "../types";
 import { opError } from "../utils/errors";
@@ -12,26 +12,39 @@ export interface UseAuthObject {
 }
 
 const useAuth = (): UseAuthObject => {
-  const { auth, setAuth, login, logout, sendPasswordResetEmail } = useContext(AuthContext);
-  const changeBrewery = (newBrewery: string) => {
-    if (auth?.user?.role === "admin" || auth?.user?.breweries?.includes(newBrewery)) {
-      setAuth({
-        ...auth,
-        currentBrewery: newBrewery
-      });
-    } else {
-      throw opError("Client is not authorized to access this brewery", {name: "unauthorized"});
-    }
-  };
+  const { auth, setAuth, login, logout, sendPasswordResetEmail } =
+    useContext(AuthContext);
+  console.log("useAuth called");
 
-  return {
+  const changeBrewery = useCallback(
+    (newBrewery: string) => {
+      console.log("change brewery to ", newBrewery)
+      if (
+        auth?.user?.role === "admin" ||
+        auth?.user?.breweries?.includes(newBrewery)
+      ) {
+        setAuth((prevState: AuthObject) => ({
+          ...prevState,
+          currentBrewery: newBrewery,
+        }));
+      } else {
+        throw opError("Client is not authorized to access this brewery", {
+          name: "unauthorized",
+        });
+      }
+    },
+    [auth, setAuth]
+  );
+
+  const output = {
     auth,
     login,
     logout,
-    changeBrewery: useCallback(changeBrewery, []),
-    sendPasswordResetEmail
+    changeBrewery,
+    sendPasswordResetEmail,
   };
+
+  return output;
 };
 
 export default useAuth;
- 

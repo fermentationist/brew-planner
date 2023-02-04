@@ -80,6 +80,9 @@ const Header = ({ children }: ChildProps) => {
   const [globalState, setGlobalState] = useGlobalState();
   const location = useLocation();
   const toggleMenu = () => {
+    console.log("toggleMenu!!")
+    console.log("setGlobalState:", setGlobalState);
+    console.log("globalState:", globalState);
     setGlobalState({
       ...globalState,
       menu: {

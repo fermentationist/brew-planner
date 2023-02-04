@@ -1,26 +1,27 @@
 import { useState, createContext, PropsWithChildren, useCallback, useEffect } from "react";
+import useDeeperMemo from "../../hooks/useDeeperMemo";
 import storage from "../../utils/storage";
 export const GlobalStateContext = createContext([{}, (): null => null]);
 
 const GlobalStateProvider = function (props: PropsWithChildren<any>) {
+  console.log("loading GlobalStateProvider")
   const {getStorage, setStorage} = storage("brewPlanner");
   const initialState = getStorage("globalState") || {};
   const [globalState, setState] = useState(initialState);
-  const setGlobalState = (newState: any) => {
+  const deepMemoize = useDeeperMemo();
+
+  const setGlobalState = useCallback((newState: any) => {
     setState(newState);
-  }
-  const memoizedSetState = useCallback(setGlobalState, []);
+  }, []);
 
   useEffect(() => {
     // when globalState is updated, save globalState to localStorage
-    setStorage("globalState", globalState)
-  }, [globalState]);
+    setStorage("globalState", globalState);
+  }, [globalState, setStorage]);
 
   return (
     <GlobalStateContext.Provider 
-      value={
-        [ globalState, memoizedSetState ]
-      }
+      value={deepMemoize([ globalState, setGlobalState ], "globalState")}
     >
       {props.children}
     </GlobalStateContext.Provider>
@@ -28,3 +29,5 @@ const GlobalStateProvider = function (props: PropsWithChildren<any>) {
 };
 
 export default GlobalStateProvider;
+
+

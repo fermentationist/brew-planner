@@ -7,6 +7,7 @@ import FalseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import Tooltip from "@mui/material/Tooltip";
 import DatePopper from "../DatePopper";
+import { memo } from "react";
 
 let cols: any[] = [];
 
@@ -62,6 +63,7 @@ const DataTable = ({
   refresh?: () => void;
   className?: string;
 }) => {
+  console.log("\nDataTable loading...\n")
   cols = columns;
   const tableOptions: MUIDataTableOptions = {
     jumpToPage: true,
@@ -100,10 +102,13 @@ const DataTable = ({
   );
 };
 
-export default DataTable;
+export default memo(DataTable, (prevProps, nextProps) => {
+  return prevProps.columns === nextProps.columns && prevProps.data === nextProps.data && nextProps.options === prevProps.options;
+});
 
 export type DataTableColumn = MUIDataTableColumn;
-
+export type DataTableColumnOptions = MUIDataTableColumnOptions;
+export type DataTableMeta = MUIDataTableMeta;
 // getColumnIndex:
 // rowData is returned by mui-datatables as an array of column values, without any keys. This function takes in the column name and returns the index of that column for use with rowData array
 export const getColumnIndex = (columnName: string) => {
@@ -163,8 +168,6 @@ const expandField = (key: string, value: any): any[] => {
   };
   return [newKey, newValue];
 };
-
-export type CreateRenderButtonOptionsFunction = ((...args: any) => MUIDataTableColumnOptions);
 
 export const columnOptions = ((): Record<string, any> => {
   const options = { sortThirdClickReset: true };

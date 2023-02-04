@@ -27,10 +27,13 @@ const BrewerySelector = ({
   const [selectedBrewery, setSelectedBrewery] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
   const [confirmedBrewery, setConfirmedBrewery] = useState(null);
-  const {isLoading, error, data} = useAPI("breweries");
+  const {isLoading, error, data, enable: enableBreweriesQuery} = useAPI("breweries");
   const { alertError } = useAlert();
 
   useEffect(() => {
+    if (isLoading && !data) {
+      enableBreweriesQuery();
+    }
     if (!isLoading) {
       if (data) {
         const allBreweries = data.data?.breweries;

@@ -1,4 +1,4 @@
-import { MouseEventHandler, ReactNode, useState, useEffect } from "react";
+import { MouseEventHandler, ReactNode, useState, useEffect, memo } from "react";
 import Divider from "@mui/material/Divider";
 import List from "@mui/material/List";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -29,7 +29,7 @@ const SettingsMenu = ({ closeDrawer }: { closeDrawer: () => void }) => {
   const [brewerySelectorIsLoading, setBrewerySelectorIsLoading] = useState(false);
   const { auth, logout, changeBrewery } = useAuth();
   const [globalState, setGlobalState] = useGlobalState();
-  const { resetAPI } = useAPI();
+  const { resetAPI, refetch: refreshBreweries } = useAPI("breweries");
 
   const navigate = useNavigate();
 
@@ -60,6 +60,7 @@ const SettingsMenu = ({ closeDrawer }: { closeDrawer: () => void }) => {
     setBrewerySelectorIsLoading(true);
     changeBrewery(breweryUuid);
     setBrewerySelectorIsLoading(false);
+    refreshBreweries();
   };
 
   // MENU ITEMS
@@ -89,7 +90,7 @@ const SettingsMenu = ({ closeDrawer }: { closeDrawer: () => void }) => {
         <FormControlLabel
           control={
             <Switch
-              checked={globalState.safeMode}
+              checked={!!globalState.safeMode}
               onChange={toggleSafeMode}
               size="small"
             />
@@ -152,4 +153,4 @@ const SettingsMenu = ({ closeDrawer }: { closeDrawer: () => void }) => {
   );
 };
 
-export default SettingsMenu;
+export default memo(SettingsMenu, () => true);
