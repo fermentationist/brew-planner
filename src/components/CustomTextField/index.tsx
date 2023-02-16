@@ -34,8 +34,9 @@ export interface CustomTextFieldProps {
   id?: string;
   errorMessages?: string | { [key: string]: any };
   step?: string;
-  min?: string;
-  pattern?: RegExp;
+  min?: string | number;
+  max?: string | number;
+  pattern?: RegExp | string;
   callback?: (value: string) => any;
   disabled?: boolean;
 }
@@ -82,6 +83,7 @@ const CustomTextField = forwardRef(
           onWheel: props.onWheel,
           step: props.step || "any",
           min: props.min,
+          max: props.max,
           pattern: props.pattern,
           disabled: props.disabled
         }}
@@ -104,7 +106,4 @@ const CustomTextField = forwardRef(
   }
 );
 
-// export default memo(CustomTextField, (prevProps, nextProps) => {
-//   return prevProps.value === nextProps.value;
-// });
 export default CustomTextField;

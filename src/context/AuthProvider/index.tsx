@@ -14,7 +14,7 @@ const { setStorage, getStorage } = storage("brewPlanner");
 
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
-const firebaseAuth = getAuth(firebaseApp);
+export const firebaseAuth = getAuth(firebaseApp);
 
 export interface IAuthContext {
   auth: AuthObject;
@@ -32,7 +32,7 @@ export const AuthContext = createContext<IAuthContext>({
   sendPasswordResetEmail: null,
 });
 
-const AuthProvider = function (props: ChildProps) {
+const AuthProvider = ({children}:{children: ChildProps}) => {
   const initialState = getStorage("authState") || { loaded: false };
   const [authState, setAuthState] = useState(initialState as AuthObject);
   const [tokenRefresh, setTokenRefresh] = useState(false);
@@ -62,9 +62,10 @@ const AuthProvider = function (props: ChildProps) {
   }, [setAuth]);
 
   useEffect(() => {
+    console.log("AuthProvider useEffect");
     const tokenExpired =
       tokenRefresh ||
-      (authState.tokenExpiration && Date.now() > authState.tokenExpiration)
+      (authState.tokenExpiration && Date.now() >= authState.tokenExpiration)
         ? true
         : false;
     if (tokenExpired) {
@@ -76,6 +77,9 @@ const AuthProvider = function (props: ChildProps) {
     }
     // was previously using firebaseAuth.onAuthStateChanged
     const removeListener = firebaseAuth.onIdTokenChanged((authUser: any) => {
+      console.log("idTokenChanged.");
+      console.log("tokenExpired:", tokenExpired)
+      console.log("authUser:", authUser)
       if (!authUser) {
         resetAuth();
       } else {
@@ -105,7 +109,7 @@ const AuthProvider = function (props: ChildProps) {
       console.log("removing auth state listener");
       removeListener();
     };
-  }, [authState.currentBrewery, authState.tokenExpiration, tokenRefresh]);
+  }, [authState.currentBrewery, authState.tokenExpiration, authState.accessToken, authState.firebaseUser, tokenRefresh, resetAuth, setAuth]);
 
   const login = useCallback(async (email: string, password: string) => {
     console.log("login called.");
@@ -140,7 +144,7 @@ const AuthProvider = function (props: ChildProps) {
 
   return (
     <AuthContext.Provider value={deepMemoize(contextValue, "authContext")}>
-      {props.children}
+      {children}
     </AuthContext.Provider>
   );
 };

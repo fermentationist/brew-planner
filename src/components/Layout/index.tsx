@@ -33,6 +33,7 @@ const Layout = () => {
       </Header>
       <Main component="main">
         <ErrorBoundary>
+          {/* the current <Route/> as defined in the <App/> component, will be rendered here as <Outlet/> */}
           <Outlet />
         </ErrorBoundary>
         {globalState?.menu?.isOpen ? <Menu menuItems={menuItems} /> : null}

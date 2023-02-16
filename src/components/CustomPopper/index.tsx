@@ -1,10 +1,11 @@
 import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip, {TooltipProps} from "@mui/material/Tooltip";
 import Paper from "@mui/material/Paper";
-import Link from "@mui/material/Link";
 import Popper, { PopperPlacementType } from "@mui/material/Popper";
-import { useState, ReactElement } from "react";
+import { useState, ReactElement, MouseEventHandler, MouseEvent } from "react";
 import { ChildProps } from "../../types";
+
+type TooltipPlacement = TooltipProps["placement"];
 
 const CustomPopper = ({
   children,
@@ -13,7 +14,7 @@ const CustomPopper = ({
   tooltip,
   buttonText
 }: {
-  children: ChildProps;
+  children: ChildProps | string;
   icon?: ReactElement;
   placement: PopperPlacementType;
   tooltip?: string;
@@ -21,15 +22,16 @@ const CustomPopper = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-  const onClick = event => {
+  const onClick: MouseEventHandler<HTMLElement> = (event: MouseEvent) => {
     setAnchorEl(event.currentTarget);
     setOpen(!open);
   };
+
   const oppositePlacement = {
-    top: "bottom",
     left: "right",
     right: "left",
     bottom: "top",
+    top: "bottom",
     "top-start": "bottom-start",
     "top-end": "bottom-end",
     "left-start": "right-start",
@@ -38,7 +40,7 @@ const CustomPopper = ({
     "right-end": "left-end",
     "bottom-start": "top-start",
     "bottom-end": "top-end"
-  };
+  } as Record<string, TooltipPlacement>;
   return (
     <>
       <Tooltip title={tooltip} placement={oppositePlacement[placement]}>

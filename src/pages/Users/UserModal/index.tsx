@@ -45,8 +45,7 @@ const UserModal = ({
       selectOptions: ["admin", "manager", "user"],
       selectRestricted: true,
       defaultValue: data?.customClaims?.role,
-      width: "250px",
-      callback: x => x
+      width: "250px"
     },
     {
       name: "breweries",
@@ -54,8 +53,7 @@ const UserModal = ({
       componentProps: {
         defaultSelected: (data?.breweries || []).map((brewery: any) => brewery?.breweryUuid || null)
       },
-      defaultValue: (data?.breweries || []).map((brewery: any) => brewery?.breweryUuid || null),
-      callback: (x => console.log("x in breweries callback:", x) || x)
+      defaultValue: (data?.breweries || []).map((brewery: any) => brewery?.breweryUuid || null)
     }
   ];
 

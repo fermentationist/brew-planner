@@ -9,7 +9,8 @@ interface ErrorBoundaryState {
   path: string | null;
 }
 
-interface ErrorBoundaryProps extends ChildProps {
+interface ErrorBoundaryProps {
+  children?: ChildProps;
   location?: any;
 }
 

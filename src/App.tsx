@@ -1,9 +1,4 @@
-import { Route, Routes } from "react-router-dom";
-import RequireAuth from "./components/RequireAuth";
-import Layout from "./components/Layout";
-import Login from "./pages/Login";
-import ErrorPage from "./pages/ErrorPage";
-import routeConfig from "./config/routeConfig.js";
+import ClientRouter from "./components/ClientRouter";
 import { ThemeProvider } from "@mui/material/styles";
 import {lightTheme, darkTheme} from "./config/themes";
 import useGlobalState from "./hooks/useGlobalState";
@@ -24,30 +19,7 @@ const App = () => {
         <QueryClientProvider client={queryClient}>
           <APIProvider>
             <AlertStateProvider>
-              <Routes>
-                <Route path="/" element={<Layout />}>
-                  <Route
-                    path="/unauthorized"
-                    element={<ErrorPage errorCode={401} />}
-                  />
-                  <Route path="/not_found" element={<ErrorPage errorCode={404} />} />
-                  <Route path="/login" element={<Login />} />
-
-                  {/* Protected Routes */}
-                  {Object.entries(routeConfig).map((entry, index) => {
-                    return (
-                      <Route
-                        element={<RequireAuth allowedRoles={entry[1].roles} />}
-                        key={index}
-                      >
-                        <Route path={entry[0]} element={entry[1].component} />
-                      </Route>
-                    );
-                  })}
-                  
-                  <Route path="/*" element={<ErrorPage errorCode={404} />} />
-                </Route>
-              </Routes>
+              <ClientRouter />
               <Alerts />
             </AlertStateProvider>
           </APIProvider>

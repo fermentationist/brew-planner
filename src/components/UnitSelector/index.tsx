@@ -3,7 +3,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 
 export interface UnitSelectorProps {
-  selections: {[key: string]: string[]};
+  selections: Record<string, string[]>;
   defaultUnit: string;
   callback?: (val: any) => any;
   setPreferredUnit: (unit: string) => void;

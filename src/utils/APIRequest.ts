@@ -1,8 +1,10 @@
 import axios from "axios";
 import storage from "./storage";
+import { firebaseAuth } from "../context/AuthProvider";
 import { opError } from "./errors";
 const { getStorage } = storage("brewPlanner");
 
+console.log("firebaseAuth?.currentUser:", firebaseAuth?.currentUser)
 export const API_URL = import.meta.env.VITE_API_URL;
 
 export default class APIRequest {
@@ -20,7 +22,7 @@ export default class APIRequest {
     this.abort = this.abort.bind(this);
   }
 
-  async request(additionalConfig = {}) {
+  async request<ResponseType>(additionalConfig = {}): (Promise<ResponseType | Error>) {
     const globalState = getStorage("globalState");
     const authState = getStorage("authState");
 
@@ -70,7 +72,11 @@ export default class APIRequest {
             if (error.response.data.error.message.toLowerCase().includes("invalid token")) {
               console.log("\ntry to renew token?\n");
               // ignore invalid token errors
-              return;
+              console.log("authState:", authState); 
+              console.log("firebaseAuth:", firebaseAuth);
+              // firebaseAuth.currentUser will probably be undefined, but this might trigger token renewal anyway?
+              firebaseAuth.updateCurrentUser(firebaseAuth.currentUser);
+              return Promise.resolve(null);
             }
             errorOutput = opError(realError.message, {
               name: realError.name,

@@ -1,5 +1,6 @@
-import { useContext, useMemo, useRef } from "react";
+import { useContext } from "react";
 import { APIContext } from "../context/APIProvider";
+import useDeeperMemo from "./useDeeperMemo";
 
 const useAPI = (apisToInclude?: string | string[]) => {
   /* 
@@ -7,7 +8,7 @@ const useAPI = (apisToInclude?: string | string[]) => {
   if invoked with a string, will return the API query corresponding to that name
   if invoked with an array, will return multiple API queries
   */
-  const memoizedOutputRef = useRef(null);
+  const deepMemoize = useDeeperMemo();
   const api = useContext(APIContext);
   let apiRequests = api;
   if (Array.isArray(apisToInclude)) {
@@ -18,22 +19,6 @@ const useAPI = (apisToInclude?: string | string[]) => {
 
   } else if (apisToInclude) {
     apiRequests = api[apisToInclude];
-  }
-
-  
-  const memoizeAPIData: any = (objToMemoize: any) => {
-    const getDepString = (obj: any) => {
-      const objCopy = {...obj};
-      delete objCopy.queryClient; // queryClient it is circular
-      return JSON.stringify(objCopy);
-    }
-    const oldDeps = getDepString(memoizedOutputRef.current);
-    const newDeps = getDepString(objToMemoize);
-    if(oldDeps === newDeps) {
-      return memoizedOutputRef.current;
-    }
-    memoizedOutputRef.current = objToMemoize;
-    return objToMemoize;
   }
 
   const output = {
@@ -47,7 +32,7 @@ const useAPI = (apisToInclude?: string | string[]) => {
     API_URL: api.API_URL,
     APIRequest: api.APIRequest,
   }
-  return memoizeAPIData(output);
+  return deepMemoize(output, "useAPI", {keysToExclude: ["queryClient"]});
 }
 
 export default useAPI;

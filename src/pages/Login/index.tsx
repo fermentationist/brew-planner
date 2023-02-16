@@ -7,20 +7,14 @@ import useAlert from "../../hooks/useAlert";
 import { FormEvent } from "react";
 import useAPI from "../../hooks/useAPI";
 
-const Login = function () {
+const Login = () => {
   const { auth, login, sendPasswordResetEmail } = useAuth();
   const { refetchAll } = useAPI();
   const navigate = useNavigate();
   const {callAlert} = useAlert();
   const location: RouterLocation = useLocation();
   const from = location.state?.from?.pathname || "/";
-  const submitLogin = async ({
-    email,
-    password
-  }: {
-    email: string;
-    password: string;
-  }, event: FormEvent) => {
+  const submitLogin = async ({email, password} : {email: string; password: string;}, event: FormEvent) => {
     event.preventDefault();
     const target = event.target as Element;
     if (target?.id === "reset-form") {

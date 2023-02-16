@@ -66,7 +66,7 @@ export const AlertStateContext = createContext({
   }
 });
 
-const AlertStateProvider = function (props: ChildProps) {
+const AlertStateProvider = function ({children}:{children: ChildProps}) {
   const [alertState, setAlertState] = useState(initialState);
 
   const callAlert = (args: CallAlertArgs) => {
@@ -149,7 +149,7 @@ const AlertStateProvider = function (props: ChildProps) {
         alertErrorProm: memoizedAlertErrorProm
       }}
     >
-      {props.children}
+      {children}
     </AlertStateContext.Provider>
   );
 };

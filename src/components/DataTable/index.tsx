@@ -103,7 +103,7 @@ const DataTable = ({
 };
 
 export default memo(DataTable, (prevProps, nextProps) => {
-  return prevProps.columns === nextProps.columns && prevProps.data === nextProps.data && nextProps.options === prevProps.options;
+  return prevProps.columns === nextProps.columns && prevProps.data === nextProps.data && prevProps.options === nextProps.options;
 });
 
 export type DataTableColumn = MUIDataTableColumn;

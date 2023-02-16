@@ -33,6 +33,7 @@ export const deleteBrewhouse = async (breweryUuid, brewhouseUuid) => {
   if (!result.affectedRows) {
     throw(`The brewery with the breweryUuid ${breweryUuid} has no brewhouse with the brewhouseUuid`, brewhouseUuid);
   }
+  return result;
 };
 
 export const isExistingBrewhouseAttribute = localCache.isExistingTableAttribute("brewhouse", getBrewhouses);

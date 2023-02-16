@@ -1,4 +1,4 @@
-import { KeyboardEventHandler, useState, useEffect } from "react";
+import { KeyboardEventHandler, useState, useEffect, memo } from "react";
 import CustomDialog from "../CustomDialog";
 import CustomAutocomplete from "../CustomAutocomplete";
 import { styled as muiStyled } from "@mui/material/styles";
@@ -17,7 +17,7 @@ const StyledAutocomplete = muiStyled(CustomAutocomplete)`
 const BrewerySelector = ({
   onSubmit,
   loading,
-  auth
+  auth,
 }: {
   onSubmit: (breweryName: string) => void;
   loading?: boolean;
@@ -27,7 +27,12 @@ const BrewerySelector = ({
   const [selectedBrewery, setSelectedBrewery] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
   const [confirmedBrewery, setConfirmedBrewery] = useState(null);
-  const {isLoading, error, data, enable: enableBreweriesQuery} = useAPI("breweries");
+  const {
+    isLoading,
+    error,
+    data,
+    enable: enableBreweriesQuery,
+  } = useAPI("breweries");
   const { alertError } = useAlert();
 
   useEffect(() => {
@@ -38,7 +43,10 @@ const BrewerySelector = ({
       if (data) {
         const allBreweries = data.data?.breweries;
         const allowedBreweries = allBreweries.filter((brewery: BreweryData) => {
-          return auth?.user?.role === "admin" || auth?.user?.breweries.includes(brewery.breweryUuid)
+          return (
+            auth?.user?.role === "admin" ||
+            auth?.user?.breweries.includes(brewery.breweryUuid)
+          );
         });
         setBreweriesData(allowedBreweries);
         const [currentBrewery] = allowedBreweries.filter(
@@ -57,7 +65,7 @@ const BrewerySelector = ({
   const autocompleteCallback = (breweryName: string) => {
     setSelectedBrewery(breweryName);
   };
-  const onKeyDown: KeyboardEventHandler = event => {
+  const onKeyDown: KeyboardEventHandler = (event) => {
     if (event.key === "Enter") {
       onSubmitWrapper(onSubmit)();
     }
@@ -65,10 +73,12 @@ const BrewerySelector = ({
   const onSubmitWrapper = (fn: (breweryName: string) => void) => {
     return () => {
       setConfirmedBrewery(selectedBrewery);
-      const [brewery] = breweriesData.filter(brewery => brewery.name === selectedBrewery);
+      const [brewery] = breweriesData.filter(
+        (brewery) => brewery.name === selectedBrewery
+      );
       setShowDialog(false);
       return fn(brewery?.breweryUuid);
-    }
+    };
   };
 
   return (
@@ -76,28 +86,28 @@ const BrewerySelector = ({
       <Typography onClick={() => setShowDialog(true)}>
         {`Current brewery: ${confirmedBrewery || "None selected"}`}
       </Typography>
-      { 
-        showDialog ? (
-          <CustomDialog
-            showDialog={showDialog}
-            closeDialog={() => setShowDialog(false)}
-            title="Select Brewery"
-            confirm={onSubmitWrapper(onSubmit)}
-            loading={loading}
-          >
-            <StyledAutocomplete
-              options={breweriesData.map((brewery: BreweryData) => brewery.name)}
-              callback={autocompleteCallback}
-              label="Selected Brewery"
-              restricted={true}
-              defaultValue={selectedBrewery}
-              onKeyDown={onKeyDown}
-            />
-          </CustomDialog>
-        ) : null
-      }
+      {showDialog ? (
+        <CustomDialog
+          showDialog={showDialog}
+          closeDialog={() => setShowDialog(false)}
+          title="Select Brewery"
+          confirm={onSubmitWrapper(onSubmit)}
+          loading={loading}
+        >
+          <StyledAutocomplete
+            options={breweriesData.map((brewery: BreweryData) => brewery.name)}
+            callback={autocompleteCallback}
+            label="Selected Brewery"
+            restricted={true}
+            defaultValue={selectedBrewery}
+            onKeyDown={onKeyDown}
+          />
+        </CustomDialog>
+      ) : null}
     </>
   );
 };
 
-export default BrewerySelector;
+export default memo(BrewerySelector, (prevProps, nextProps) => {
+  return prevProps.loading === nextProps.loading; 
+});

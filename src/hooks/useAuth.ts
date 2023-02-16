@@ -2,6 +2,7 @@ import { useContext, useCallback } from "react";
 import { AuthContext } from "../context/AuthProvider";
 import { AuthObject } from "../types";
 import { opError } from "../utils/errors";
+import useDeeperMemo from "./useDeeperMemo";
 
 export interface UseAuthObject {
   auth: AuthObject;
@@ -14,6 +15,7 @@ export interface UseAuthObject {
 const useAuth = (): UseAuthObject => {
   const { auth, setAuth, login, logout, sendPasswordResetEmail } =
     useContext(AuthContext);
+  const deepMemoize = useDeeperMemo();
   console.log("useAuth called");
 
   const changeBrewery = useCallback(
@@ -43,8 +45,8 @@ const useAuth = (): UseAuthObject => {
     changeBrewery,
     sendPasswordResetEmail,
   };
-
-  return output;
+  console.log(output.auth)
+  return deepMemoize(output, "auth");
 };
 
 export default useAuth;

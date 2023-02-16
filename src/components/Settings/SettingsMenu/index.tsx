@@ -26,6 +26,7 @@ interface SettingsMenuItem {
 }
 
 const SettingsMenu = ({ closeDrawer }: { closeDrawer: () => void }) => {
+  console.log("SettingsMenu loaded")
   const [brewerySelectorIsLoading, setBrewerySelectorIsLoading] = useState(false);
   const { auth, logout, changeBrewery } = useAuth();
   const [globalState, setGlobalState] = useGlobalState();
@@ -42,17 +43,20 @@ const SettingsMenu = ({ closeDrawer }: { closeDrawer: () => void }) => {
   };
 
   const toggleDarkMode = () => {
-    console.log("globalState:", globalState)
-    setGlobalState({
-      ...globalState,
-      theme: globalState.theme === "dark" ? "light" : "dark"
+    setGlobalState(prevState => {
+      return {
+        ...prevState,
+        theme: globalState.theme === "dark" ? "light" : "dark"
+      }
     });
   };
 
   const toggleSafeMode = () => {
-    setGlobalState({
-      ...globalState,
-      safeMode: !globalState.safeMode
+    setGlobalState(prevState => {
+      return {
+        ...prevState,
+        safeMode: !globalState.safeMode
+      }
     });
   };
 
@@ -60,7 +64,8 @@ const SettingsMenu = ({ closeDrawer }: { closeDrawer: () => void }) => {
     setBrewerySelectorIsLoading(true);
     changeBrewery(breweryUuid);
     setBrewerySelectorIsLoading(false);
-    refreshBreweries();
+    // refreshBreweries();
+    closeDrawer();
   };
 
   // MENU ITEMS

@@ -54,6 +54,7 @@ export const parseQueryString = (queriesToRetrieve: string[], fullQueryString: s
 }
 
 export const stringDiff = (strA: string, strB: string) => {
+  console.log("stringDiff called")
   if (!strA) {
     return strB;
   }
@@ -61,27 +62,33 @@ export const stringDiff = (strA: string, strB: string) => {
     return strA;
   }
   const [longer, shorter] = strA.length > strB.length ? [strA, strB] : [strB, strA];
-  const diff = longer.split("").reduce((diffArray: string[], char, index) => {
+  const emptyDiffArray = () => Array(longer.length).fill("");
+  const diffs = longer.split("").reduce((diffArrays: string[][], char, index) => {
     if (char !== shorter[index]) {
-      diffArray[index] = char;
+      diffArrays[0][index] = char;
+      diffArrays[1][index] = shorter[index];
     }
-    return diffArray;
-  }, Array(longer.length).fill(""));
-  return diff.join("");
+    return diffArrays;
+  }, [emptyDiffArray(), emptyDiffArray()]);
+  return diffs.map(diffArray => diffArray.join(""));
 }
 
 // to time execution of synchronous functions
 export const timeFunction = (fn: (() => any), ...args: any) => {
   const start = Date.now();
-  const result = fn(...args);
+  const result = fn(...(args as []));
   const end = Date.now();
   return [end - start, result];
 }
 
 // this function will only stringify functions, and objects with functions occurring at the root level of the object. More deeply nested functions will be converted to null.
-export const stringifyObjectWithFunctions = (obj: Record<string, any>) => {
+export const stringifyObjectWithFunctions = (obj: Record<string, any>, {keysToExclude = [],
+stringifyFunctions = true}) => {
   return JSON.stringify(obj, (key: string, value: any) => {
-    if (typeof value === "function") {
+    if (keysToExclude.includes(key)) {
+      return null;
+    }
+    if (typeof value === "function" && stringifyFunctions) {
       return String(value);
     }
     return value;

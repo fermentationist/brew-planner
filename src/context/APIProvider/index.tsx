@@ -8,6 +8,7 @@ import {
 import APIRequest, { API_URL } from "../../utils/APIRequest";
 import useAuth from "../../hooks/useAuth";
 import { UserData, APIError, BreweryData, BrewhouseData } from "../../types";
+import useDeeperMemo from "../../hooks/useDeeperMemo";
 
 export const APIContext = createContext({} as any);
 
@@ -16,8 +17,9 @@ export type ReactQueryResult = UseQueryResult<any, any> & {
   disable?: () => void;
 };
 
-const APIProvider = function (props: ChildProps) {
+const APIProvider = ({ children }: { children: ChildProps }) => {
   const { auth } = useAuth();
+  const deepMemoize = useDeeperMemo();
   const CURRENT_BREWERY = auth?.currentBrewery;
   const BREWERY_ROUTE = `${API_URL}/breweries/${CURRENT_BREWERY}`;
   const [enabledQueries, setEnabledQueries] = useState(
@@ -30,17 +32,19 @@ const APIProvider = function (props: ChildProps) {
   type BreweriesData = { data: BreweryData[]; status: string };
   type BrewhousesData = { data: BrewhouseData[]; status: string };
 
-  const toggleQueryFn = (queryName: string, boolean: boolean) => () =>
-    setEnabledQueries((prevState) => {
-      console.log(`"${queryName}" query ${boolean ? "enabled" : "disabled"}`);
-      return {
-        ...prevState,
-        [queryName]: boolean,
-      };
-    });
+  const toggleQueryFn = useCallback(
+    (queryName: string, boolean: boolean) => () =>
+      setEnabledQueries((prevState) => {
+        console.log(`"${queryName}" query ${boolean ? "enabled" : "disabled"}`);
+        return {
+          ...prevState,
+          [queryName]: boolean,
+        };
+      }),
+    []
+  );
 
-  const apiRequest =
-    ({ url, baseURL }: { url: string; baseURL?: string }) =>
+  const apiRequest: (<T>({url, baseURL}:{url: string; baseURL?: string;}) => (...args: any[]) => Promise<T | Error>) = ({ url, baseURL }: { url: string; baseURL?: string }) =>
     ({ signal }: { signal?: AbortSignal }) => {
       return new APIRequest({
         baseURL,
@@ -53,12 +57,14 @@ const APIProvider = function (props: ChildProps) {
   const apiRequests: Record<string, ReactQueryResult> = {
     // API Requests
     users: {
-      ...useQuery<UsersData, ErrorData>({
-        queryKey: ["users", auth?.accessToken], // a react-query queryKey is like the dependency array of a useEffect hook, a change in one of the elements will trigger a refetch
-        queryFn: apiRequest({ url: "/users" }),
-        staleTime: 60 * 1000 * 5,
-        enabled: Boolean(enabledQueries.users),
-      }),
+      ...useQuery<UsersData, ErrorData>(
+        ["users", auth?.accessToken], // a react-query queryKey is like the dependency array of a useEffect hook, a change in one of the elements will trigger a refetch
+        apiRequest({ url: "/users" }),
+        {
+          staleTime: 60 * 1000 * 5,
+          enabled: Boolean(enabledQueries.users),
+        }
+      ),
       enable: useCallback(toggleQueryFn("users", true), []),
       disable: useCallback(toggleQueryFn("users", false), []),
     },
@@ -118,22 +124,26 @@ const APIProvider = function (props: ChildProps) {
     console.log("all API queries disabled");
   }, []);
 
+  const contextValue = {
+    ...apiRequests,
+    resetAPI,
+    refetchAll,
+    invalidateAll,
+    disableAll,
+    queryClient,
+    API_URL,
+    BREWERY_ROUTE,
+    CURRENT_BREWERY,
+    APIRequest,
+  };
+
   return (
     <APIContext.Provider
-      value={{
-        ...apiRequests,
-        resetAPI,
-        refetchAll,
-        invalidateAll,
-        disableAll,
-        queryClient,
-        API_URL,
-        BREWERY_ROUTE,
-        CURRENT_BREWERY,
-        APIRequest,
-      }}
+      value={deepMemoize(contextValue, "APIContext", {
+        keysToExclude: ["queryClient"],
+      })}
     >
-      {props.children}
+      {children}
     </APIContext.Provider>
   );
 };

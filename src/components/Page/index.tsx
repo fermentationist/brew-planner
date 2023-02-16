@@ -27,7 +27,7 @@ const StyledPaper = muiStyled(Paper)`
   height: 100%;
 `;
 
-const Page = ({children}: ChildProps) => {
+const Page = ({children}: {children?: ChildProps}) => {
   return (
     <Background>
       <StyledPaper>

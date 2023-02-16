@@ -1,4 +1,11 @@
-import { useState, useEffect, SetStateAction, Dispatch, memo, useMemo } from "react";
+import {
+  useState,
+  useEffect,
+  SetStateAction,
+  Dispatch,
+  memo,
+  useMemo,
+} from "react";
 import IconButton from "@mui/material/IconButton";
 import AddIcon from "@mui/icons-material/AddCircle";
 import Tooltip from "@mui/material/Tooltip";
@@ -6,20 +13,16 @@ import useAPI from "../../hooks/useAPI";
 import useAlert from "../../hooks/useAlert";
 import useAuth from "../../hooks/useAuth";
 import useConvertUnits from "../../hooks/useConvertUnits";
-import useCreateColumnsWithUnitConversion from "../../hooks/useCreateColumnsWithUnitConversion";
 import DataTable, { columnOptions } from "../../components/DataTable";
 import Page from "../../components/Page";
 import withLoadingSpinner from "../../hoc/withLoadingSpinner";
 import BrewhouseModal, { brewhouseInputs } from "./BrewhouseModal";
 import { APIError, BrewhouseData } from "../../types";
+import useConfirm from "../../hooks/useConfirm";
 
 type Mode = "create" | "edit";
 
-const Brewhouses = ({
-  doneLoading
-}: {
-  doneLoading: () => void;
-}) => {
+const Brewhouses = ({ startLoading, doneLoading }: { startLoading: () => void; doneLoading: () => void }) => {
   const [tableData, setTableData] = useState([]);
   const [showBrewhouseModal, setShowBrewhouseModal] = useState(false);
   const [mode, setMode]: [mode: Mode, setMode: Dispatch<SetStateAction<Mode>>] =
@@ -32,19 +35,22 @@ const Brewhouses = ({
     refetch: refresh,
     BREWERY_ROUTE,
     APIRequest,
-    enable: enableBrewhouseQuery
+    enable: enableBrewhouseQuery,
   } = useAPI("brewhouses");
-  const { alertError, alertErrorProm } = useAlert();
+  const { alertError, alertErrorProm, callAlert } = useAlert();
+  const { confirmDelete } = useConfirm();
   const { auth } = useAuth();
-  const {generateColumnsFromInputs} = useCreateColumnsWithUnitConversion();
-  const {renameNewPreferredUnits} = useConvertUnits();
+  const {
+    renameTempPreferredUnits,
+    generateColumnsFromInputs,
+    preferredUnits,
+  } = useConvertUnits();
   useEffect(() => {
     if (isLoading && !brewhousesData) {
       enableBrewhouseQuery();
     }
     if (!isLoading) {
       if (brewhousesData) {
-        console.log("brewhousesData:", brewhousesData.data?.brewhouses);
         const dataWithNestedRowData = brewhousesData.data?.brewhouses?.map(
           (row: BrewhouseData) => {
             const rowCopy = { ...row };
@@ -60,7 +66,14 @@ const Brewhouses = ({
       }
       doneLoading();
     }
-  }, [brewhousesData, isLoading, error, doneLoading, alertError, enableBrewhouseQuery]);
+  }, [
+    brewhousesData,
+    isLoading,
+    error,
+    doneLoading,
+    alertError,
+    enableBrewhouseQuery,
+  ]);
 
   const addBrewhouse = () => {
     setShowBrewhouseModal(true);
@@ -92,10 +105,46 @@ const Brewhouses = ({
     const response = await apiReq.request().catch(async (error: APIError) => {
       await alertErrorProm(error);
     });
-    console.log("response:", response);
-    !editMode && renameNewPreferredUnits(response.data?.brewhouseUuid);
+    // if response.data?.brewhouseUuid is undefined, renameTempPreferredUnits will just delete the preferredUnits that were temporarily created by the BrewhouseModal, otherwise it will rename them
+    renameTempPreferredUnits(response.data?.brewhouseUuid);
     refresh();
     setShowBrewhouseModal(false);
+  };
+
+  const deleteBrewhouse = async (brewhouseUuid: string) => {
+    const deleteBrewhouseRequest = new APIRequest({
+      baseURL: BREWERY_ROUTE,
+      url: `/brewhouses/${brewhouseUuid}`,
+      method: "delete"
+    });
+    return deleteBrewhouseRequest.request().catch(async(error: APIError) => {
+      await alertErrorProm(error);
+    })
+  }
+
+  const deleteRows = async (rowsDeleted: any) => {
+    const brewhouseUuidsToDelete = rowsDeleted.data.map(
+      (row: { index: number; dataIndex: number }) => {
+        return tableData[row.dataIndex].brewhouseUuid;
+      }
+    );
+    const qty = brewhouseUuidsToDelete.length;
+    const confirm = await confirmDelete(qty, "brewhouse");
+    if (!confirm) {
+      return;
+    }
+    if (qty > 1) {
+      startLoading();
+    }
+    if (qty > 4) {
+      callAlert("Please be patient, this may take a little while...");
+    }
+    for (const uuid of brewhouseUuidsToDelete) {
+      console.log("attempting to delete brewhouse:", uuid);
+      await deleteBrewhouse(uuid);
+    }
+    refresh();
+    doneLoading();
   };
 
   const generatedColumns = generateColumnsFromInputs(brewhouseInputs);
@@ -106,13 +155,13 @@ const Brewhouses = ({
       name: "brewhouseUuid",
       options: {
         ...columnOptions.options,
-        display: false
-      }
+        display: false,
+      },
     },
     ...generatedColumns,
     {
       name: "data",
-      options: columnOptions.rowDataOptions
+      options: columnOptions.rowDataOptions,
     },
     {
       name: "",
@@ -121,7 +170,8 @@ const Brewhouses = ({
         editBrewhouse
       ),
     },
-  ]
+  ];
+  console.log("Brewhouses columns:", columns);
   return (
     <Page>
       <Tooltip title="Add Brewhouse">
@@ -129,7 +179,16 @@ const Brewhouses = ({
           <AddIcon />
         </IconButton>
       </Tooltip>
-      <DataTable data={tableData} columns={columns} refresh={refresh} />
+      <DataTable
+        data={tableData}
+        columns={useMemo(() => columns, [preferredUnits])}
+        refresh={refresh}
+        options={{
+          selectableRows: "multiple",
+          selectableRowsHeader: true,
+          onRowsDelete: deleteRows
+        }}
+      />
       {showBrewhouseModal ? (
         <BrewhouseModal
           showModal={showBrewhouseModal}

@@ -1,4 +1,4 @@
-import { memo, useState, forwardRef, Ref, useCallback } from "react";
+import { memo, useState, forwardRef, Ref } from "react";
 import UnitSelector from "../UnitSelector";
 import CustomNumberField, {
   CustomNumberFieldProps,
@@ -24,7 +24,6 @@ const CustomNumberFieldWithUnits = forwardRef(
       parseUnit,
       getAltUnitSelections,
     } = useConvertUnits();
-    console.log("props in CustomNumberFieldWithUnits:", props)
     const { value: initialDefaultValue, unit: initialDefaultUnit } =
       convertToPreferredUnit(props.name, props.defaultValue ?? props.value, props.preferredUnitKey);
     const memoizedInitialDefaultValue = useMemo(() => {

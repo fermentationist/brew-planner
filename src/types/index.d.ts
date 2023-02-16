@@ -19,9 +19,7 @@ export interface AuthObject {
   refresh?: () => void;
 }
 
-export interface ChildProps extends React.PropsWithChildren {
-  [key: string]: any;
-}
+export type ChildProps = React.PropsWithChildren["children"];
 
 export interface MenuItem {
   title: string;
@@ -89,5 +87,5 @@ export interface UserData {
     role: string;
     breweries?: string[];
   };
-  breweries?: BreweryData[]
+  breweries?: BreweryData[];
 }

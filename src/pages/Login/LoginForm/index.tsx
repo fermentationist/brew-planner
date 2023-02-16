@@ -7,9 +7,13 @@ import styled from "styled-components";
 import { styled as muiStyled } from "@mui/material/styles";
 import { useForm } from "react-hook-form";
 import { FormEvent, useState } from "react";
+import ReactHookForm from "../../../components/ReactHookForm";
 
 export interface LoginFormProps {
-  onSubmit: ({email, password} : {email: string, password: string}, event: FormEvent) => Promise<boolean>;
+  onSubmit: (
+    { email, password }: { email: string; password: string },
+    event: FormEvent
+  ) => Promise<boolean>;
 }
 
 const Button = muiStyled(MuiButton)`
@@ -31,72 +35,68 @@ const LoginForm = (props: LoginFormProps): JSX.Element => {
   const {
     register,
     handleSubmit,
-    formState: { errors: formErrors }
+    formState: { errors: formErrors },
   } = useForm();
   const togglePasswordReset = () => {
     setResetState(!resetState);
-  }
+  };
+  const inputs = [
+    {
+      name: "email",
+      label: "Email",
+      type: "email",
+      validation: {
+        required: true,
+      },
+      errorMessages: {
+        required: "required field",
+      },
+      width: "250px",
+    },
+    {
+      name: "password",
+      label: "Password",
+      type: "password",
+      validation: {
+        required: true,
+      },
+      errorMessages: {
+        required: "required field",
+      },
+      width: "250px",
+    },
+  ];
+  const formInputs = !resetState ? inputs : inputs.slice(0, 1);
+  console.log("formInputs:", formInputs)
   return (
     <Card>
       <Container className="login-form-inner-container">
-        <form onSubmit={(event) => {handleSubmit(props.onSubmit)(event); return false;}} id={resetState ? "reset-form" : "login-form"}>
-          <Grid container spacing={2} direction="column">
-            <Grid item>
-              <TextField
-                name="email"
-                register={register}
-                internalLabel="Email"
-                validation={{ required: true }}
-                width="250px"
-              />
-              <FormError
-                formErrors={formErrors}
-                field="email"
-                errorMessages={{required: "required field"}}
-                width="220px"
-              />
-            </Grid>
-            {
-              !resetState ? (
-                <>
-                  <Grid item>
-                    <TextField
-                      name="password"
-                      register={register}
-                      type="password"
-                      internalLabel="Password"
-                      validation={{ required: true }}
-                      width="250px"
-                    />
-                    <FormError
-                      formErrors={formErrors}
-                      field="password"
-                      errorMessages={{required: "required field"}}
-                      width="220px"
-                    />
-                  </Grid>
-                  <Grid item>
-                    <Button type="submit" form="login-form" variant="contained">
-                      Log in
-                    </Button>
-                    <Button onClick={togglePasswordReset}>
-                      reset password
-                    </Button>
-                  </Grid>
-                </>
-              ) : (
-                <Grid item>
-                    <Button type="submit" form="reset-form" variant="contained">
-                      Send email
-                    </Button>
-                    <Button onClick={togglePasswordReset}>
-                      Log in
-                    </Button>
-                  </Grid>
-              )
-            }
-          </Grid>
-        </form>
+        <ReactHookForm
+          inputs={formInputs}
+          formId={resetState ? "reset-form" : "login-form"}
+          onSubmit={props.onSubmit}
+        />
+        {
+          !resetState ? (
+            <>
+              <Button type="submit" form="login-form" variant="contained">
+                Log in
+              </Button>
+              <Button onClick={togglePasswordReset}>
+                reset password
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button type="submit" form="reset-form" variant="contained">
+                Send email
+              </Button>
+              <Button onClick={togglePasswordReset}>
+                Log in
+              </Button>
+            </>
+          )
+        }
       </Container>
     </Card>
   );

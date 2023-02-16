@@ -58,7 +58,6 @@ app.use((req, res, next) => {
   res.locals.opError = opError;
   res.locals.inputError = inputError;
   res.set("Content-Type", "application/json");
-  // res.set("Access-Control-Allow-Origin", "http://localhost:3001");
   res.header("Access-Control-Allow-Origin", "*"); 
   res.header("Access-Control-Allow-Credentials", false)
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Firebase-Token");

@@ -17,7 +17,7 @@ export const brewhouseInputs = [
     name: "batchSize",
     label: "Batch Volume",
     type: "numberWithUnits",
-    convertOnUnitChange: false,
+    convertOnUnitChange: true,
     validation: required,
     errorMessages: requiredMessage,
     maxDecPlaces: 2,
