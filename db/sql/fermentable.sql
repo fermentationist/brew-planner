@@ -3,7 +3,9 @@ CREATE TABLE IF NOT EXISTS fermentable (
   fermentable_uuid BINARY (16) NOT NULL UNIQUE,
   created_by VARCHAR (36) NOT NULL,
   version INT NOT NULL DEFAULT 1,
-  UNIQUE KEY (fermentable_uuid), -- there can be only one version per fermentable_id
+  brewery_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_fermentable_brewery_uuid FOREIGN KEY (brewery_uuid) REFERENCES brewery (brewery_uuid) ON DELETE CASCADE,
+  UNIQUE KEY (brewery_uuid, name),
   name VARCHAR (100) NOT NULL,
   type ENUM ("Grain", "Sugar", "Extract", "Dry Extract", "Adjunct"),
   yield DECIMAL (5, 2) NOT NULL, -- this decimal represents a whole number percentage, i.e. the value 33.33 represents a yield of 33.33%, or 0.3333
@@ -29,7 +31,9 @@ CREATE TABLE IF NOT EXISTS fermentable_version (
   CONSTRAINT fk_fermentable_version_fermentable_uuid FOREIGN KEY (fermentable_uuid) REFERENCES fermentable (fermentable_uuid),
   created_by VARCHAR (36) NOT NULL,
   version INT NOT NULL,
-  UNIQUE KEY (fermentable_uuid), -- there can be only one version per fermentable_uuid
+  brewery_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_fermentable_version_brewery_uuid FOREIGN KEY (brewery_uuid) REFERENCES brewery (brewery_uuid) ON DELETE CASCADE,
+  UNIQUE KEY (brewery_uuid, name),
   name VARCHAR (100) NOT NULL,
   type ENUM ("Grain", "Sugar", "Extract", "Dry Extract", "Adjunct"),
   yield DECIMAL (5, 2) NOT NULL, -- this decimal represents a whole number percentage, i.e. the value 33.33 represents a yield of 33.33%, or 0.3333

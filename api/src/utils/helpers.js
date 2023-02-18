@@ -8,13 +8,15 @@ export const randomInt = (min, max, exclude = []) => {
   return output;
 };
 
-export const randomFloat = (min, max, decimalPlaces, exclude=[]) => {
-  let output = Math.floor(((Math.random() * (max - min + 1)) + min) * (10 ** decimalPlaces)) / (10 ** decimalPlaces);
+export const randomFloat = (min, max, decimalPlaces, exclude = []) => {
+  let output =
+    Math.floor((Math.random() * (max - min + 1) + min) * 10 ** decimalPlaces) /
+    10 ** decimalPlaces;
   while (exclude.includes(output) || output > max || output < min) {
     output = Math.floor(Math.random() * (max - min + 1)) + min;
   }
   return output;
-}
+};
 
 export const getRandomArrayMembers = (array, num) => {
   const arrayCopy = [...array];
@@ -39,24 +41,31 @@ export const randomString = (length, lettersOnly = false) => {
 };
 
 export const useTimeout = (ms = 1000) =>
-  new Promise(resolve => setTimeout(resolve, ms));
+  new Promise((resolve) => setTimeout(resolve, ms));
 
-export const toCamelCase = str => {
+export const toCamelCase = (str) => {
   return str
-    .replace(/([_-][a-z])/gi, captureGroup => captureGroup.toUpperCase()) // turns "snake_case" into "snake_Case"
+    .replace(/([_-][a-z])/gi, (captureGroup) => captureGroup.toUpperCase()) // turns "snake_case" into "snake_Case"
     .replace(/[_-]/gi, ""); // turns "snake_Case" into "snakeCase"
 };
 
-export const toSnakeCase = str => {
+export const toSnakeCase = (str) => {
   return str
-  .replace(/(.?[A-Z])/g, captureGroup => {
-    return captureGroup[0] + "_" + captureGroup[1].toLowerCase();
-  }) // turns "camelCase" into "camel_case"
-  .replace(/(-{1}.?)/g, captureGroup => {
-    return "_" + captureGroup[1]
-  }); // turns "kebab-case" into "kebab_case"
-}
+    .replace(/(.?[A-Z])/g, (captureGroup) => {
+      return captureGroup[0] + "_" + captureGroup[1].toLowerCase();
+    }) // turns "camelCase" into "camel_case"
+    .replace(/(-{1}.?)/g, (captureGroup) => {
+      return "_" + captureGroup[1];
+    }); // turns "kebab-case" into "kebab_case"
+};
 
+export const objectKeysToSnakeCase = (object) => {
+  return Object.fromEntries(
+    Object.entries(object).map((entry) => {
+      return [toSnakeCase(entry[0]), entry[1]];
+    })
+  );
+};
 
 /* 
 cleanQueryResult example
@@ -73,17 +82,21 @@ output:
   addedAt: 1658758201000
 }
 */
-export const cleanQueryResult = result => {
+export const cleanQueryResult = (result) => {
   let cleanedResult = {};
-  if (result && typeof result === "object") { // non-null objects
-    if (Array.isArray(result)) { // arrays
-      cleanedResult = result.map(item => cleanQueryResult(item));
-    } else { // objects
+  if (result && typeof result === "object") {
+    // non-null objects
+    if (Array.isArray(result)) {
+      // arrays
+      cleanedResult = result.map((item) => cleanQueryResult(item));
+    } else {
+      // objects
       for (const key in result) {
         if (!key.includes("_key")) {
           // exclude "key" attributes, i.e. inventory_key or product_key
           const value = result[key];
-          if (value instanceof Date) { // replace date output with unix timestamps
+          if (value instanceof Date) {
+            // replace date output with unix timestamps
             cleanedResult[toCamelCase(key)] = new Date(value).getTime();
           } else if (value && typeof value === "object") {
             cleanedResult[toCamelCase(key)] = cleanQueryResult(value);
@@ -93,18 +106,21 @@ export const cleanQueryResult = result => {
         }
       }
     }
-  } else { // primitive values
-    cleanedResult = result; 
+  } else {
+    // primitive values
+    cleanedResult = result;
   }
   return cleanedResult;
 };
 
-export const removeKeys = input => { 
+export const removeKeys = (input) => {
   let cleanedOutput = {};
-  if (input && typeof input === "object") { 
-    if (Array.isArray(input)) { // arrays
-      cleanedOutput = input.map(item => removeKeys(item));
-    } else { // objects
+  if (input && typeof input === "object") {
+    if (Array.isArray(input)) {
+      // arrays
+      cleanedOutput = input.map((item) => removeKeys(item));
+    } else {
+      // objects
       for (const key in input) {
         if (!key.toLowerCase().includes("key")) {
           // exclude "key" attributes, i.e. inventoryKey or productKey
@@ -112,21 +128,22 @@ export const removeKeys = input => {
         }
       }
     }
-  } else { // primitive values
+  } else {
+    // primitive values
     cleanedOutput = input;
   }
   return cleanedOutput;
-}
+};
 
-export const rejectOnFalse = fn => {
+export const rejectOnFalse = (fn) => {
   return async (...args) => {
     const success = await fn(...args);
     if (success) {
       return Promise.resolve(success);
     }
     return Promise.reject(false);
-  }
-}
+  };
+};
 
 export default {
   randomInt,
@@ -135,5 +152,5 @@ export default {
   randomString,
   toCamelCase,
   cleanQueryResult,
-  rejectOnFalse
+  rejectOnFalse,
 };

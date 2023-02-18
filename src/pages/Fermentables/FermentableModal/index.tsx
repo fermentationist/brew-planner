@@ -103,16 +103,6 @@ export const fermentableInputs = [
       display: false
     }
   },
-  // {
-  //   name: "recommendedMash",
-  //   label: "Recommended mash",
-  //   type: "switch",
-  //   defaultChecked: false,
-  //   width: "250px",
-  //   tableOptions: {
-  //     display: false
-  //   }
-  // },
   {
     name: "recommendedMash",
     label: "Mash recommended",

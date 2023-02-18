@@ -17,10 +17,8 @@ import DataTable, { columnOptions } from "../../components/DataTable";
 import Page from "../../components/Page";
 import withLoadingSpinner from "../../hoc/withLoadingSpinner";
 import BrewhouseModal, { brewhouseInputs } from "./BrewhouseModal";
-import { APIError, BrewhouseData } from "../../types";
+import { APIError, BrewhouseData, Mode } from "../../types";
 import useConfirm from "../../hooks/useConfirm";
-
-type Mode = "create" | "edit";
 
 const Brewhouses = ({ startLoading, doneLoading }: { startLoading: () => void; doneLoading: () => void }) => {
   const [tableData, setTableData] = useState([]);
