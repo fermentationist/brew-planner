@@ -28,6 +28,7 @@ import { ChildProps } from "../../types";
 
 const COMPONENT_TYPES: Record<string, FunctionComponent> = {
   text: CustomTextField,
+  textarea: CustomTextField,
   number: CustomNumberField,
   select: CustomAutocomplete,
   switch: CustomSwitch,
@@ -195,6 +196,12 @@ const Form = function (props: FormProps) {
           preferredUnitKey: input.preferredUnitKey
         } as CustomNumberFieldWithUnitsProps;
         break;
+      
+      case "textarea":
+        componentProps = {
+          ...componentProps,
+          multiline: true
+        }
     }
     return componentProps;
   };
@@ -230,7 +237,6 @@ const Form = function (props: FormProps) {
               return onChange(event);
             },
           };
-          
           return (
             // creating the input component that was defined in the input object
             <Container key={input.name}>

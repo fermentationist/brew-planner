@@ -1,14 +1,15 @@
+/* global process */
 import "dotenv/config";
 
 const DEFAULT_CACHE_EXPIRATION_TIME =
   process.env.DEFAULT_CACHE_EXPIRATION_TIME || 1000 * 60 * 60;
 
 export default class LocalCache {
-  constructor () {
+  constructor() {
     this._cache = new Map();
   }
 
-  async get (key) {
+  async get(key) {
     const entry = this._cache.get(key);
     if (entry) {
       if (Date.now() >= entry.expires) {
@@ -29,7 +30,7 @@ export default class LocalCache {
     return null;
   }
 
-  put (key, value, { updateFn, expirationTime } = {}) {
+  put(key, value, { updateFn, expirationTime } = {}) {
     const data = {
       expirationTime,
       expires: Date.now() + (expirationTime || DEFAULT_CACHE_EXPIRATION_TIME),
@@ -39,11 +40,11 @@ export default class LocalCache {
     this._cache.set(key, data);
   }
 
-  delete (key) {
+  delete(key) {
     this._cache.delete(key);
   }
 
-  clear () {
+  clear() {
     this._cache.clear();
   }
 
@@ -55,7 +56,7 @@ export default class LocalCache {
     return this._cache.size;
   }
 
-  invalidate (key) {
+  invalidate(key) {
     const keys = Array.isArray(key) ? key : [key];
     for (const cacheKey of keys) {
       const entry = this._cache.get(cacheKey);
@@ -67,7 +68,11 @@ export default class LocalCache {
     }
   }
 
-  async getOrFetch (key, updateFn, expirationTime = DEFAULT_CACHE_EXPIRATION_TIME) {
+  async getOrFetch(
+    key,
+    updateFn,
+    expirationTime = DEFAULT_CACHE_EXPIRATION_TIME
+  ) {
     let tableData = await this.get(key);
     const dataExists =
       tableData &&
@@ -87,15 +92,37 @@ export default class LocalCache {
     return tableData;
   }
 
-  isExistingTableAttribute (
+  isExistingTableAttribute(
     tableName,
     updateFn,
     expirationTime = DEFAULT_CACHE_EXPIRATION_TIME
   ) {
-    return async (inputStr, tableAttribute) => {
-      const tableData = await this.getOrFetch(tableName, updateFn, expirationTime);
-      const attributeArray = tableData.map((row) => row[tableAttribute]);
-      return attributeArray.includes(inputStr);
+    return async (input, tableAttribute, requiredConditionsObject = {}) => {
+      const tableData = await this.getOrFetch(
+        tableName,
+        updateFn,
+        expirationTime
+      );
+      const filterForConditions = !!Object.keys(requiredConditionsObject)
+        .length;
+      const conditionFilter = (row) => {
+        if (filterForConditions) {
+          for (const attr in requiredConditionsObject) {
+            const value = requiredConditionsObject[attr];
+            if (Array.isArray(value)) {
+              if (!value.includes(row[attr])) {
+                return false;
+              }
+            } else if (row[attr] !== value) {
+              return false;
+            }
+          }
+        }
+        return true;
+      }
+      const filteredData = filterForConditions ? tableData.filter(conditionFilter) : tableData;
+      const attributeArray = filteredData.map((row) => row[tableAttribute]);
+      return attributeArray.includes(input);
     };
   }
 }

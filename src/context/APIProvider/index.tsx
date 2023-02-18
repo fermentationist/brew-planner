@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import APIRequest, { API_URL } from "../../utils/APIRequest";
 import useAuth from "../../hooks/useAuth";
-import { UserData, APIError, BreweryData, BrewhouseData } from "../../types";
+import { UserData, APIError, BreweryData, BrewhouseData, FermentablesData } from "../../types";
 import useDeeperMemo from "../../hooks/useDeeperMemo";
 
 export const APIContext = createContext({} as any);
@@ -96,6 +96,20 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
       enable: useCallback(toggleQueryFn("brewhouses", true), []),
       disable: useCallback(toggleQueryFn("brewhouses", false), []),
     },
+
+    fermentables: {
+      ...useQuery<FermentablesData, ErrorData>({
+        queryKey: ["fermentables", auth?.currentBrewery, auth?.accessToken],
+        queryFn: apiRequest({
+          baseURL: BREWERY_ROUTE,
+          url: "fermentables"
+        }),
+        staleTime: 60 * 1000 * 10,
+        enabled: Boolean(enabledQueries.fermentables)
+      }),
+      enable: useCallback(toggleQueryFn("fermentables", true), []),
+      disable: useCallback(toggleQueryFn("fermentables", false), [])
+    }
   };
 
   console.log("\nAPI_REQUESTS:", apiRequests);

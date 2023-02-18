@@ -3,6 +3,7 @@ import { isExistingBreweryUuid } from "./breweries.js";
 import * as validate from "../middleware/input-validation.js";
 import { isExistingUid } from "./users.js";
 import { rejectOnFalse } from "../utils/helpers.js";
+import { inputError } from "../server/errors.js";
 
 //validation helpers
 
@@ -12,6 +13,17 @@ const numOpt = { no_symbols: true };
 const brewhouseUuidChecker = (input) => brewhouseService.isExistingBrewhouseAttribute(input, "brewhouseUuid");
 
 const isExistingBrewhouseUuid = rejectOnFalse(brewhouseUuidChecker);
+
+const customBrewhouseNameValidator = async (req, res, next) => {
+  // ensures that brewhouse name is unique (for the current brewery)
+  const breweryUuid = req.params.breweryUuid;
+  const {name} = req.body;
+  const nameAlreadyExists = await brewhouseService.isExistingBrewhouseAttribute(name, "name", {breweryUuid});
+  if (nameAlreadyExists) {
+    return next(inputError([{msg: "Invalid input", location: "body", param: "name"}]));
+  }
+  return next();
+}
 
 // getBrewhouses
 /**
@@ -80,6 +92,7 @@ const createBrewhouseValidation = [
     .isString()
     .isLength({ min: 1, max: 100 })
     .customSanitizer(validate.xssSanitize),
+  customBrewhouseNameValidator,
   validate.param("breweryUuid").exists(opt).custom(isExistingBreweryUuid),
   validate.body("brewhouseUuid").optional(opt).isUUID(1),
   validate.body("createdBy").exists(opt).isString().custom(isExistingUid),

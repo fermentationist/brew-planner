@@ -88,7 +88,6 @@ const Brewhouses = ({ startLoading, doneLoading }: { startLoading: () => void; d
   };
 
   const createOrUpdateBrewhouse = async (formData: BrewhouseData) => {
-    console.log("formData:", formData);
     const editMode = mode === "edit";
     const reqBody = editMode
       ? formData

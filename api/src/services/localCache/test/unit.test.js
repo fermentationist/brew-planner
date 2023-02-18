@@ -1,4 +1,4 @@
-/* global describe, before, it, after */
+/* global describe, before, it, after, setTimeout */
 import assert from "assert";
 import { randomString } from "../../../utils/helpers.js";
 import LocalCache from "../lib/localCache.js";
@@ -159,6 +159,60 @@ describe("localCache", () => {
     // cache invalidated - now changes should be refelcted
     assert.strictEqual(await isExistingVal("d"), true);
     assert.strictEqual(await isExistingId(4), true);
+    // updateFn was called again because of cache invalidation
+    assert.strictEqual(callCount, 2);
+  });
+
+  it("isExistingTableAttribute - if passed an object as a third argument, returns a function that checks if a value already exists in a specified column of a (cached) table, in the same row as whatever conditions are defined in the passed object", async () => {
+    let callCount = 0;
+    const mockTable2 = [
+      { id: 1, val: "a" },
+      { id: 2, val: "b" },
+      { id: 3, val: "c" },
+    ];
+    const spyUpdateFn = async () => {
+      callCount++;
+      return Promise.resolve([...mockTable2]);
+    };
+    const isExistingMockTableAttribute = localCache.isExistingTableAttribute(
+      "mockTable2",
+      spyUpdateFn
+    );
+    localCache.invalidate("mockTable");
+    const isCoincidentVal = (input) => isExistingMockTableAttribute(input, "val", {id: [1, 4]});
+    const isCoincidentId = (input) => isExistingMockTableAttribute(input, "id", {val: ["a", "d"]});
+
+    // table has not yet been cached, updateFn not yet called
+    assert.strictEqual(callCount, 0);
+    assert.strictEqual(await isCoincidentVal("a"), true);
+    // updateFn has been called once
+    assert.strictEqual(callCount, 1);
+    // the results of updateFn have already been cached
+    assert.strictEqual(await isCoincidentVal("b"), false);
+    assert.strictEqual(await isCoincidentVal("c"), false);
+    assert.strictEqual(await isCoincidentId(1), true);
+    assert.strictEqual(await isCoincidentId(2), false);
+    assert.strictEqual(await isCoincidentId(3), false);
+    
+    assert.strictEqual(await isCoincidentVal("d"), false);
+    assert.strictEqual(await isCoincidentVal(1), false);
+    assert.strictEqual(await isCoincidentId(4), false);
+    assert.strictEqual(await isCoincidentId("a"), false);
+    // so updateFn will not have been called again
+    assert.strictEqual(callCount, 1);
+
+    // update table
+    mockTable2.push({ id: 4, val: "d" });
+    // old state of table is still cached
+    assert.strictEqual(await isCoincidentVal("d"), false);
+    assert.strictEqual(await isCoincidentId(4), false);
+    // so updateFn will not have been called again
+    assert.strictEqual(callCount, 1);
+
+    localCache.invalidate("mockTable2");
+    // cache invalidated - now changes should be refelcted
+    assert.strictEqual(await isCoincidentVal("d"), true);
+    assert.strictEqual(await isCoincidentId(4), true);
     // updateFn was called again because of cache invalidation
     assert.strictEqual(callCount, 2);
   });

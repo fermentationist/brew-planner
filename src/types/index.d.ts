@@ -89,3 +89,28 @@ export interface UserData {
   };
   breweries?: BreweryData[];
 }
+
+export type FermentableType = "Grain" | "Sugar" | "Extract" | "Dry Extract" | "Adjunct"
+
+export interface FermentablesData {
+  fermentableUuid: string;
+  createdBy: string;
+  version: number;
+  name: string;
+  type: FermentableType;
+  yield: number;
+  color: number;
+  origin?: string;
+  supplier?: string;
+  coarseFineDiff?: number;
+  moisture?: number;
+  diastaticPower?: number;
+  protein?: number;
+  maxInBatch?: number;
+  recommendedMash?: boolean;
+  notes?: string;
+  addAfterBoil?: boolean;
+  createdAt: number;
+}
+
+export type Mode = "create" | "edit";

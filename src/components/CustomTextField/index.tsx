@@ -6,10 +6,12 @@ import {
   SyntheticEvent,
   memo,
 } from "react";
-import TextField from "@mui/material/TextField";
+import TextField, {TextFieldProps} from "@mui/material/TextField";
 import styled from "styled-components";
 import { UseFormRegister } from "react-hook-form";
 import { styled as muiStyled } from "@mui/material/styles";
+
+// export type CustomTextFieldProps = TextFieldProps 
 
 export interface CustomTextFieldProps {
   name: string;
@@ -39,6 +41,9 @@ export interface CustomTextFieldProps {
   pattern?: RegExp | string;
   callback?: (value: string) => any;
   disabled?: boolean;
+  multiline?: boolean;
+  minRows?: number;
+  maxRows?: number;
 }
 
 const CustomLabel = styled.label`
@@ -70,6 +75,9 @@ const CustomTextField = forwardRef(
         defaultValue={props.defaultValue}
         value={props.value}
         inputRef={forwardedRef}
+        multiline={props.multiline}
+        minRows={props.minRows}
+        maxRows={props.maxRows}
         inputProps={{
           onBlur: props.onBlur,
           onFocus: props.onFocus,
