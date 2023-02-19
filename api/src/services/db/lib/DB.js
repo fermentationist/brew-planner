@@ -1,13 +1,14 @@
+/* global console, setTimeout */
 import mysql from "mysql2";
 import { OperationalError, ProgramError } from "../../../server/errors.js";
 import proxyMysqlDeadlockRetries from "node-mysql-deadlock-retries";
 
-const formWhere = function (exactAttributes, queryParams = {}) {
+const formWhere = function (exactAttributes, queryParams) {
   let whereClause = "";
   let join = "WHERE ";
   const values = [];
   for (const attr of exactAttributes) {
-    if (queryParams.hasOwnProperty(attr) && queryParams[attr] !== "") {
+    if (Object.hasOwn(queryParams, attr) && queryParams[attr] !== "") {
       whereClause = whereClause + join + attr + "=?";
       join = " AND ";
       values.push(queryParams[attr]);
@@ -28,7 +29,7 @@ const insertion = function (tablename, rows = [], attrs = [], ignore = true) {
   let dupJoin = "";
   let values = [];
   for (const attr of attrs) {
-    if (rows[0].hasOwnProperty(attr)) {
+    if (Object.hasOwn(rows[0], attr)) {
       dupString += dupJoin + attr + "=VALUES(" + attr + ")";
       dupJoin = ", ";
       sqlString = sqlString + join + attr;
@@ -40,7 +41,7 @@ const insertion = function (tablename, rows = [], attrs = [], ignore = true) {
     if (rows.indexOf(dataObj) == rows.length - 1) {
       join = "";
     }
-    const filteredAttrs = attrs.filter(attr => dataObj.hasOwnProperty(attr));
+    const filteredAttrs = attrs.filter(attr => Object.hasOwn(dataObj, attr));
     valueString += valueClause(filteredAttrs.length) + join;
     values.push(...filteredAttrs.map(attr => dataObj[attr]));
   }
@@ -296,7 +297,7 @@ class DB {
     let nextChar = " ";
     let values = [];
     for (const attr of attributes) {
-      if (updates.hasOwnProperty(attr)) {
+      if (Object.hasOwn(updates, attr)) {
         sqlString = sqlString + nextChar + attr + "=?";
         values.push(updates[attr]);
         nextChar = ", ";
@@ -314,7 +315,7 @@ class DB {
     let nextChar = " ";
     let values = [];
     for (const attr of attributes) {
-      if (updates.hasOwnProperty(attr)) {
+      if (Object.hasOwn(updates, attr)) {
         sqlString = sqlString + nextChar + attr + "=?";
         values.push(updates[attr]);
         nextChar = ", ";
@@ -333,7 +334,7 @@ class DB {
     const obj = formWhere(attributes, params);
     let sqlString = "DELETE FROM " + tablename + " ";
     sqlString = sqlString + obj.sqlString;
-    if (params.hasOwnProperty("limit")) {
+    if (Object.hasOwn(params, "limit")) {
       sqlString += " LIMIT " + params.limit;
     }
     this.query(sqlString, obj.values, callback);
@@ -343,7 +344,7 @@ class DB {
     const obj = formWhere(attributes, params);
     let sqlString = "DELETE FROM " + tablename + " ";
     sqlString = sqlString + obj.sqlString;
-    if (params.hasOwnProperty("limit")) {
+    if (Object.hasOwn(params, "limit")) {
       sqlString += " LIMIT " + params.limit;
     }
     return this.queryProm(sqlString, obj.values);
