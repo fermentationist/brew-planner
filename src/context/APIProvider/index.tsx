@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import APIRequest, { API_URL } from "../../utils/APIRequest";
 import useAuth from "../../hooks/useAuth";
-import { UserData, APIError, BreweryData, BrewhouseData, FermentableData } from "../../types";
+import { UserData, APIError, BreweryData, BrewhouseData, FermentableData, HopData } from "../../types";
 import useDeeperMemo from "../../hooks/useDeeperMemo";
 
 export const APIContext = createContext({} as any);
@@ -109,6 +109,20 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
       }),
       enable: useCallback(toggleQueryFn("fermentables", true), []),
       disable: useCallback(toggleQueryFn("fermentables", false), [])
+    },
+
+    hops: {
+      ...useQuery<HopData, ErrorData>({
+        queryKey: ["hops", auth?.currentBrewery, auth?.accessToken],
+        queryFn: apiRequest({
+          baseURL: BREWERY_ROUTE,
+          url: "hops"
+        }),
+        staleTime: 60 * 1000 * 10,
+        enabled: Boolean(enabledQueries.hops)
+      }),
+      enable: useCallback(toggleQueryFn("hops", true), []),
+      disable: useCallback(toggleQueryFn("hops", false), [])
     }
   };
 

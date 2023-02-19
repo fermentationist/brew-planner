@@ -10,10 +10,10 @@ import useAlert from "../../hooks/useAlert";
 import useConfirm from "../../hooks/useConfirm";
 import useAuth from "../../hooks/useAuth";
 import useConvertUnits from "../../hooks/useConvertUnits";
-import FermentableModal, { fermentableInputs } from "./FermentableModal";
-import { FermentableData, Mode, APIError } from "../../types";
+import HopModal, { hopInputs } from "./HopModal";
+import { HopData, Mode, APIError } from "../../types";
 
-const Fermentables = ({
+const Hops = ({
   startLoading,
   doneLoading,
 }: {
@@ -21,7 +21,7 @@ const Fermentables = ({
   doneLoading: () => void;
 }) => {
   const [tableData, setTableData] = useState([]);
-  const [showFermentableModal, setShowFermentableModal] = useState(false);
+  const [showHopModal, setShowHopModal] = useState(false);
   const [mode, setMode]: [mode: Mode, setMode: Dispatch<SetStateAction<Mode>>] =
     useState("create" as Mode);
   const [modalData, setModalData] = useState(null);
@@ -30,22 +30,22 @@ const Fermentables = ({
   const { confirmDelete } = useConfirm();
   const {
     isLoading,
-    enable: enableFermentablesQuery,
-    data: fermentablesData,
-    error: fermentablesError,
+    enable: enableHopsQuery,
+    data: hopsData,
+    error: hopsError,
     refetch: refresh,
     APIRequest,
     BREWERY_ROUTE,
-  } = useAPI("fermentables");
+  } = useAPI("hops");
   const { generateColumnsFromInputs } = useConvertUnits();
   useEffect(() => {
-    if (isLoading && !fermentablesData) {
-      enableFermentablesQuery();
+    if (isLoading && !hopsData) {
+      enableHopsQuery();
     }
     if (!isLoading) {
-      if (fermentablesData) {
-        const dataWithNestedRowData = fermentablesData.data?.fermentables?.map(
-          (row: FermentableData) => {
+      if (hopsData) {
+        const dataWithNestedRowData = hopsData.data?.hops?.map(
+          (row: HopData) => {
             const rowCopy = { ...row };
             rowCopy.data = { ...row };
             return rowCopy;
@@ -53,30 +53,29 @@ const Fermentables = ({
         );
         setTableData(dataWithNestedRowData);
       }
-      if (fermentablesError) {
-        console.error(fermentablesError);
-        alertError(fermentablesError);
+      if (hopsError) {
+        console.error(hopsError);
+        alertError(hopsError);
       }
       doneLoading();
     }
   }, [
-    fermentablesData,
+    hopsData,
     isLoading,
-    fermentablesError,
+    hopsError,
     doneLoading,
     alertError,
-    enableFermentablesQuery,
+    enableHopsQuery,
   ]);
 
-  const createOrUpdateFermentable = async (formData: FermentableData) => {
+  const createOrUpdateHop = async (formData: HopData) => {
     const editMode = mode === "edit";
     const reqBody = editMode
       ? formData
       : { ...formData, createdBy: auth?.user?.uid };
-    // reqBody.recommendedMash = reqBody.recommendedMash === "true" ? true : reqBody.recommendedMash === "false" ? false : reqBody.recommendedMash;
     const url = editMode
-      ? "/fermentables/" + modalData.fermentableUuid
-      : "/fermentables";
+      ? "/hops/" + modalData.hopUuid
+      : "/hops";
     const apiReq = new APIRequest({
       baseURL: BREWERY_ROUTE,
       url,
@@ -88,40 +87,40 @@ const Fermentables = ({
     });
     console.log("response:", response);
     refresh();
-    setShowFermentableModal(false);
+    setShowHopModal(false);
   };
 
-  const addFermentable = () => {
+  const addHop = () => {
     setModalData(null);
     setMode("create");
-    setShowFermentableModal(true);
+    setShowHopModal(true);
   };
 
-  const editFermentable = (rowData: FermentableData) => {
+  const editHop = (rowData: HopData) => {
     setModalData(rowData);
     setMode("edit");
-    setShowFermentableModal(true);
+    setShowHopModal(true);
   };
 
-  const deleteFermentable = async (fermentableUuid: string) => {
-    const deleteFermentableRequest = new APIRequest({
+  const deleteHop = async (hopUuid: string) => {
+    const deleteHopRequest = new APIRequest({
       baseURL: BREWERY_ROUTE,
-      url: `/fermentables/${fermentableUuid}`,
+      url: `/hops/${hopUuid}`,
       method: "delete",
     });
-    return deleteFermentableRequest.request().catch(async (error: APIError) => {
+    return deleteHopRequest.request().catch(async (error: APIError) => {
       await alertErrorProm(error);
     });
   };
 
   const deleteRows = async (rowsDeleted: any) => {
-    const fermentableUuidsToDelete = rowsDeleted.data.map(
+    const hopUuidsToDelete = rowsDeleted.data.map(
       (row: { index: number; dataIndex: number }) => {
-        return tableData[row.dataIndex].fermentableUuid;
+        return tableData[row.dataIndex].hopUuid;
       }
     );
-    const qty = fermentableUuidsToDelete.length;
-    const confirm = await confirmDelete(qty, "fermentable");
+    const qty = hopUuidsToDelete.length;
+    const confirm = await confirmDelete(qty, "hop");
     if (!confirm) {
       return;
     }
@@ -131,19 +130,19 @@ const Fermentables = ({
     if (qty > 4) {
       callAlert("Please be patient, this may take a little while...");
     }
-    for (const uuid of fermentableUuidsToDelete) {
-      console.log("attempting to delete fermentable:", uuid);
-      await deleteFermentable(uuid);
+    for (const uuid of hopUuidsToDelete) {
+      console.log("attempting to delete hop:", uuid);
+      await deleteHop(uuid);
     }
     refresh();
     doneLoading();
   };
 
-  const generatedColumns = generateColumnsFromInputs(fermentableInputs);
+  const generatedColumns = generateColumnsFromInputs(hopInputs);
   const columns = [
     {
-      label: "Fermentable ID",
-      name: "fermentableUuid",
+      label: "Hop ID",
+      name: "hopUuid",
       options: {
         ...columnOptions.options,
         display: false,
@@ -157,15 +156,15 @@ const Fermentables = ({
     {
       name: "",
       options: columnOptions.createRenderEditButtonOptions(
-        "edit fermentable",
-        editFermentable
+        "edit hop",
+        editHop
       ),
     },
   ];
   return (
     <Page>
-      <Tooltip title="add fermentable">
-        <IconButton onClick={addFermentable}>
+      <Tooltip title="add hop">
+        <IconButton onClick={addHop}>
           <AddIcon />
         </IconButton>
       </Tooltip>
@@ -179,17 +178,17 @@ const Fermentables = ({
           onRowsDelete: deleteRows,
         }}
       />
-      {showFermentableModal ? (
-        <FermentableModal
-          showModal={showFermentableModal}
-          closeModal={() => setShowFermentableModal(false)}
+      {showHopModal ? (
+        <HopModal
+          showModal={showHopModal}
+          closeModal={() => setShowHopModal(false)}
           mode={mode}
           data={modalData}
-          onSubmit={createOrUpdateFermentable}
+          onSubmit={createOrUpdateHop}
         />
       ) : null}
     </Page>
   );
 };
 
-export default withLoadingSpinner(Fermentables);
+export default withLoadingSpinner(Hops);

@@ -5,14 +5,6 @@ import {
   protectBreweryRoutes,
   protectAdminRoutes,
 } from "../middleware/auth.js";
-// import {
-//   getAllInventory,
-//   getBreweryInventory,
-//   createBreweryInventory,
-//   updateBreweryInventory,
-//   createInventoryChange,
-//   getInventoryChanges
-// } from "../controllers/inventory.js";
 import {
   getBreweryUsers,
   createBreweryUser,
@@ -31,11 +23,17 @@ import {
   deleteFermentable,
 } from "../controllers/fermentables.js";
 
+import {
+  createHop,
+  getHops,
+  updateHop,
+  deleteHop,
+} from "../controllers/hops.js";
+
 const router = Router();
 
 // breweries routes
 router.get("/", getBreweries);
-// router.get("/inventory", [protectAdminRoutes, getAllInventory]);
 router.use("/:breweryUuid/", protectBreweryRoutes);
 router.get("/:breweryUuid/test", testController);
 router.get("/:breweryUuid/users", getBreweryUsers);
@@ -49,10 +47,8 @@ router.get("/:breweryUuid/fermentables", getFermentables);
 router.post("/:breweryUuid/fermentables", createFermentable);
 router.patch("/:breweryUuid/fermentables/:fermentableUuid", updateFermentable);
 router.delete("/:breweryUuid/fermentables/:fermentableUuid", deleteFermentable);
-// router.post("/:breweryUuid/brewhouses", createBrewhouse);
-// router.get("/:breweryUuid/inventory", getBreweryInventory);
-// router.post("/:breweryUuid/inventory", createBreweryInventory);
-// router.patch("/:breweryUuid/inventory/:inventoryId", updateBreweryInventory);
-// router.get("/:breweryUuid/inventoryChange", getInventoryChanges);
-// router.post("/:breweryUuid/inventoryChange", createInventoryChange);
+router.get("/:breweryUuid/hops", getHops);
+router.post("/:breweryUuid/hops", createHop);
+router.patch("/:breweryUuid/hops/:hopUuid", updateHop);
+router.delete("/:breweryUuid/hops/:hopUuid", deleteHop);
 export default router;

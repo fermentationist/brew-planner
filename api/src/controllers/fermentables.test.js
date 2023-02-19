@@ -4,7 +4,6 @@ import { v1 as createUuid } from "uuid";
 import TestAPI from "../../test/TestAPI.js";
 import {
   expectError,
-  expectInvalidInput,
   runDataValidationTests,
   getEntityFactory,
   deleteEntityFactory,
@@ -33,7 +32,6 @@ const createFermentable = createEntityFactory("fermentable");
 const deleteFermentable = deleteEntityFactory("fermentable");
 
 const getExistingFermentables = getEntityFactory("fermentable");
-const getExistingBreweries = getEntityFactory("brewery");
 
 const verifyFermentableData = async (fermentablesData) => {
   const existingFermentables = await getExistingFermentables();
@@ -47,8 +45,8 @@ const verifyFermentableData = async (fermentablesData) => {
       true
     );
     const [dbData] = existingFermentables.filter(
-      (existingBrewhouse) =>
-        existingBrewhouse.fermentable_uuid === fermentable.fermentableUuid
+      (existingFermentable) =>
+        existingFermentable.fermentable_uuid === fermentable.fermentableUuid
     );
     for (const attr in fermentable) {
       let dbValue = dbData[toSnakeCase(attr)];
@@ -149,7 +147,7 @@ export default describe("fermentable routes", function () {
     assert.strictEqual(response.status, "ok");
     await verifyFermentableData(response.fermentables);
     const fermentableUuids = response.fermentables.map(
-      (brewhouse) => brewhouse.fermentableUuid
+      (fermentable) => fermentable.fermentableUuid
     );
     for (const createdUuid of fermentablesToDelete.slice(0, 3)) {
       assert(fermentableUuids.includes(createdUuid));
@@ -270,7 +268,7 @@ export default describe("fermentable routes", function () {
     );
     assert.strictEqual(response.status, "ok");
     const { fermentables } = await makeGetFermentablesRequest(breweryUuid);
-    const uuids = fermentables.map((brewhouse) => brewhouse.fermentableUuid);
+    const uuids = fermentables.map((fermentable) => fermentable.fermentableUuid);
     assert(!uuids.includes(fermentableUuid));
   });
 
@@ -279,9 +277,9 @@ export default describe("fermentable routes", function () {
     const validFermentableUuid =
       fermentablesToDelete[fermentablesToDelete.length - 1];
 
-    const missingFermentableUuid = void 0;
+    const missingBreweryUuid = void 0;
     await expectError(
-      makeDeleteFermentableRequest(missingFermentableUuid, validFermentableUuid)
+      makeDeleteFermentableRequest(missingBreweryUuid, validFermentableUuid)
     );
 
     const invalidBreweryUuid = "invalidFermentableUuid";
@@ -294,9 +292,9 @@ export default describe("fermentable routes", function () {
       makeDeleteFermentableRequest(validButWrongBreweryUuid, validFermentableUuid)
     );
 
-    const missingBrewhouseUuid = void 0;
+    const missingFermentableUuid = void 0;
     await expectError(
-      makeDeleteFermentableRequest(validBreweryUuid, missingBrewhouseUuid)
+      makeDeleteFermentableRequest(validBreweryUuid, missingFermentableUuid)
     );
 
     const invalidFermentableUuid = "invalidBreweryUuid";
@@ -304,16 +302,16 @@ export default describe("fermentable routes", function () {
       makeDeleteFermentableRequest(validBreweryUuid, invalidFermentableUuid)
     );
 
-    const validButWrongBrewhouseUuid = createUuid();
+    const validButWrongFermentableUuid = createUuid();
     await expectError(
-      makeDeleteFermentableRequest(validBreweryUuid, validButWrongBrewhouseUuid)
+      makeDeleteFermentableRequest(validBreweryUuid, validButWrongFermentableUuid)
     );
 
-    const realButMismatchedBrewhouseUuid = fermentablesToDelete[0];
+    const realButMismatchedFermentableUuid = fermentablesToDelete[0];
     await expectError(
       makeDeleteFermentableRequest(
         validBreweryUuid,
-        realButMismatchedBrewhouseUuid
+        realButMismatchedFermentableUuid
       )
     );
   });

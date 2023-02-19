@@ -115,3 +115,23 @@ export interface FermentableData {
 }
 
 export type Mode = "create" | "edit";
+
+export type HopForm = "Pellet" | "Plug" | "Leaf";
+
+export interface HopData {
+  hopUuid: string;
+  createdBy: string;
+  version: number;
+  name: string;
+  alpha: number;
+  beta?: number;
+  form?: HopForm;
+  notes?: string;
+  origin?: string;
+  supplier?: string;
+  humulene?: number;
+  caryophyllene?: number;
+  cohumulone?: number;
+  myrcene?: number;
+  createdAt: number;
+}
