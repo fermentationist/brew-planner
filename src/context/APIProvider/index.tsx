@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import APIRequest, { API_URL } from "../../utils/APIRequest";
 import useAuth from "../../hooks/useAuth";
-import { UserData, APIError, BreweryData, BrewhouseData, FermentablesData } from "../../types";
+import { UserData, APIError, BreweryData, BrewhouseData, FermentableData } from "../../types";
 import useDeeperMemo from "../../hooks/useDeeperMemo";
 
 export const APIContext = createContext({} as any);
@@ -98,7 +98,7 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
     },
 
     fermentables: {
-      ...useQuery<FermentablesData, ErrorData>({
+      ...useQuery<FermentableData, ErrorData>({
         queryKey: ["fermentables", auth?.currentBrewery, auth?.accessToken],
         queryFn: apiRequest({
           baseURL: BREWERY_ROUTE,

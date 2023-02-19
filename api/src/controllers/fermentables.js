@@ -3,12 +3,14 @@ import * as fermentableService from "../services/fermentable.js";
 import * as validate from "../middleware/input-validation.js";
 import { isExistingBreweryUuid } from "./breweries.js";
 import { inputError } from "../server/errors.js";
-import { rejectOnFalse } from "../utils/helpers.js";
+import { rejectOnFalse, numberValidator } from "../utils/helpers.js";
 
 //validation helpers
 
 const opt = { checkFalsy: true };
 const numOpt = { no_symbols: true };
+
+const isPercentage = numberValidator({min: 0, max: 100});
 
 const validFermentableTypeChecker = input => fermentableService.FERMENTABLE_TYPES.includes(input);
 const isValidFermentableType = rejectOnFalse(validFermentableTypeChecker);
@@ -106,15 +108,15 @@ const createFermentableValidation = [
   validate.body("fermentableUuid").optional(opt).isUUID(1),
   validate.body("createdBy").exists(opt).isString().custom(isExistingUid),
   validate.body("type").exists(opt).custom(isValidFermentableType),
-  validate.body("yield").exists().isNumeric({min: 0, max: 100}).not().isString(),
-  validate.body("color").exists().isNumeric({min: 0}).not().isString(),
-  validate.body("origin").optional().isString().customSanitizer(validate.xssSanitize),
-  validate.body("supplier").optional().isString().customSanitizer(validate.xssSanitize),
-  validate.body("coarseFineDiff").optional().isNumeric({min: 0, max: 100}).not().isString(),
-  validate.body("moisture").optional().isNumeric({min: 0, max: 100}).not().isString(),
-  validate.body("diastaticPower").optional().isNumeric({min: 0}).not().isString(),
-  validate.body("protein").optional().isNumeric({min: 0, max: 100}).not().isString(),
-  validate.body("maxInBatch").optional().isNumeric({min: 0, max: 100}).not().isString(),
+  validate.body("yield").exists().custom(isPercentage),
+  validate.body("color").exists().custom(numberValidator({min: 0})),
+  validate.body("origin").optional().isString().isLength({max: 100}).customSanitizer(validate.xssSanitize),
+  validate.body("supplier").optional().isString().isLength({max: 100}).customSanitizer(validate.xssSanitize),
+  validate.body("coarseFineDiff").optional().custom(isPercentage),
+  validate.body("moisture").optional().custom(isPercentage),
+  validate.body("diastaticPower").optional().custom(numberValidator({min: 0})),
+  validate.body("protein").optional().custom(isPercentage),
+  validate.body("maxInBatch").optional().custom(isPercentage),
   validate.body("recommendedMash").optional().isBoolean(),
   validate.body("notes").optional().isString().customSanitizer(validate.xssSanitize),
   validate.body("addAfterBoil").optional().isBoolean(),
@@ -130,7 +132,7 @@ const createFermentableController = async (req, res, next) => {
     return res.locals.sendResponse(res, { fermentableUuid });
   } catch (error) {
     console.log(error);
-    return next(res.locals.opError("Brewhouse creation failed", error));
+    return next(res.locals.opError("Fermentable creation failed", error));
   }
 };
 

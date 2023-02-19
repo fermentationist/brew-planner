@@ -1,3 +1,4 @@
+/* global process, console */
 import dotenv from "dotenv";
 import { stringify as uuidStringify } from "uuid";
 dotenv.config();

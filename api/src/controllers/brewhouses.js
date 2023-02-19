@@ -2,7 +2,7 @@ import * as brewhouseService from "../services/brewhouse.js";
 import { isExistingBreweryUuid } from "./breweries.js";
 import * as validate from "../middleware/input-validation.js";
 import { isExistingUid } from "./users.js";
-import { rejectOnFalse } from "../utils/helpers.js";
+import { rejectOnFalse, numberValidator } from "../utils/helpers.js";
 import { inputError } from "../server/errors.js";
 
 //validation helpers
@@ -96,20 +96,20 @@ const createBrewhouseValidation = [
   validate.param("breweryUuid").exists(opt).custom(isExistingBreweryUuid),
   validate.body("brewhouseUuid").optional(opt).isUUID(1),
   validate.body("createdBy").exists(opt).isString().custom(isExistingUid),
-  validate.body("batchSize").exists().isNumeric().not().isString(),
-  validate.body("tunVolume").exists().isNumeric().not().isString(),
-  validate.body("tunWeight").exists().isNumeric().not().isString(),
-  validate.body("tunLoss").optional().isNumeric().not().isString(),
-  validate.body("tunSpecificHeat").exists().isNumeric().not().isString(),
-  validate.body("lauterDeadspace").optional().isNumeric().not().isString(),
-  validate.body("topUpWater").optional().isNumeric().not().isString(),
-  validate.body("trubChillerLoss").optional().isNumeric().not().isString(),
-  validate.body("evaporationRate").exists().isNumeric().not().isString(),
-  validate.body("kettleVol").exists().isNumeric().not().isString(),
-  validate.body("miscLoss").optional().isNumeric().not().isString(),
-  validate.body("extractEfficiency").exists().isNumeric().not().isString(),
-  validate.body("grainAbsorptionRate").exists().isNumeric().not().isString(),
-  validate.body("hopUtilization").exists().isNumeric().not().isString(),
+  validate.body("batchSize").exists().custom(numberValidator({min: 0})),
+  validate.body("tunVolume").exists().custom(numberValidator({min: 0})),
+  validate.body("tunWeight").exists().custom(numberValidator({min: 0})),
+  validate.body("tunLoss").optional().custom(numberValidator({min: 0})),
+  validate.body("tunSpecificHeat").exists().custom(numberValidator({min: 0})),
+  validate.body("lauterDeadspace").optional().custom(numberValidator({min: 0})),
+  validate.body("topUpWater").optional().custom(numberValidator({min: 0})),
+  validate.body("trubChillerLoss").optional().custom(numberValidator({min: 0})),
+  validate.body("evaporationRate").exists().custom(numberValidator({min: 0})),
+  validate.body("kettleVol").exists().custom(numberValidator({min: 0})),
+  validate.body("miscLoss").optional().custom(numberValidator({min: 0})),
+  validate.body("extractEfficiency").exists().custom(numberValidator({min: 0})),
+  validate.body("grainAbsorptionRate").exists().custom(numberValidator({min: 0})),
+  validate.body("hopUtilization").exists().custom(numberValidator({min: 0})),
   validate.catchValidationErrors,
 ];
 
@@ -167,20 +167,20 @@ const updateBrewhouseValidation = [
     .isString()
     .isLength({ min: 1, max: 100 })
     .customSanitizer(validate.xssSanitize),
-  validate.body("batchSize").optional().isNumeric().not().isString(),
-  validate.body("tunVolume").optional().isNumeric().not().isString(),
-  validate.body("tunWeight").optional().isNumeric().not().isString(),
-  validate.body("tunLoss").optional().isNumeric().not().isString(),
-  validate.body("tunSpecificHeat").optional().isNumeric().not().isString(),
-  validate.body("lauterDeadspace").optional().isNumeric().not().isString(),
-  validate.body("topUpWater").optional().isNumeric().not().isString(),
-  validate.body("trubChillerLoss").optional().isNumeric().not().isString(),
-  validate.body("evaporationRate").optional().isNumeric().not().isString(),
-  validate.body("kettleVol").optional().isNumeric().not().isString(),
-  validate.body("miscLoss").optional().isNumeric().not().isString(),
-  validate.body("extractEfficiency").optional().isNumeric().not().isString(),
-  validate.body("grainAbsorptionRate").optional().isNumeric().not().isString(),
-  validate.body("hopUtilization").optional().isNumeric().not().isString(),
+  validate.body("batchSize").optional().custom(numberValidator({min: 0})),
+  validate.body("tunVolume").optional().custom(numberValidator({min: 0})),
+  validate.body("tunWeight").optional().custom(numberValidator({min: 0})),
+  validate.body("tunLoss").optional().custom(numberValidator({min: 0})),
+  validate.body("tunSpecificHeat").optional().custom(numberValidator({min: 0})),
+  validate.body("lauterDeadspace").optional().custom(numberValidator({min: 0})),
+  validate.body("topUpWater").optional().custom(numberValidator({min: 0})),
+  validate.body("trubChillerLoss").optional().custom(numberValidator({min: 0})),
+  validate.body("evaporationRate").optional().custom(numberValidator({min: 0})),
+  validate.body("kettleVol").optional().custom(numberValidator({min: 0})),
+  validate.body("miscLoss").optional().custom(numberValidator({min: 0})),
+  validate.body("extractEfficiency").optional().custom(numberValidator({min: 0})),
+  validate.body("grainAbsorptionRate").optional().custom(numberValidator({min: 0})),
+  validate.body("hopUtilization").optional().custom(numberValidator({min: 0})),
   validate.catchValidationErrors,
 ];
 

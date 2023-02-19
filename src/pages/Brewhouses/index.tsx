@@ -148,7 +148,7 @@ const Brewhouses = ({ startLoading, doneLoading }: { startLoading: () => void; d
 
   const columns = [
     {
-      title: "Brewhouse ID",
+      label: "Brewhouse ID",
       name: "brewhouseUuid",
       options: {
         ...columnOptions.options,

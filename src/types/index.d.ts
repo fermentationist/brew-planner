@@ -92,7 +92,7 @@ export interface UserData {
 
 export type FermentableType = "Grain" | "Sugar" | "Extract" | "Dry Extract" | "Adjunct"
 
-export interface FermentablesData {
+export interface FermentableData {
   fermentableUuid: string;
   createdBy: string;
   version: number;

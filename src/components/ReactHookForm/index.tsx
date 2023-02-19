@@ -43,8 +43,9 @@ export interface FormInputOptions {
   defaultChecked?: boolean;
   value?: any;
   selectOptions?: any[]; // options to be used if the input is a select (CustomAutocomplete) element
-  callback?: (val: any) => any; // for inputs like "select"
   selectRestricted?: boolean;
+  selectOptionKey?: string; // if selectOptions are objects, which key to look for option under
+  callback?: (val: any) => any; // for inputs like "select"
   validation?: {
     [key: string]: string | boolean | number | ((input: any) => boolean);
   };
@@ -155,7 +156,8 @@ const Form = function (props: FormProps) {
           ...componentProps,
           options: input.selectOptions,
           restricted: input.selectRestricted,
-          label: input.label ?? input.name
+          label: input.label ?? input.name,
+          optionKey: input.selectOptionKey,
         } as CustomAutocompleteProps;
         break;
 

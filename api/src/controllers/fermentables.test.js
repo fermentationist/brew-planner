@@ -1,4 +1,4 @@
-/*global it, describe, before, after */
+/*global it, describe, before, after, console */
 import assert from "assert";
 import { v1 as createUuid } from "uuid";
 import TestAPI from "../../test/TestAPI.js";
@@ -43,46 +43,28 @@ const verifyFermentableData = async (fermentablesData) => {
   for (const fermentable of fermentablesData) {
     assertEqualIfCondition(
       fermentable.fermentableUuid,
-      existingFermentableUuids.includes(fermentable.brewhouseUuid),
+      existingFermentableUuids.includes(fermentable.fermentableUuid),
       true
     );
     const [dbData] = existingFermentables.filter(
       (existingBrewhouse) =>
         existingBrewhouse.fermentable_uuid === fermentable.fermentableUuid
     );
-    assert.strictEqual(fermentable.name, dbData.name);
-    assert.strictEqual(fermentable.type, dbData.type);
-    assert.strictEqual(fermentable.yield, dbData.yield);
-    assert.strictEqual(fermentable.color, dbData.color);
-    assert.strictEqual(fermentable.origin, dbData.origin);
-    assert.strictEqual(fermentable.supplier, dbData.supplier);
-    assert.strictEqual(fermentable.coarseFineDiff, dbData.coarse_fine_diff);
-    assert.strictEqual(fermentable.moisture, dbData.moisture);
-    assert.strictEqual(fermentable.diastaticPower, dbData.diastatic_power);
-    assert.strictEqual(fermentable.protein, dbData.protein);
-    assert.strictEqual(fermentable.maxInBatch, dbData.max_in_batch);
-    assert.strictEqual(fermentable.recommendedMash, dbData.recommended_mash);
-    assert.strictEqual(fermentable.notes, dbData.notes);
-    assert.strictEqual(fermentable.addAfterBoil, dbData.add_after_boil);
+    for (const attr in fermentable) {
+      let dbValue = dbData[toSnakeCase(attr)];
+      dbValue = dbValue instanceof Date ? dbValue.getTime() : dbValue;
+      assert.strictEqual(fermentable[attr], dbValue);
+    }
   }
 };
 
 const confirmFermentableInsertion = async (fermentableUuid, fermentableData) => {
   const [dbData] = await getExistingFermentables(fermentableUuid);
-  assert.strictEqual(fermentableData.name, dbData.name);
-    assert.strictEqual(fermentableData.type, dbData.type);
-    assert.strictEqual(fermentableData.yield, dbData.yield);
-    assert.strictEqual(fermentableData.color, dbData.color);
-    assert.strictEqual(fermentableData.origin, dbData.origin);
-    assert.strictEqual(fermentableData.supplier, dbData.supplier);
-    assert.strictEqual(fermentableData.coarseFineDiff, dbData.coarse_fine_diff);
-    assert.strictEqual(fermentableData.moisture, dbData.moisture);
-    assert.strictEqual(fermentableData.diastaticPower, dbData.diastatic_power);
-    assert.strictEqual(fermentableData.protein, dbData.protein);
-    assert.strictEqual(fermentableData.maxInBatch, dbData.max_in_batch);
-    assert.strictEqual(fermentableData.recommendedMash, dbData.recommended_mash);
-    assert.strictEqual(fermentableData.notes, dbData.notes);
-    assert.strictEqual(fermentableData.addAfterBoil, dbData.add_after_boil);
+  for (const attr in fermentableData) {
+    let dbValue = dbData[toSnakeCase(attr)];
+    dbValue = dbValue instanceof Date ? dbValue.getTime() : dbValue;
+    assert.strictEqual(fermentableData[attr], dbValue);
+  }
 };
 
 const getFermentableTestData = async () => {
@@ -91,7 +73,7 @@ const getFermentableTestData = async () => {
   return {
     name: `Test fermentable ${randomString(6)}`,
     createdBy: randomUser.uid,
-    type: getRandomArrayMembers(FERMENTABLE_TYPES, 1),
+    type: getRandomArrayMembers(FERMENTABLE_TYPES, 1)[0],
     yield: randomFloat(0, 100),
     color: randomFloat(0, 500),
     origin: `Test origin ${randomString(4)}`,
@@ -131,11 +113,11 @@ export default describe("fermentable routes", function () {
   const breweriesToDelete = [],
     fermentablesToDelete = [];
   let userBreweries;
-
+  let randomFermentableNames;
   before(async () => {
     const randomNames = [randomString(6), randomString(6), randomString(6)];
     const randomBreweryNames = randomNames.map((rnd) => `Test brewery ${rnd}`);
-    const randomFermentableNames = randomNames.map(
+    randomFermentableNames = randomNames.map(
       (rnd) => `Test fermentable ${rnd.split("").reverse().join("")}`
     );
     await api.signInAsNewUser({ role: "user" });
@@ -145,8 +127,9 @@ export default describe("fermentable routes", function () {
       breweriesToDelete.push(uuid);
       // create 3 test fermentables for each brewery
       for (const name of randomFermentableNames) {
+        const testData = await getFermentableTestData();
         const fermentableUuid = await createFermentable({
-          ...objectKeysToSnakeCase(getFermentableTestData()),
+          ...objectKeysToSnakeCase(testData),
           name,
           brewery_uuid: uuid,
           created_by: api.user.uid,
@@ -159,7 +142,7 @@ export default describe("fermentable routes", function () {
     await api.deleteUser();
   });
 
-  it.only("/breweries/:breweryUuid/brewhouses GET", async function () {
+  it("/breweries/:breweryUuid/fermentables GET", async function () {
     const [breweryUuid] = breweriesToDelete;
     await api.signInAsNewUser({ role: "user", breweries: [breweryUuid] });
     const response = await makeGetFermentablesRequest(breweryUuid);
@@ -173,81 +156,72 @@ export default describe("fermentable routes", function () {
     }
   });
 
-  // it("/breweries/:breweryUuid/brewhouses GET - input validation", async () => {
-  //   const missingUuid = void 0;
-  //   await expectError(makeGetBrewhousesRequest(missingUuid));
-  //   const invalidUuid = "invalidUuid";
-  //   await expectError(makeGetBrewhousesRequest(invalidUuid));
-  //   const randomButValidUuid = createUuid();
-  //   await expectError(makeGetBrewhousesRequest(randomButValidUuid));
-  //   const wrongBreweryUuid = breweriesToDelete[1];
-  //   await expectError(makeGetBrewhousesRequest(wrongBreweryUuid));
-  //   await api.deleteUser();
-  // });
+  it("/breweries/:breweryUuid/fermentables GET - input validation", async () => {
+    const missingUuid = void 0;
+    await expectError(makeGetFermentablesRequest(missingUuid));
+    const invalidUuid = "invalidUuid";
+    await expectError(makeGetFermentablesRequest(invalidUuid));
+    const randomButValidUuid = createUuid();
+    await expectError(makeGetFermentablesRequest(randomButValidUuid));
+    const wrongBreweryUuid = breweriesToDelete[1];
+    await expectError(makeGetFermentablesRequest(wrongBreweryUuid));
+    await api.deleteUser();
+  });
 
-  // it("/breweries/:breweryUuid/brewhouses POST", async () => {
-  //   const testData = await getBrewhouseTestData();
-  //   const existingBreweries = await getExistingBreweries();
-  //   const existingBreweryUuids = existingBreweries.map(
-  //     (brewery) => brewery.brewery_uuid
-  //   );
-  //   userBreweries = [breweriesToDelete[breweriesToDelete.length - 1]];
-  //   await api.signInAsNewUser({ role: "user", breweries: userBreweries });
-  //   const response = await makeCreateBrewhouseRequest(
-  //     userBreweries[0],
-  //     testData
-  //   );
-  //   assert.strictEqual(response.status, "ok");
-  //   await confirmBrewhouseInsertion(response.brewhouseUuid, testData);
-  //   fermentablesToDelete.push(response.brewhouseUuid);
-  //   localCache.invalidate("brewhouse");
-  // });
+  it("/breweries/:breweryUuid/fermentables POST", async () => {
+    const testData = await getFermentableTestData();
+    console.log("TEST_DATA:", testData);
+    userBreweries = [breweriesToDelete[breweriesToDelete.length - 1]];
+    await api.signInAsNewUser({ role: "user", breweries: userBreweries });
+    const response = await makeCreateFermentableRequest(
+      userBreweries[0],
+      testData
+    );
+    assert.strictEqual(response.status, "ok");
+    await confirmFermentableInsertion(response.fermentableUuid, testData);
+    fermentablesToDelete.push(response.fermentableUuid);
+    localCache.invalidate("fermentable");
+  });
 
-  // it("/breweries/:breweryUuid/brewhouses POST - with user provided UUID", async () => {
-  //   const testData = await getBrewhouseTestData();
-  //   const brewhouseUuid = createUuid();
-  //   testData.brewhouseUuid = brewhouseUuid;
-  //   const response = await makeCreateBrewhouseRequest(
-  //     userBreweries[0],
-  //     testData
-  //   );
-  //   assert.strictEqual(response.status, "ok");
-  //   assert.strictEqual(response.brewhouseUuid, brewhouseUuid);
-  //   await confirmBrewhouseInsertion(response.brewhouseUuid, testData);
-  //   fermentablesToDelete.push(response.brewhouseUuid);
-  //   localCache.invalidate("brewhouse");
-  // });
+  it("/breweries/:breweryUuid/fermentables POST - with user provided UUID", async () => {
+    const testData = await getFermentableTestData();
+    const fermentableUuid = createUuid();
+    testData.fermentableUuid = fermentableUuid;
+    const response = await makeCreateFermentableRequest(
+      userBreweries[0],
+      testData
+    );
+    assert.strictEqual(response.status, "ok");
+    assert.strictEqual(response.fermentableUuid, fermentableUuid);
+    await confirmFermentableInsertion(response.fermentableUuid, testData);
+    fermentablesToDelete.push(response.fermentableUuid);
+    localCache.invalidate("fermentable");
+  });
 
-  // it("/breweries/:breweryUuid/brewhouses POST - input validation", async () => {
-  //   const [breweryUuid] = userBreweries;
-  //   const testData = await getBrewhouseTestData();
-  //   const invalidTestData = {
-  //     name: [void 0, "", randomString(101)],
-  //     createdBy: [void 0, randomString(36), randomInt(999999)],
-  //     batchSize: [void 0, `${randomInt(5, 10)}`, randomString(6)],
-  //     tunVolume: [void 0, `${randomInt(5, 10)}`, randomString(6)],
-  //     tunWeight: [void 0, `${randomInt(5, 10)}`, randomString(6)],
-  //     tunLoss: [`${randomInt(5, 10)}`, randomString(6)],
-  //     tunSpecificHeat: [void 0, `${randomInt(5, 10)}`, randomString(6)],
-  //     lauterDeadspace: [`${randomInt(5, 10)}`, randomString(6)],
-  //     topUpWater: [`${randomInt(5, 10)}`, randomString(6)],
-  //     trubChillerLoss: [`${randomInt(5, 10)}`, randomString(6)],
-  //     evaporationRate: [void 0, `${randomFloat(1, 3, 2)}`, randomString(6)],
-  //     kettleVol: [void 0, `${randomInt(5, 10)}`, randomString(6)],
-  //     miscLoss: [`${randomFloat(0, 5)}`, randomString(6)],
-  //     extractEfficiency: [void 0, `${randomFloat(50, 90, 2)}`, randomString(6)],
-  //     grainAbsorptionRate: [
-  //       void 0,
-  //       `${randomFloat(0.1, 0.3, 2)}`,
-  //       randomString(6),
-  //     ],
-  //     hopUtilization: [void 0, `${randomFloat(50, 90, 2)}`, randomString(6)],
-  //   };
-  //   await runDataValidationTests(invalidTestData, testData, api, {
-  //     url: `/breweries/${breweryUuid}/brewhouses`,
-  //     method: "post",
-  //   });
-  // });
+  it("/breweries/:breweryUuid/fermentables POST - input validation", async () => {
+    const [breweryUuid] = userBreweries;
+    const testData = await getFermentableTestData();
+    const invalidTestData = {
+      name: [void 0, "", randomString(101), randomFermentableNames[0]],
+      createdBy: [void 0, randomString(36), randomInt(999999)],
+      yield: [void 0, `${randomFloat(0, 100)}`, randomString(6), -1 * randomFloat(0, 100), randomFloat(100.01, 1000)],
+      color: [void 0, `${randomInt(0, 100)}`, randomString(6), -1 * randomFloat(0, 100)],
+      origin: [randomInt(5, 10), randomString(101)],
+      supplier: [randomInt(5, 10), randomString(101)],
+      coarseFineDiff: [`${randomFloat(0, 100)}`, -1 * randomFloat(0, 100), randomFloat(100.01, 1000)],
+      moisture: [`${randomFloat(0, 100)}`, -1 * randomFloat(0, 100), randomFloat(100.01, 1000)],
+      diastaticPower: [`${randomInt(0, 200)}`, -1 * randomFloat(0, 100)],
+      protein: [`${randomFloat(0, 100)}`, -1 * randomFloat(0, 100), randomFloat(100.01, 1000)],
+      maxInBatch: [`${randomFloat(0, 100)}`, -1 * randomFloat(0, 100), randomFloat(100.01, 1000)],
+      recommendedMash: [randomInt(5, 10), randomString(6)],
+      notes: [randomFloat(0, 1000)],
+      addAfterBoil: [randomInt(5, 10), randomString(6)]
+    };
+    await runDataValidationTests(invalidTestData, testData, api, {
+      url: `/breweries/${breweryUuid}/fermentables`,
+      method: "post",
+    });
+  });
 
   // it("/breweries/:breweryUuid/brewhouses/:brewhouseUuid PATCH", async () => {
   //   const updateData = await getBrewhouseTestData();

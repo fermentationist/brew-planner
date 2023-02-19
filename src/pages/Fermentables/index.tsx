@@ -3,13 +3,14 @@ import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import AddIcon from "@mui/icons-material/AddCircle";
 import useAPI from "../../hooks/useAPI";
-import DataTable from "../../components/DataTable";
+import DataTable, { columnOptions } from "../../components/DataTable";
 import Page from "../../components/Page";
 import withLoadingSpinner from "../../hoc/withLoadingSpinner";
 import useAlert from "../../hooks/useAlert";
+import useAuth from "../../hooks/useAuth";
 import useConvertUnits from "../../hooks/useConvertUnits";
 import FermentableModal, { fermentableInputs } from "./FermentableModal";
-import { FermentablesData, Mode } from "../../types";
+import { FermentableData, Mode, APIError } from "../../types";
 
 const Fermentables = ({
   startLoading,
@@ -23,13 +24,16 @@ const Fermentables = ({
   const [mode, setMode]: [mode: Mode, setMode: Dispatch<SetStateAction<Mode>>] =
     useState("create" as Mode);
   const [modalData, setModalData] = useState(null);
-  const { alertError } = useAlert();
+  const { alertError, alertErrorProm } = useAlert();
+  const { auth } = useAuth();
   const {
     isLoading,
     enable: enableFermentablesQuery,
     data: fermentablesData,
     error: fermentablesError,
-    refetch: refresh
+    refetch: refresh,
+    APIRequest,
+    BREWERY_ROUTE,
   } = useAPI("fermentables");
   const {
     renameTempPreferredUnits,
@@ -43,7 +47,7 @@ const Fermentables = ({
     if (!isLoading) {
       if (fermentablesData) {
         const dataWithNestedRowData = fermentablesData.data?.fermentables?.map(
-          (row: FermentablesData) => {
+          (row: FermentableData) => {
             const rowCopy = { ...row };
             rowCopy.data = { ...row };
             return rowCopy;
@@ -66,8 +70,27 @@ const Fermentables = ({
     enableFermentablesQuery,
   ]);
 
-  const createOrUpdateFermentable = (formData) => {
-    console.log("formData:", formData);
+  const createOrUpdateFermentable = async (formData: FermentableData) => {
+    const editMode = mode === "edit";
+    const reqBody = editMode
+      ? formData
+      : { ...formData, createdBy: auth?.user?.uid };
+    // reqBody.recommendedMash = reqBody.recommendedMash === "true" ? true : reqBody.recommendedMash === "false" ? false : reqBody.recommendedMash;
+    const url = editMode
+      ? "/fermentables/" + modalData.fermentableUuid
+      : "/fermentables";
+    const apiReq = new APIRequest({
+      baseURL: BREWERY_ROUTE,
+      url,
+      method: editMode ? "patch" : "post",
+      data: reqBody,
+    });
+    const response = await apiReq.request().catch(async (error: APIError) => {
+      await alertErrorProm(error);
+    });
+    console.log("response:", response);
+    refresh();
+    setShowFermentableModal(false);
   };
 
   const addFermentable = () => {
@@ -76,18 +99,39 @@ const Fermentables = ({
     setShowFermentableModal(true);
   };
 
-  const editFermentable = rowData => {
+  const editFermentable = (rowData) => {
     setModalData(rowData);
     setMode("edit");
     setShowFermentableModal(true);
-  }
+  };
 
   const deleteRows = () => {
-// 
-  }
+    //
+  };
 
   const generatedColumns = generateColumnsFromInputs(fermentableInputs);
-  const columns = [...generatedColumns];
+  const columns = [
+    {
+      label: "Fermentable ID",
+      name: "fermentableUuid",
+      options: {
+        ...columnOptions.options,
+        display: false,
+      },
+    },
+    ...generatedColumns,
+    {
+      name: "data",
+      options: columnOptions.rowDataOptions,
+    },
+    {
+      name: "",
+      options: columnOptions.createRenderEditButtonOptions(
+        "edit fermentable",
+        editFermentable
+      ),
+    },
+  ];
   return (
     <Page>
       <Tooltip title="Add Fermentable">
@@ -99,8 +143,7 @@ const Fermentables = ({
         columns={useMemo(() => columns, [preferredUnits])}
         data={tableData}
         refresh={refresh}
-        options=
-        {{
+        options={{
           selectableRows: "multiple",
           selectableRowsHeader: true,
           onRowsDelete: deleteRows,

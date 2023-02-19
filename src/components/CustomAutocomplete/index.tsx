@@ -42,15 +42,15 @@ const CustomAutocomplete = forwardRef(
     }: CustomAutocompleteProps,
     forwardedRef: Ref<any>
   ) => {
-    const [value, setValue] = useState(defaultValue || null);
+    const [value, setValue] = useState(defaultValue);
     useEffect(() => {
       // if in restricted mode, clear input if value is no longer included in options (when options change)
       const selections = optionKey
         ? options.map(option => option[optionKey])
         : options;
       if (restricted && !selections.includes(value)) {
-        setValue(null);
-        callback(null);
+        setValue(void 0);
+        callback(void 0);
       }
     }, [options, optionKey, restricted]);
 

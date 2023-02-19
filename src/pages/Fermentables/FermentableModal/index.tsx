@@ -108,6 +108,7 @@ export const fermentableInputs = [
     label: "Mash recommended",
     type: "select",
     selectOptions: ["true", "false"],
+    transform: (val?: string) => val === "true" ? true : val === "false" ? false : val,
     selectRestricted: true,
     width: "250px",
     tableOptions: {
@@ -129,6 +130,7 @@ export const fermentableInputs = [
     type: "select",
     selectOptions: ["true", "false"],
     selectRestricted: true,
+    transform: (val?: string) => val === "true" ? true : val === "false" ? false : val,
     width: "250px",
     tableOptions: {
       display: false

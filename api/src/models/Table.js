@@ -1,22 +1,6 @@
 import db from "../services/db/index.js";
-import { toCamelCase, toSnakeCase } from "../utils/helpers.js";
+import { objectKeysToCamelCase, objectKeysToSnakeCase } from "../utils/helpers.js";
 import {parse as uuidParse} from "uuid";
-
-const camelCaseObject = object => {
-  const newObject = {};
-  for (const key in object) {
-    newObject[toCamelCase(key)] = object[key];
-  }
-  return newObject;
-}
-
-const snakeCaseObject = object => {
-  const newObject = {};
-  for (const key in object) {
-    newObject[toSnakeCase(key)] = object[key];
-  }
-  return newObject;
-}
 
 export const convertUuidToBuffer = uuid => Buffer.from(uuidParse(uuid));
 
@@ -30,6 +14,25 @@ export const convertObjectUUIDsToBuffers = object => {
     newObj[key] = value;
   }
   return newObj;
+}
+
+export const convertBooleansToIntegers = object => {
+  const newObj = {};
+  for (const key in object){
+    let value = object[key];
+    if (typeof value === "boolean") {
+      value = value ? 1 : 0;
+    } 
+    newObj[key] = value;
+  }
+  return newObj;
+}
+
+export const prepareInputObjectForDB = object => {
+  const paramsWithBinaryUuids = convertObjectUUIDsToBuffers(object);
+  const snakeCaseParams = objectKeysToSnakeCase(paramsWithBinaryUuids);
+  const paramsWithIntegerBooleans = convertBooleansToIntegers(snakeCaseParams);
+  return paramsWithIntegerBooleans;
 }
 
 // removes keys containing the substring "_key", changes Date objects to Unix timestamps and camelCases keys
@@ -46,7 +49,7 @@ const cleanResults = (resultsArray) => {
         rowCopy[key] = value.getTime();
       }
     }
-    return camelCaseObject(rowCopy);
+    return objectKeysToCamelCase(rowCopy);
   });
 }
 
@@ -69,34 +72,27 @@ export default class Table {
 
   async select (params) {
     await this.init();
-    const paramsWithBinaryUuids = convertObjectUUIDsToBuffers(params);
-    const snakeCaseParams = snakeCaseObject(paramsWithBinaryUuids);
-    const results = await db.selectProm(this.tableName, this.columns, snakeCaseParams);
+    const preppedParams = prepareInputObjectForDB(params);
+    const results = await db.selectProm(this.tableName, this.columns, preppedParams);
     return cleanResults(results);
   }
 
   async update (updates, params) {
     await this.init();
-    const paramsWithBinaryUuids = convertObjectUUIDsToBuffers(params);
-    const snakeCaseParams = snakeCaseObject(paramsWithBinaryUuids);
-    const updatesWithBinaryUuids = convertObjectUUIDsToBuffers(updates);
-    const snakeCaseUpdates = snakeCaseObject(updatesWithBinaryUuids);
-    return db.updateProm(this.tableName, this.columns, snakeCaseUpdates, snakeCaseParams);
+    const preppedParams = prepareInputObjectForDB(params);
+    const preppedUpdates = prepareInputObjectForDB(updates);
+    return db.updateProm(this.tableName, this.columns, preppedUpdates, preppedParams);
   }
 
   async insert (rows, ignore = true) {
     await this.init();
-    const snakeCaseRows = rows.map(row => {
-      const rowWithBinaryUuids = convertObjectUUIDsToBuffers(row);
-      return snakeCaseObject(rowWithBinaryUuids);
-    });
-    return db.insertProm(this.tableName, this.columns, snakeCaseRows, ignore);
+    const preppedRows = rows.map(row => prepareInputObjectForDB(row));
+    return db.insertProm(this.tableName, this.columns, preppedRows, ignore);
   }
 
   async delete (params) {
     await this.init();
-    const paramsWithBinaryUuids = convertObjectUUIDsToBuffers(params);
-    const snakeCaseParams = snakeCaseObject(paramsWithBinaryUuids);
-    return db.deleteProm(this.tableName, this.columns, snakeCaseParams);
+    const preppedParams = prepareInputObjectForDB(params);
+    return db.deleteProm(this.tableName, this.columns, preppedParams);
   }
 }

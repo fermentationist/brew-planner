@@ -1,3 +1,4 @@
+/* global setTimeout */
 //test helpers
 
 export const randomInt = (min, max, exclude = []) => {
@@ -9,6 +10,7 @@ export const randomInt = (min, max, exclude = []) => {
 };
 
 export const randomFloat = (min, max, decimalPlaces, exclude = []) => {
+  decimalPlaces = decimalPlaces || 2;
   let output =
     Math.floor((Math.random() * (max - min + 1) + min) * 10 ** decimalPlaces) /
     10 ** decimalPlaces;
@@ -59,13 +61,21 @@ export const toSnakeCase = (str) => {
     }); // turns "kebab-case" into "kebab_case"
 };
 
-export const objectKeysToSnakeCase = (object) => {
-  return Object.fromEntries(
-    Object.entries(object).map((entry) => {
-      return [toSnakeCase(entry[0]), entry[1]];
-    })
-  );
-};
+export const objectKeysToSnakeCase = object => {
+  const newObject = {};
+  for (const key in object) {
+    newObject[toSnakeCase(key)] = object[key];
+  }
+  return newObject;
+}
+
+export const objectKeysToCamelCase = object => {
+  const newObject = {};
+  for (const key in object) {
+    newObject[toCamelCase(key)] = object[key];
+  }
+  return newObject;
+}
 
 /* 
 cleanQueryResult example
@@ -145,6 +155,14 @@ export const rejectOnFalse = (fn) => {
   };
 };
 
+export const numberValidator = ({
+  min = Number.NEGATIVE_INFINITY,
+  max = Number.POSITIVE_INFINITY,
+} = {}) =>
+  rejectOnFalse(
+    (input) => typeof input === "number" && input >= min && input <= max
+  );
+
 export default {
   randomInt,
   getRandomArrayMembers,
@@ -153,4 +171,5 @@ export default {
   toCamelCase,
   cleanQueryResult,
   rejectOnFalse,
+  numberValidator,
 };
