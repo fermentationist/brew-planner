@@ -111,6 +111,7 @@ export interface FermentableData {
   notes?: string;
   addAfterBoil?: boolean;
   createdAt: number;
+  data?: any;
 }
 
 export type Mode = "create" | "edit";

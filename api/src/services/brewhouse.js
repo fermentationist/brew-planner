@@ -26,7 +26,11 @@ export const createBrewhouse = async (breweryUuid, brewhouseData) => {
   return newBrewhouse.brewhouseUuid;
 }
 
-export const updateBrewhouse = (breweryUuid, brewhouseUuid, updateData) => Tables.brewhouse.update(updateData, {breweryUuid, brewhouseUuid});
+export const updateBrewhouse = async (breweryUuid, brewhouseUuid, updateData) => {
+  const result = await Tables.brewhouse.update(updateData, {breweryUuid, brewhouseUuid});
+  localCache.invalidate("brewhouse");
+  return result;
+};
 
 export const deleteBrewhouse = async (breweryUuid, brewhouseUuid) => {
   const result = await Tables.brewhouse.delete({breweryUuid, brewhouseUuid});

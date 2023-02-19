@@ -2,14 +2,14 @@ CREATE TABLE IF NOT EXISTS fermentable (
   fermentable_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   fermentable_uuid BINARY (16) NOT NULL UNIQUE,
   created_by VARCHAR (36) NOT NULL,
-  version INT NOT NULL DEFAULT 1,
   brewery_uuid BINARY (16) NOT NULL,
   CONSTRAINT fk_fermentable_brewery_uuid FOREIGN KEY (brewery_uuid) REFERENCES brewery (brewery_uuid) ON DELETE CASCADE,
-  UNIQUE KEY (brewery_uuid, name),
   name VARCHAR (100) NOT NULL,
+  UNIQUE KEY (brewery_uuid, name),
+  version INT NOT NULL DEFAULT 1,
   type ENUM ("Grain", "Sugar", "Extract", "Dry Extract", "Adjunct"),
   yield DECIMAL (5, 2) NOT NULL, -- this decimal represents a whole number percentage, i.e. the value 33.33 represents a yield of 33.33%, or 0.3333
-  color DECIMAL (6, 2), --  the color contribution of the fermentable, measured in degrees Lovibond (SRM)
+  color DECIMAL (6, 2) NOT NULL, --  the color contribution of the fermentable, measured in degrees Lovibond (SRM)
   origin VARCHAR (100), -- geographical origin
   supplier VARCHAR (100), -- brand
   coarse_fine_diff DECIMAL (5, 2), -- a percentage, only applicable to "grain" or "adjunct types"
@@ -28,12 +28,12 @@ ALTER TABLE fermentable ADD INDEX (fermentable_uuid);
 CREATE TABLE IF NOT EXISTS fermentable_version (
   fermentable_version_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   fermentable_uuid BINARY (16) NOT NULL,
-  CONSTRAINT fk_fermentable_version_fermentable_uuid FOREIGN KEY (fermentable_uuid) REFERENCES fermentable (fermentable_uuid),
+  CONSTRAINT fk_fermentable_version_fermentable_uuid FOREIGN KEY (fermentable_uuid) REFERENCES fermentable (fermentable_uuid) ON DELETE CASCADE,
   created_by VARCHAR (36) NOT NULL,
   version INT NOT NULL,
   brewery_uuid BINARY (16) NOT NULL,
   CONSTRAINT fk_fermentable_version_brewery_uuid FOREIGN KEY (brewery_uuid) REFERENCES brewery (brewery_uuid) ON DELETE CASCADE,
-  UNIQUE KEY (brewery_uuid, name),
+  UNIQUE KEY (fermentable_uuid, version),
   name VARCHAR (100) NOT NULL,
   type ENUM ("Grain", "Sugar", "Extract", "Dry Extract", "Adjunct"),
   yield DECIMAL (5, 2) NOT NULL, -- this decimal represents a whole number percentage, i.e. the value 33.33 represents a yield of 33.33%, or 0.3333
@@ -100,7 +100,9 @@ CREATE TRIGGER before_update_on_fermentable
   BEFORE UPDATE ON fermentable
   FOR EACH ROW
   BEGIN
+    SET NEW.version = OLD.version + 1;
     INSERT INTO fermentable_version (
+      brewery_uuid,
       fermentable_uuid,
       created_by,
       version,
@@ -121,6 +123,7 @@ CREATE TRIGGER before_update_on_fermentable
       created_at
     )
     VALUES (
+      OLD.brewery_uuid,
       OLD.fermentable_uuid,
       OLD.created_by,
       OLD.version,
@@ -140,5 +143,4 @@ CREATE TRIGGER before_update_on_fermentable
       OLD.add_after_boil,
       OLD.created_at
     );
-    SET NEW.version = OLD.version + 1;
   END;

@@ -158,6 +158,7 @@ const Form = function (props: FormProps) {
           restricted: input.selectRestricted,
           label: input.label ?? input.name,
           optionKey: input.selectOptionKey,
+          defaultValue: typeof input.defaultValue === "boolean" ? String(input.defaultValue) : input.defaultValue
         } as CustomAutocompleteProps;
         break;
 

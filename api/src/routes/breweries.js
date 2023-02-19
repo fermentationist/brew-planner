@@ -22,9 +22,14 @@ import {
   getBrewhouses,
   createBrewhouse,
   updateBrewhouse,
-  deleteBrewhouse
+  deleteBrewhouse,
 } from "../controllers/brewhouses.js";
-import { createFermentable, getFermentables } from "../controllers/fermentables.js";
+import {
+  createFermentable,
+  getFermentables,
+  updateFermentable,
+  deleteFermentable,
+} from "../controllers/fermentables.js";
 
 const router = Router();
 
@@ -42,6 +47,8 @@ router.patch("/:breweryUuid/brewhouses/:brewhouseUuid", updateBrewhouse);
 router.delete("/:breweryUuid/brewhouses/:brewhouseUuid", deleteBrewhouse);
 router.get("/:breweryUuid/fermentables", getFermentables);
 router.post("/:breweryUuid/fermentables", createFermentable);
+router.patch("/:breweryUuid/fermentables/:fermentableUuid", updateFermentable);
+router.delete("/:breweryUuid/fermentables/:fermentableUuid", deleteFermentable);
 // router.post("/:breweryUuid/brewhouses", createBrewhouse);
 // router.get("/:breweryUuid/inventory", getBreweryInventory);
 // router.post("/:breweryUuid/inventory", createBreweryInventory);

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, Dispatch, SetStateAction } from "react";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import AddIcon from "@mui/icons-material/AddCircle";
@@ -7,6 +7,7 @@ import DataTable, { columnOptions } from "../../components/DataTable";
 import Page from "../../components/Page";
 import withLoadingSpinner from "../../hoc/withLoadingSpinner";
 import useAlert from "../../hooks/useAlert";
+import useConfirm from "../../hooks/useConfirm";
 import useAuth from "../../hooks/useAuth";
 import useConvertUnits from "../../hooks/useConvertUnits";
 import FermentableModal, { fermentableInputs } from "./FermentableModal";
@@ -24,8 +25,9 @@ const Fermentables = ({
   const [mode, setMode]: [mode: Mode, setMode: Dispatch<SetStateAction<Mode>>] =
     useState("create" as Mode);
   const [modalData, setModalData] = useState(null);
-  const { alertError, alertErrorProm } = useAlert();
+  const { callAlert, alertError, alertErrorProm } = useAlert();
   const { auth } = useAuth();
+  const { confirmDelete } = useConfirm();
   const {
     isLoading,
     enable: enableFermentablesQuery,
@@ -99,14 +101,46 @@ const Fermentables = ({
     setShowFermentableModal(true);
   };
 
-  const editFermentable = (rowData) => {
+  const editFermentable = (rowData: FermentableData) => {
     setModalData(rowData);
     setMode("edit");
     setShowFermentableModal(true);
   };
 
-  const deleteRows = () => {
-    //
+  const deleteFermentable = async (fermentableUuid: string) => {
+    const deleteFermentableRequest = new APIRequest({
+      baseURL: BREWERY_ROUTE,
+      url: `/fermentables/${fermentableUuid}`,
+      method: "delete"
+    });
+    return deleteFermentableRequest.request().catch(async(error: APIError) => {
+      await alertErrorProm(error);
+    })
+  }
+
+  const deleteRows = async (rowsDeleted: any) => {
+    const fermentableUuidsToDelete = rowsDeleted.data.map(
+      (row: { index: number; dataIndex: number }) => {
+        return tableData[row.dataIndex].fermentableUuid;
+      }
+    );
+    const qty = fermentableUuidsToDelete.length;
+    const confirm = await confirmDelete(qty, "brewhouse");
+    if (!confirm) {
+      return;
+    }
+    if (qty > 1) {
+      startLoading();
+    }
+    if (qty > 4) {
+      callAlert("Please be patient, this may take a little while...");
+    }
+    for (const uuid of fermentableUuidsToDelete) {
+      console.log("attempting to delete fermentable:", uuid);
+      await deleteFermentable(uuid);
+    }
+    refresh();
+    doneLoading();
   };
 
   const generatedColumns = generateColumnsFromInputs(fermentableInputs);
