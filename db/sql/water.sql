@@ -2,9 +2,11 @@ CREATE TABLE IF NOT EXISTS water (
   water_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   water_uuid BINARY (16) NOT NULL UNIQUE,
   created_by VARCHAR(36) NOT NULL,
-  version INT NOT NULL DEFAULT 1,
-  UNIQUE KEY (water_uuid), -- there can be only one version per water_uuid
+  brewery_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_water_brewery_uuid FOREIGN KEY (brewery_uuid) REFERENCES brewery (brewery_uuid) ON DELETE CASCADE,
   name VARCHAR (100) NOT NULL,
+  UNIQUE KEY (brewery_uuid, name),
+  version INT NOT NULL DEFAULT 1,
   calcium DECIMAL (6, 2) DEFAULT 0, -- parts per million
   bicarbonate DECIMAL (6, 2) DEFAULT 0, -- parts per million
   sulfate DECIMAL (6, 2) DEFAULT 0, -- parts per million
@@ -22,11 +24,13 @@ ALTER TABLE water ADD INDEX (water_uuid);
 CREATE TABLE IF NOT EXISTS water_version (
   water_version_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   water_uuid BINARY (16) NOT NULL,
-  CONSTRAINT fk_water_version_water_uuid FOREIGN KEY (water_uuid) REFERENCES water (water_uuid), -- reference to current version
-  created_by VARCHAR(36) NOT NULL,
-  version INT NOT NULL,
+  CONSTRAINT fk_water_version_water_uuid FOREIGN KEY (water_uuid) REFERENCES water (water_uuid) ON DELETE CASCADE, -- reference to current version
+  brewery_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_water_version_brewery_uuid FOREIGN KEY (brewery_uuid) REFERENCES brewery (brewery_uuid) ON DELETE CASCADE,
   UNIQUE KEY (water_uuid, version),
   name VARCHAR (100) NOT NULL,
+  version INT NOT NULL,
+  created_by VARCHAR(36) NOT NULL,
   calcium DECIMAL (6, 2), -- parts per million
   bicarbonate DECIMAL (6, 2), -- parts per million
   sulfate DECIMAL (6, 2), -- parts per million
@@ -88,6 +92,7 @@ CREATE TRIGGER before_update_on_water
   BEGIN
     INSERT INTO water_version (
       water_uuid,
+      brewery_uuid,
       version,
       created_by,
       name,
@@ -102,6 +107,7 @@ CREATE TRIGGER before_update_on_water
     )
     VALUES (
       OLD.water_uuid,
+      OLD.brewery_uuid,
       OLD.version,
       OLD.created_by,
       OLD.name,

@@ -27,6 +27,10 @@ const menuItems: IMenuItem[] = [
       {
         title: "Hops",
         link: "/ingredients/hops"
+      },
+      {
+        title: "Water Profiles",
+        link: "/ingredients/water_profiles"
       }
     ]
   }

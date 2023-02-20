@@ -30,6 +30,13 @@ import {
   deleteHop,
 } from "../controllers/hops.js";
 
+import {
+  createWater,
+  getWaters,
+  updateWater,
+  deleteWater,
+} from "../controllers/waters.js";
+
 const router = Router();
 
 // breweries routes
@@ -51,4 +58,8 @@ router.get("/:breweryUuid/hops", getHops);
 router.post("/:breweryUuid/hops", createHop);
 router.patch("/:breweryUuid/hops/:hopUuid", updateHop);
 router.delete("/:breweryUuid/hops/:hopUuid", deleteHop);
+router.get("/:breweryUuid/waters", getWaters);
+router.post("/:breweryUuid/waters", createWater);
+router.patch("/:breweryUuid/waters/:waterUuid", updateWater);
+router.delete("/:breweryUuid/waters/:waterUuid", deleteWater);
 export default router;

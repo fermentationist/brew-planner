@@ -168,7 +168,6 @@ const Brewhouses = ({ startLoading, doneLoading }: { startLoading: () => void; d
       ),
     },
   ];
-  console.log("Brewhouses columns:", columns);
   return (
     <Page>
       <Tooltip title="Add Brewhouse">

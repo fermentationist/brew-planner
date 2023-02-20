@@ -1,3 +1,4 @@
+/* global Buffer */
 import db from "../services/db/index.js";
 import { objectKeysToCamelCase, objectKeysToSnakeCase } from "../utils/helpers.js";
 import {parse as uuidParse} from "uuid";
@@ -28,6 +29,7 @@ export const convertBooleansToIntegers = object => {
   return newObj;
 }
 
+// converts object keys to camelCase, converts string UUIDs to binary, converts boolean values to 1 or 0
 export const prepareInputObjectForDB = object => {
   const paramsWithBinaryUuids = convertObjectUUIDsToBuffers(object);
   const snakeCaseParams = objectKeysToSnakeCase(paramsWithBinaryUuids);

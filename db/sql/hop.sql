@@ -26,11 +26,11 @@ CREATE TABLE IF NOT EXISTS hop_version (
   hop_version_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   hop_uuid BINARY (16) NOT NULL,
   CONSTRAINT fk_hop_version_hop_uuid FOREIGN KEY (hop_uuid) REFERENCES hop (hop_uuid) ON DELETE CASCADE,
+  brewery_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_hop_version_brewery_uuid FOREIGN KEY (brewery_uuid) REFERENCES brewery (brewery_uuid) ON DELETE CASCADE,
   name VARCHAR (100) NOT NULL,
   created_by VARCHAR (36) NOT NULL,
   version INT NOT NULL,
-  brewery_uuid BINARY (16) NOT NULL,
-  CONSTRAINT fk_hop_version_brewery_uuid FOREIGN KEY (brewery_uuid) REFERENCES brewery (brewery_uuid) ON DELETE CASCADE,
   UNIQUE KEY (hop_uuid, version),
   alpha DECIMAL (5, 2) NOT NULL, -- this decimal represents a whole number percentage, i.e. the value 5.5 represents an alpha acid level of 5.5%, or 0.055
   beta DECIMAL (5, 2), -- percentage

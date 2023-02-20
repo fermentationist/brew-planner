@@ -7,7 +7,8 @@ const tableNames = [
   "brewhouse",
   "recipe",
   "fermentable",
-  "hop"
+  "hop",
+  "water"
 ];
 
 for (const tableName of tableNames) {

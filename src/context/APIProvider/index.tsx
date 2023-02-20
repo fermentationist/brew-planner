@@ -1,5 +1,5 @@
 import { createContext, useCallback, useState } from "react";
-import { ChildProps } from "../../types";
+import { ChildProps, WaterData } from "../../types";
 import {
   useQuery,
   useQueryClient,
@@ -123,7 +123,22 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
       }),
       enable: useCallback(toggleQueryFn("hops", true), []),
       disable: useCallback(toggleQueryFn("hops", false), [])
-    }
+    },
+
+    waters: {
+      ...useQuery<WaterData, ErrorData>({
+        queryKey: ["waters", auth?.currentBrewery, auth?.accessToken],
+        queryFn: apiRequest({
+          baseURL: BREWERY_ROUTE,
+          url: "waters"
+        }),
+        staleTime: 60 * 1000 * 10,
+        enabled: Boolean(enabledQueries.waters)
+      }),
+      enable: useCallback(toggleQueryFn("waters", true), []),
+      disable: useCallback(toggleQueryFn("waters", false), [])
+    },
+
   };
 
   console.log("\nAPI_REQUESTS:", apiRequests);

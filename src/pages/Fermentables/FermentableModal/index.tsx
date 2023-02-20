@@ -2,8 +2,9 @@ import FormModal, { FormInputOptions } from "../../../components/FormModal";
 
 const required = { required: true };
 const requiredMessage = { required: "required field" };
-
-// creating input list outside of component so it can be exported for use in creating table columns for Brewhouses table
+const percentage = { min: 0, max: 100 };
+const percentageMessage = { min: "Please enter a valid percentage (>= 0)", max: "Please enter a valid percentage (<= 100)" };
+// creating input list outside of component so it can be exported for use in creating table columns for Fermentables table
 export const fermentableInputs = [
   {
     name: "name",
@@ -27,17 +28,17 @@ export const fermentableInputs = [
     name: "yield",
     label: "Yield (%)",
     type: "number",
-    validation: required,
-    errorMessages: requiredMessage,
+    validation: {...required, ...percentage},
+    errorMessages: {...requiredMessage, ...percentageMessage},
     maxDecPlaces: 2,
     width: "250px",
   },
   {
     name: "color",
-    label: "Color (SRM)",
+    label: "Color (ºL)",
     type: "number",
-    validation: required,
-    errorMessages: requiredMessage,
+    validation: {...required, min: 0},
+    errorMessages: {...requiredMessage, min: "Please enter a positive number"},
     width: "250px",
   },
   {
@@ -63,6 +64,8 @@ export const fermentableInputs = [
     label: "Coarse/Fine Difference (%)",
     type: "number",
     width: "250px",
+    validation: percentage,
+    errorMessages: percentageMessage,
     tableOptions: {
       display: false,
     },
@@ -72,6 +75,8 @@ export const fermentableInputs = [
     label: "Moisture (%)",
     type: "number",
     width: "250px",
+    validation: percentage,
+    errorMessages: percentageMessage,
     tableOptions: {
       display: false
     }
@@ -81,6 +86,8 @@ export const fermentableInputs = [
     label: "Diastatic power (ºL)",
     type: "number",
     width: "250px",
+    validation: percentage,
+    errorMessages: percentageMessage,
     tableOptions: {
       display: false
     }
@@ -90,6 +97,8 @@ export const fermentableInputs = [
     label: "Protein (%)",
     type: "number",
     width: "250px",
+    validation: percentage,
+    errorMessages: percentageMessage,
     tableOptions: {
       display: false
     }
@@ -99,6 +108,8 @@ export const fermentableInputs = [
     label: "Max per batch (%)",
     type: "number",
     width: "250px",
+    validation: percentage,
+    errorMessages: percentageMessage,
     tableOptions: {
       display: false
     }

@@ -76,7 +76,31 @@ const unitDefaults: {[field: string]: {
   controlledNumberWithUnitsTest: {
     default: "gal",
     canonical: "l"
-  }
+  },
+  calcium: {
+    default: "ppm",
+    canonical: "ppm"
+  },
+  bicarbonate: {
+    default: "ppm",
+    canonical: "ppm"
+  },
+  sulfate: {
+    default: "ppm",
+    canonical: "ppm"
+  },
+  chloride: {
+    default: "ppm",
+    canonical: "ppm"
+  },
+  sodium: {
+    default: "ppm",
+    canonical: "ppm"
+  },
+  magnesium: {
+    default: "ppm",
+    canonical: "ppm"
+  },
 }
 
 export default unitDefaults;

@@ -134,4 +134,21 @@ export interface HopData {
   cohumulone?: number;
   myrcene?: number;
   createdAt: number;
+  data?: any;
+}
+
+export interface WaterData {
+  waterUuid: string;
+  createdBy: string;
+  name: string;
+  calcium?: number;
+  bicarbonate?: number;
+  sulfate?: number;
+  chloride?: number;
+  sodium?: number;
+  magnesium?: number;
+  ph?: number;
+  notes?: string;
+  createdAt: number;
+  data?: any;
 }

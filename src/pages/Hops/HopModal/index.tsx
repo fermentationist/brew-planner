@@ -2,8 +2,9 @@ import FormModal, { FormInputOptions } from "../../../components/FormModal";
 
 const required = { required: true };
 const requiredMessage = { required: "required field" };
-
-// creating input list outside of component so it can be exported for use in creating table columns for Brewhouses table
+const percentage = { min: 0, max: 100 };
+const percentageMessage = { min: "Please enter a valid percentage (>= 0)", max: "Please enter a valid percentage (<= 100)" };
+// creating input list outside of component so it can be exported for use in creating table columns for Hops table
 export const hopInputs = [
   {
     name: "name",
@@ -17,8 +18,8 @@ export const hopInputs = [
     name: "alpha",
     label: "Alpha acids (%)",
     type: "number",
-    validation: required,
-    errorMessages: requiredMessage,
+    validation: {...required, ...percentage},
+    errorMessages: {...requiredMessage, ...percentageMessage},
     width: "250px",
   },
   {
@@ -26,6 +27,8 @@ export const hopInputs = [
     label: "Beta acids (%)",
     type: "number",
     width: "250px",
+    validation: percentage,
+    errorMessages: percentageMessage,
     tableOptions: {
       display: false,
     },
@@ -70,6 +73,8 @@ export const hopInputs = [
     label: "Humulene (%)",
     type: "number",
     width: "250px",
+    validation: percentage,
+    errorMessages: percentageMessage,
     tableOptions: {
       display: false,
     },
@@ -79,6 +84,8 @@ export const hopInputs = [
     label: "Caryophyllene (%)",
     type: "number",
     width: "250px",
+    validation: percentage,
+    errorMessages: percentageMessage,
     tableOptions: {
       display: false,
     },
@@ -88,6 +95,8 @@ export const hopInputs = [
     label: "Cohumulone (%)",
     type: "number",
     width: "250px",
+    validation: percentage,
+    errorMessages: percentageMessage,
     tableOptions: {
       display: false,
     },
@@ -97,6 +106,8 @@ export const hopInputs = [
     label: "Myrcene (%)",
     type: "number",
     width: "250px",
+    validation: percentage,
+    errorMessages: percentageMessage,
     tableOptions: {
       display: false,
     },
