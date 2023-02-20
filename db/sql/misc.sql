@@ -3,8 +3,10 @@ CREATE TABLE IF NOT EXISTS misc (
   misc_uuid BINARY (16) NOT NULL UNIQUE,
   created_by VARCHAR (36) NOT NULL,
   version INT NOT NULL DEFAULT 1,
-  UNIQUE KEY (misc_uuid), -- there can be only one version per misc_id
+  brewery_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_misc_brewery_uuid FOREIGN KEY (brewery_uuid) REFERENCES brewery (brewery_uuid) ON DELETE CASCADE,
   name VARCHAR (100) NOT NULL,
+  UNIQUE KEY (brewery_uuid, name),
   type ENUM ("Spice", "Fining", "Water Agent", "Herb", "Flavor", "Other") NOT NULL,
   use_for TEXT, -- recommended use
   notes TEXT,
@@ -16,10 +18,12 @@ ALTER TABLE misc ADD INDEX (misc_uuid);
 CREATE TABLE IF NOT EXISTS misc_version (
   misc_version_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   misc_uuid BINARY (16) NOT NULL,
-  CONSTRAINT fk_misc_version_misc_uuid FOREIGN KEY (misc_uuid) REFERENCES misc (misc_uuid), -- reference to current version
-  created_by VARCHAR (36) NOT NULL,
+  CONSTRAINT fk_misc_version_misc_uuid FOREIGN KEY (misc_uuid) REFERENCES misc (misc_uuid) ON DELETE CASCADE, -- reference to current version
+  brewery_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_misc_version_brewery_uuid FOREIGN KEY (brewery_uuid) REFERENCES brewery (brewery_uuid) ON DELETE CASCADE,
   version INT NOT NULL,
   UNIQUE KEY (misc_uuid, version),
+  created_by VARCHAR (36) NOT NULL,
   name VARCHAR (100) NOT NULL,
   type ENUM ("Spice", "Fining", "Water Agent", "Herb", "Flavor", "Other") NOT NULL,
   use_for TEXT, -- recommended use
@@ -81,6 +85,7 @@ CREATE TRIGGER before_update_on_misc
   BEGIN
     INSERT INTO misc_version (
       misc_uuid,
+      brewery_uuid,
       created_by,
       version,
       name,
@@ -91,6 +96,7 @@ CREATE TRIGGER before_update_on_misc
     )
     VALUES (
       OLD.misc_uuid,
+      OLD.brewery_uuid,
       OLD.created_by,
       OLD.version,
       OLD.name,

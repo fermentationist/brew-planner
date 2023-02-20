@@ -2,9 +2,11 @@ CREATE TABLE IF NOT EXISTS yeast (
   yeast_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   yeast_uuid BINARY (16) NOT NULL UNIQUE,
   created_by VARCHAR (36) NOT NULL,
-  version INT NOT NULL DEFAULT 1,
-  UNIQUE KEY (yeast_uuid), -- there can be only one version per yeast_uuid
+  brewery_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_yeast_brewery_uuid FOREIGN KEY (brewery_uuid) REFERENCES brewery (brewery_uuid) ON DELETE CASCADE,
   name VARCHAR (100) NOT NULL,
+  UNIQUE KEY (brewery_uuid, name),
+  version INT NOT NULL DEFAULT 1,
   type ENUM ("Ale", "Lager", "Wheat", "Wine", "Champagne", "Kveik") NOT NULL,
   laboratory VARCHAR (100), -- name of the lab that produced the yeast
   product_id VARCHAR (36), -- manufacturers product id, i.e. WLP001
@@ -23,10 +25,12 @@ ALTER TABLE yeast ADD INDEX (yeast_uuid);
 CREATE TABLE IF NOT EXISTS yeast_version (
   yeast_version_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   yeast_uuid BINARY (16) NOT NULL,
-  CONSTRAINT fk_yeast_version_yeast_uuid FOREIGN KEY (yeast_uuid) REFERENCES yeast (yeast_uuid), -- reference to current version
-  created_by VARCHAR (36) NOT NULL,
+  CONSTRAINT fk_yeast_version_yeast_uuid FOREIGN KEY (yeast_uuid) REFERENCES yeast (yeast_uuid) ON DELETE CASCADE, -- reference to current version
+  brewery_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_yeast_version_brewery_uuid FOREIGN KEY (brewery_uuid) REFERENCES brewery (brewery_uuid) ON DELETE CASCADE,
   version INT NOT NULL DEFAULT 1,
-  UNIQUE KEY (yeast_uuid),
+  UNIQUE KEY (yeast_uuid, version),
+  created_by VARCHAR (36) NOT NULL,
   name VARCHAR (100) NOT NULL,
   type ENUM ("Ale", "Lager", "Wheat", "Wine", "Champagne", "Kveik") NOT NULL,
   laboratory VARCHAR (100), -- name of the lab that produced the yeast
@@ -98,6 +102,7 @@ CREATE TRIGGER before_update_on_yeast
   BEGIN
     INSERT INTO yeast_version (
       yeast_uuid,
+      brewery_uuid,
       created_by,
       version,
       name,
@@ -115,6 +120,7 @@ CREATE TRIGGER before_update_on_yeast
     )
     VALUES (
       OLD.yeast_uuid,
+      OLD.brewery_uuid,
       OLD.created_by,
       OLD.version,
       OLD.name,

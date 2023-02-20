@@ -1,3 +1,4 @@
+/* global console */
 import { isExistingUid } from "./users.js";
 import * as waterService from "../services/water.js";
 import * as validate from "../middleware/input-validation.js";
@@ -13,8 +14,6 @@ const numOpt = { no_symbols: true };
 const waterUuidChecker = (input) =>
   waterService.isExistingWaterAttribute(input, "waterUuid");
 const isExistingWaterUuid = rejectOnFalse(waterUuidChecker);
-
-const isPercentage = numberValidator({ min: 0, max: 100 });
 
 const customWaterNameValidator = async (req, res, next) => {
   // ensures that Water name is unique (for the current brewery)
