@@ -9,7 +9,8 @@ const tableNames = [
   "fermentable",
   "hop",
   "water",
-  "yeast"
+  "yeast",
+  "misc"
 ];
 
 for (const tableName of tableNames) {

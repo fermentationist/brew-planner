@@ -44,6 +44,13 @@ import {
   deleteYeast,
 } from "../controllers/yeasts.js";
 
+import {
+  createMisc,
+  getMiscs,
+  updateMisc,
+  deleteMisc,
+} from "../controllers/miscs.js";
+
 const router = Router();
 
 // breweries routes
@@ -73,4 +80,8 @@ router.get("/:breweryUuid/yeasts", getYeasts);
 router.post("/:breweryUuid/yeasts", createYeast);
 router.patch("/:breweryUuid/yeasts/:yeastUuid", updateYeast);
 router.delete("/:breweryUuid/yeasts/:yeastUuid", deleteYeast);
+router.get("/:breweryUuid/miscs", getMiscs);
+router.post("/:breweryUuid/miscs", createMisc);
+router.patch("/:breweryUuid/miscs/:miscUuid", updateMisc);
+router.delete("/:breweryUuid/miscs/:miscUuid", deleteMisc);
 export default router;

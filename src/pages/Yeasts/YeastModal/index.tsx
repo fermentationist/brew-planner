@@ -102,7 +102,7 @@ export const yeastInputs = [
     name: "maxReuse",
     label: "Max repitches",
     type: "number",
-    step: 1,
+    step: "1",
     width: "250px",
     validation: {min: 0},
     errorMessages: {min: "Please enter a positive integer"},
@@ -128,7 +128,7 @@ const YeastModal = ({
 }) => {
   // add defaultValues from existing data (present if in "edit" mode)
   const formInputs: FormInputOptions[] = yeastInputs.map((input) => {
-    const inputCopy: FormInputOptions = { ...input };
+    const inputCopy = { ...input } as FormInputOptions;
     inputCopy.defaultValue = data?.[input.name] ?? inputCopy.defaultValue;
     if (inputCopy.preferredUnitKeyField) {
       inputCopy.preferredUnitKey =

@@ -46,18 +46,14 @@ export interface FormInputOptions {
   selectRestricted?: boolean;
   selectOptionKey?: string; // if selectOptions are objects, which key to look for option under
   callback?: (val: any) => any; // for inputs like "select"
-  validation?: {
-    [key: string]: string | boolean | number | ((input: any) => boolean);
-  };
-  errorMessages?: {
-    [key: string]: string | ((formErrors: any) => string);
-  };
+  validation?: Record<string, any>;
+  errorMessages?: Record<string, any>;
   width?: string;
   ref?: Ref<any>;
   component?: FunctionComponent;
   componentProps?: Record<string, any>;
   step?: string;
-  unitSelections?: {[key: string]: string[]};
+  unitSelections?: Record<string, string[]>;
   unit?: string;
   transform?: (value: any) => any;
   onChange?: (event: ChangeEvent) => void;

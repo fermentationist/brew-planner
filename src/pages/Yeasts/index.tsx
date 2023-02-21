@@ -10,7 +10,7 @@ import useAlert from "../../hooks/useAlert";
 import useConfirm from "../../hooks/useConfirm";
 import useAuth from "../../hooks/useAuth";
 import useConvertUnits from "../../hooks/useConvertUnits";
-import YeastModal, { yeastInputs } from "./YeastModal";
+import YeastModal, { yeastInputs } from "./YeastModal/index.tsx";
 import { YeastData, Mode, APIError } from "../../types";
 
 const Yeasts = ({

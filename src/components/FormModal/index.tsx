@@ -1,6 +1,8 @@
-import { Ref, useState, useCallback, memo} from "react";
+import { Ref, useState, useCallback, memo } from "react";
 import CustomDialog from "../CustomDialog";
-import ReactHookForm, {FormInputOptions as InputOptions} from "../ReactHookForm";
+import ReactHookForm, {
+  FormInputOptions as InputOptions,
+} from "../ReactHookForm";
 import MuiButton from "@mui/lab/LoadingButton";
 import { styled as muiStyled } from "@mui/material/styles";
 
@@ -21,7 +23,7 @@ const FormModal = ({
   inputs,
   formId,
   title,
-  onSubmit
+  onSubmit,
 }: {
   mode?: "create" | "edit";
   showModal: boolean;
@@ -52,11 +54,22 @@ const FormModal = ({
     <StyledDialog
       showDialog={showModal}
       closeDialog={useCallback(closeModal, [])}
-      title={(mode ? mode[0].toUpperCase() + mode.slice(1) : "") + (title ? " " + title : "")}
+      title={
+        (mode ? mode[0].toUpperCase() + mode.slice(1) : "") +
+        (title ? " " + title : "")
+      }
     >
-      <ReactHookForm onSubmit={onSubmitWrapper(onSubmit)} formId={formId} inputs={inputs}>
-      </ReactHookForm>
-      <Button type="submit" form={formId} variant="contained" loading={buttonLoadingState}>
+      <ReactHookForm
+        onSubmit={onSubmitWrapper(onSubmit)}
+        formId={formId}
+        inputs={inputs}
+      />
+      <Button
+        type="submit"
+        form={formId}
+        variant="contained"
+        loading={buttonLoadingState}
+      >
         Save
       </Button>
       <Button onClick={closeModal}>Cancel</Button>

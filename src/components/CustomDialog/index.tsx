@@ -6,13 +6,14 @@ import Button from "@mui/lab/LoadingButton";
 import { ChildProps } from "../../types/";
 import { styled as muiStyled } from "@mui/material/styles";
 
-export interface CustomDialogProps extends ChildProps {
+export interface CustomDialogProps {
   showDialog: boolean;
   closeDialog: () => void;
   className?: string;
   title?: string;
   confirm?: () => void;
   loading?: boolean;
+  children?: ChildProps;
 }
 
 const StyledContent = muiStyled(DialogContent)`
