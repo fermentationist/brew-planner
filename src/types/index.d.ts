@@ -90,7 +90,12 @@ export interface UserData {
   breweries?: BreweryData[];
 }
 
-export type FermentableType = "Grain" | "Sugar" | "Extract" | "Dry Extract" | "Adjunct"
+export type FermentableType =
+  | "Grain"
+  | "Sugar"
+  | "Extract"
+  | "Dry Extract"
+  | "Adjunct";
 
 export interface FermentableData {
   fermentableUuid: string;
@@ -149,6 +154,34 @@ export interface WaterData {
   magnesium?: number;
   ph?: number;
   notes?: string;
+  createdAt: number;
+  data?: any;
+}
+
+export type YeastType =
+  | "Ale"
+  | "Lager"
+  | "Wheat"
+  | "Wine"
+  | "Champagne"
+  | "Kveik";
+
+export type FlocculationType = "Low" | "Medium" | "High" | "Very High";
+
+export interface YeastData {
+  yeastUuid: string;
+  createdBy: string;
+  name: string;
+  type?: YeastType;
+  laboratory?: string;
+  productId?: string;
+  minTemperature?: number;
+  maxTemperature?: number;
+  flocculation?: FlocculationType;
+  attenuation?: number;
+  notes?: string;
+  bestFor?: string;
+  maxReuse?: number;
   createdAt: number;
   data?: any;
 }

@@ -261,7 +261,7 @@ export const updateFermentable = [updateFermentableValidation, updateFermentable
 
 // deleteFermentable
 /**
- * @api {delete} /breweries/:breweryUuid/fermentables/:fermentableUuid Delete fermentable (admin)
+ * @api {delete} /breweries/:breweryUuid/fermentables/:fermentableUuid Delete fermentable
  * @apiName DeleteFermentable
  * @apiGroup Fermentables
  * @apiDescription Delete a fermentable

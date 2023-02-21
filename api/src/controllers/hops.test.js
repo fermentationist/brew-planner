@@ -121,7 +121,7 @@ export default describe("hop routes", function () {
     for (const name of randomBreweryNames) {
       const uuid = await createBrewery({ name });
       breweriesToDelete.push(uuid);
-      // create 3 test fermentables for each brewery
+      // create 3 test hops for each brewery
       for (const name of randomHopNames) {
         const testData = await getHopTestData();
         const hopUuid = await createHop({

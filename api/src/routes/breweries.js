@@ -37,6 +37,13 @@ import {
   deleteWater,
 } from "../controllers/waters.js";
 
+import {
+  createYeast,
+  getYeasts,
+  updateYeast,
+  deleteYeast,
+} from "../controllers/yeasts.js";
+
 const router = Router();
 
 // breweries routes
@@ -62,4 +69,8 @@ router.get("/:breweryUuid/waters", getWaters);
 router.post("/:breweryUuid/waters", createWater);
 router.patch("/:breweryUuid/waters/:waterUuid", updateWater);
 router.delete("/:breweryUuid/waters/:waterUuid", deleteWater);
+router.get("/:breweryUuid/yeasts", getYeasts);
+router.post("/:breweryUuid/yeasts", createYeast);
+router.patch("/:breweryUuid/yeasts/:yeastUuid", updateYeast);
+router.delete("/:breweryUuid/yeasts/:yeastUuid", deleteYeast);
 export default router;

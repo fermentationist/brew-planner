@@ -243,9 +243,9 @@ const updateHopController = async (req, res, next) => {
 
 export const updateHop = [updateHopValidation, updateHopController];
 
-// deleteFermentable
+// deleteHop
 /**
- * @api {delete} /breweries/:breweryUuid/hops/:hopUuid Delete fermentable (admin)
+ * @api {delete} /breweries/:breweryUuid/hops/:hopUuid Delete hop
  * @apiName DeleteHop
  * @apiGroup Hops
  * @apiDescription Delete a hop

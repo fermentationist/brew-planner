@@ -8,7 +8,8 @@ const tableNames = [
   "recipe",
   "fermentable",
   "hop",
-  "water"
+  "water",
+  "yeast"
 ];
 
 for (const tableName of tableNames) {

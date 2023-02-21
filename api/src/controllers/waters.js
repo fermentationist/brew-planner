@@ -206,7 +206,7 @@ export const updateWater = [updateWaterValidation, updateWaterController];
 
 // deleteWater
 /**
- * @api {delete} /breweries/:breweryUuid/waters/:waterUuid Delete water (admin)
+ * @api {delete} /breweries/:breweryUuid/waters/:waterUuid Delete water
  * @apiName DeleteWater
  * @apiGroup Waters
  * @apiDescription Delete a water
