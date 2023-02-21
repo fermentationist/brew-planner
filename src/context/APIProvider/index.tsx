@@ -1,5 +1,5 @@
 import { createContext, useCallback, useState } from "react";
-import { ChildProps, WaterData } from "../../types";
+import { ChildProps, WaterData, YeastData } from "../../types";
 import {
   useQuery,
   useQueryClient,
@@ -139,6 +139,19 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
       disable: useCallback(toggleQueryFn("waters", false), [])
     },
 
+    yeasts: {
+      ...useQuery<YeastData, ErrorData>({
+        queryKey: ["yeasts", auth?.currentBrewery, auth?.accessToken],
+        queryFn: apiRequest({
+          baseURL: BREWERY_ROUTE,
+          url: "yeasts"
+        }),
+        staleTime: 60 * 1000 * 10,
+        enabled: Boolean(enabledQueries.yeasts)
+      }),
+      enable: useCallback(toggleQueryFn("yeasts", true), []),
+      disable: useCallback(toggleQueryFn("yeasts", false), [])
+    },
   };
 
   console.log("\nAPI_REQUESTS:", apiRequests);
