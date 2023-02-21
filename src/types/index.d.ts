@@ -185,3 +185,21 @@ export interface YeastData {
   createdAt: number;
   data?: any;
 }
+
+export type MiscType =
+  | "Spice"
+  | "Fining"
+  | "Water Agent"
+  | "Herb"
+  | "Flavor"
+  | "Other";
+
+export interface MiscData {
+  miscUuid: string;
+  name: string;
+  type: MiscType;
+  useFor?: string;
+  notes?: string;
+  createdAt: number;
+  data?: any;
+}
