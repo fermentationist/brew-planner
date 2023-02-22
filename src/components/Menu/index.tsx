@@ -37,11 +37,13 @@ const Menu = ({menuItems, nested}: MenuProps) => {
   );
   const { auth } = useAuth();
   const toggleExpandCollapse = (title: string) => {
+    console.log("toggleExpandCollapse called")
     const titleState = (collapsedState && collapsedState[title]) || false;
     const newCollapsedState = {
       ...collapsedState,
       [title]: !titleState
     };
+    console.log("newCollapsedState:", newCollapsedState);
     setCollapsedState(newCollapsedState);
     setGlobalState({
       ...globalState,

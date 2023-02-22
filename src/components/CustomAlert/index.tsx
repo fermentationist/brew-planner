@@ -29,7 +29,9 @@ const CustomAlert = () => {
           </Typography>
             {alertState?.child}
         </StyledBox>
-        <Button onClick={closeDialog}>Close</Button>
+        { alertState?.showCloseButton ? (
+          <Button onClick={closeDialog}>Close</Button>
+        ) : null}
       </Stack>
     </CustomDialog>
   );

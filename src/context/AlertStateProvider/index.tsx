@@ -9,6 +9,7 @@ export interface AlertState {
   closeCallback?: (x: boolean) => void;
   promptForInput?: boolean;
   child?: JSX.Element;
+  showCloseButton?: boolean;
 }
 
 export interface CallAlertParams {
@@ -18,6 +19,7 @@ export interface CallAlertParams {
   closeCallback?: (x: boolean) => void;
   promptForInput?: boolean;
   child?: JSX.Element;
+  showCloseButton?: boolean;
 }
 
 export type CallAlertArgs = CallAlertParams | string;
@@ -70,7 +72,7 @@ const AlertStateProvider = function ({children}:{children: ChildProps}) {
   const [alertState, setAlertState] = useState(initialState);
 
   const callAlert = (args: CallAlertArgs) => {
-    let message, title, confirmCallback, closeCallback, promptForInput, child;
+    let message, title, confirmCallback, closeCallback, promptForInput, child, showCloseButton = true;
     if (typeof args === "string") {
       message = args;
     } else {
@@ -80,7 +82,8 @@ const AlertStateProvider = function ({children}:{children: ChildProps}) {
         confirmCallback,
         closeCallback,
         promptForInput,
-        child
+        child,
+        showCloseButton
       } = args);
     }
     setAlertState({
@@ -90,7 +93,8 @@ const AlertStateProvider = function ({children}:{children: ChildProps}) {
       confirmCallback: confirmCallback || null,
       closeCallback: closeCallback || null,
       promptForInput: promptForInput || false,
-      child: child
+      child,
+      showCloseButton
     });
   };
 

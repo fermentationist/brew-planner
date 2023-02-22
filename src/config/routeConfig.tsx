@@ -4,6 +4,7 @@ import FermentablesPage from "../pages/Fermentables";
 import HopsPage from "../pages/Hops";
 import WatersPage from "../pages/Waters";
 import YeastsPage from "../pages/Yeasts";
+import MiscsPage from "../pages/Miscs";
 import Users from "../pages/Users";
 import withBreweryRequired from "../hoc/withBreweryRequired";
 
@@ -12,6 +13,7 @@ const Fermentables = withBreweryRequired(FermentablesPage);
 const Hops = withBreweryRequired(HopsPage);
 const Waters = withBreweryRequired(WatersPage);
 const Yeasts = withBreweryRequired(YeastsPage);
+const Miscs = withBreweryRequired(MiscsPage);
 
 export interface Routes {
   [route: string]: {
@@ -48,6 +50,10 @@ const routes: Routes = {
   "/ingredients/yeasts": {
     roles: ["user", "manager", "admin"],
     component: <Yeasts />
+  },
+  "/ingredients/misc_additions": {
+    roles: ["user", "manager", "admin"],
+    component: <Miscs />
   },
   "/users": {
     roles: ["admin", "manager"],

@@ -31,17 +31,31 @@ export const createFermentable = async (breweryUuid, fermentableData) => {
   return newFermentable.fermentableUuid;
 };
 
-export const updateFermentable = async (breweryUuid, fermentableUuid, updateData) => {
-  const result = await Tables.fermentable.update(updateData, {breweryUuid, fermentableUuid});
+export const updateFermentable = async (
+  breweryUuid,
+  fermentableUuid,
+  updateData
+) => {
+  const result = await Tables.fermentable.update(updateData, {
+    breweryUuid,
+    fermentableUuid,
+  });
   localCache.invalidate("fermentable");
   return result;
 };
 
 export const deleteFermentable = async (breweryUuid, fermentableUuid) => {
-  const result = await Tables.fermentable.delete({breweryUuid, fermentableUuid});
+  const result = await Tables.fermentable.delete({
+    breweryUuid,
+    fermentableUuid,
+  });
   if (!result.affectedRows) {
-    throw(`The brewery with the breweryUuid ${breweryUuid} has no fermentable with the fermentableUuid`, fermentableUuid);
+    throw (
+      (`The brewery with the breweryUuid ${breweryUuid} has no fermentable with the fermentableUuid`,
+      fermentableUuid)
+    );
   }
+  localCache.invalidate("fermentable");
   return result;
 };
 

@@ -10,10 +10,10 @@ import useAlert from "../../hooks/useAlert";
 import useConfirm from "../../hooks/useConfirm";
 import useAuth from "../../hooks/useAuth";
 import useConvertUnits from "../../hooks/useConvertUnits";
-import WaterModal, { waterInputs } from "./WaterModal";
-import { WaterData, Mode, APIError } from "../../types";
+import MiscModal, { miscInputs } from "./MiscModal";
+import { MiscData, Mode, APIError } from "../../types";
 
-const Waters = ({
+const Miscs = ({
   startLoading,
   doneLoading,
 }: {
@@ -21,7 +21,7 @@ const Waters = ({
   doneLoading: () => void;
 }) => {
   const [tableData, setTableData] = useState([]);
-  const [showWaterModal, setShowWaterModal] = useState(false);
+  const [showMiscModal, setShowMiscModal] = useState(false);
   const [mode, setMode]: [mode: Mode, setMode: Dispatch<SetStateAction<Mode>>] =
     useState("create" as Mode);
   const [modalData, setModalData] = useState(null);
@@ -30,26 +30,22 @@ const Waters = ({
   const { confirmDelete, confirm } = useConfirm();
   const {
     isLoading,
-    enable: enableWatersQuery,
-    data: watersData,
-    error: watersError,
+    enable: enableMiscsQuery,
+    data: miscsData,
+    error: miscsError,
     refetch: refresh,
     APIRequest,
     BREWERY_ROUTE,
-  } = useAPI("waters");
-  const {
-    renameTempPreferredUnits,
-    generateColumnsFromInputs,
-    preferredUnits,
-  } = useConvertUnits();
+  } = useAPI("miscs");
+  const { generateColumnsFromInputs } = useConvertUnits();
   useEffect(() => {
-    if (isLoading && !watersData) {
-      enableWatersQuery();
+    if (isLoading && !miscsData) {
+      enableMiscsQuery();
     }
     if (!isLoading) {
-      if (watersData) {
-        const dataWithNestedRowData = watersData.data?.waters?.map(
-          (row: WaterData) => {
+      if (miscsData) {
+        const dataWithNestedRowData = miscsData.data?.miscs?.map(
+          (row: MiscData) => {
             const rowCopy = { ...row };
             rowCopy.data = { ...row };
             return rowCopy;
@@ -57,29 +53,29 @@ const Waters = ({
         );
         setTableData(dataWithNestedRowData);
       }
-      if (watersError) {
-        console.error(watersError);
-        alertError(watersError);
+      if (miscsError) {
+        console.error(miscsError);
+        alertError(miscsError);
       }
       doneLoading();
     }
   }, [
-    watersData,
+    miscsData,
     isLoading,
-    watersError,
+    miscsError,
     doneLoading,
     alertError,
-    enableWatersQuery,
+    enableMiscsQuery,
   ]);
 
-  const createOrUpdateWater = async (formData: WaterData) => {
+  const createOrUpdateMisc = async (formData: MiscData) => {
     const editMode = mode === "edit";
     const reqBody = editMode
       ? formData
       : { ...formData, createdBy: auth?.user?.uid };
     const url = editMode
-      ? "/waters/" + modalData.waterUuid
-      : "/waters";
+      ? "/miscs/" + modalData.miscUuid
+      : "/miscs";
     const apiReq = new APIRequest({
       baseURL: BREWERY_ROUTE,
       url,
@@ -89,43 +85,42 @@ const Waters = ({
     const response = await apiReq.request().catch(async (error: APIError) => {
       await alertErrorProm(error);
     });
-    // if response.data?.waterUuid is undefined, renameTempPreferredUnits will just delete the preferredUnits that were temporarily created by the WaterModal, otherwise it will rename them
-    renameTempPreferredUnits(response.data?.waterUuid);
+    console.log("response:", response);
     refresh();
-    setShowWaterModal(false);
+    setShowMiscModal(false);
   };
 
-  const addWater = () => {
+  const addMisc = () => {
     setModalData(null);
     setMode("create");
-    setShowWaterModal(true);
+    setShowMiscModal(true);
   };
 
-  const editWater = (rowData: WaterData) => {
+  const editMisc = (rowData: MiscData) => {
     setModalData(rowData);
     setMode("edit");
-    setShowWaterModal(true);
+    setShowMiscModal(true);
   };
 
-  const deleteWater = async (waterUuid: string) => {
-    const deleteWaterRequest = new APIRequest({
+  const deleteMisc = async (miscUuid: string) => {
+    const deleteMiscRequest = new APIRequest({
       baseURL: BREWERY_ROUTE,
-      url: `/waters/${waterUuid}`,
+      url: `/miscs/${miscUuid}`,
       method: "delete",
     });
-    return deleteWaterRequest.request().catch(async (error: APIError) => {
+    return deleteMiscRequest.request().catch(async (error: APIError) => {
       await alertErrorProm(error);
     });
   };
 
   const deleteRows = async (rowsDeleted: any) => {
-    const waterUuidsToDelete = rowsDeleted.data.map(
+    const miscUuidsToDelete = rowsDeleted.data.map(
       (row: { index: number; dataIndex: number }) => {
-        return tableData[row.dataIndex].waterUuid;
+        return tableData[row.dataIndex].miscUuid;
       }
     );
-    const qty = waterUuidsToDelete.length;
-    const confirmResult = await confirmDelete(qty, "water profile");
+    const qty = miscUuidsToDelete.length;
+    const confirmResult = await confirmDelete(qty, "miscellaneous addition");
     if (!confirmResult) {
       return;
     }
@@ -137,10 +132,10 @@ const Waters = ({
     }
     startLoading();
     let count = 1;
-    for (const uuid of waterUuidsToDelete) {
-      console.log("attempting to delete water profile:", uuid);
-      callAlert({message: `Deleting ${count} of ${waterUuidsToDelete.length} water profiles...`, showCloseButton: false});
-      await deleteWater(uuid);
+    for (const uuid of miscUuidsToDelete) {
+      console.log("attempting to delete miscellaneous addition:", uuid);
+      callAlert({message: `Deleting ${count} of ${miscUuidsToDelete.length} miscellaneous additions...`, showCloseButton: false});
+      await deleteMisc(uuid);
       count ++;
     }
     resetAlertState();
@@ -148,11 +143,11 @@ const Waters = ({
     doneLoading();
   };
 
-  const generatedColumns = generateColumnsFromInputs(waterInputs);
+  const generatedColumns = generateColumnsFromInputs(miscInputs);
   const columns = [
     {
-      label: "Water ID",
-      name: "waterUuid",
+      label: "Misc ID",
+      name: "miscUuid",
       options: {
         ...columnOptions.options,
         display: false,
@@ -166,20 +161,20 @@ const Waters = ({
     {
       name: "",
       options: columnOptions.createRenderEditButtonOptions(
-        "edit water profile",
-        editWater
+        "edit misc. addition",
+        editMisc
       ),
     },
   ];
   return (
     <Page>
-      <Tooltip title="add water profile">
-        <IconButton onClick={addWater}>
+      <Tooltip title="add misc. addition">
+        <IconButton onClick={addMisc}>
           <AddIcon />
         </IconButton>
       </Tooltip>
       <DataTable
-        columns={useMemo(() => columns, [preferredUnits])}
+        columns={useMemo(() => columns, [])}
         data={tableData}
         refresh={refresh}
         options={{
@@ -188,17 +183,17 @@ const Waters = ({
           onRowsDelete: deleteRows,
         }}
       />
-      {showWaterModal ? (
-        <WaterModal
-          showModal={showWaterModal}
-          closeModal={() => setShowWaterModal(false)}
+      {showMiscModal ? (
+        <MiscModal
+          showModal={showMiscModal}
+          closeModal={() => setShowMiscModal(false)}
           mode={mode}
           data={modalData}
-          onSubmit={createOrUpdateWater}
+          onSubmit={createOrUpdateMisc}
         />
       ) : null}
     </Page>
   );
 };
 
-export default withLoadingSpinner(Waters);
+export default withLoadingSpinner(Miscs);

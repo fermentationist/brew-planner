@@ -25,9 +25,9 @@ const Hops = ({
   const [mode, setMode]: [mode: Mode, setMode: Dispatch<SetStateAction<Mode>>] =
     useState("create" as Mode);
   const [modalData, setModalData] = useState(null);
-  const { callAlert, alertError, alertErrorProm } = useAlert();
+  const { callAlert, alertError, alertErrorProm, resetAlertState } = useAlert();
   const { auth } = useAuth();
-  const { confirmDelete } = useConfirm();
+  const { confirmDelete, confirm } = useConfirm();
   const {
     isLoading,
     enable: enableHopsQuery,
@@ -120,20 +120,25 @@ const Hops = ({
       }
     );
     const qty = hopUuidsToDelete.length;
-    const confirm = await confirmDelete(qty, "hop");
-    if (!confirm) {
+    const confirmResult = await confirmDelete(qty, "hop");
+    if (!confirmResult) {
       return;
     }
-    if (qty > 1) {
-      startLoading();
-    }
     if (qty > 4) {
-      callAlert("Please be patient, this may take a little while...");
+      const secondConfirm = await confirm("Please be patient, this may take a little while...");
+      if (!secondConfirm) {
+        return;
+      }
     }
+    startLoading();
+    let count = 1;
     for (const uuid of hopUuidsToDelete) {
       console.log("attempting to delete hop:", uuid);
+      callAlert({message: `Deleting ${count} of ${hopUuidsToDelete.length} hops...`, showCloseButton: false});
       await deleteHop(uuid);
+      count ++;
     }
+    resetAlertState();
     refresh();
     doneLoading();
   };

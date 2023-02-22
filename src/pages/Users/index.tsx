@@ -25,7 +25,7 @@ const Users = function ({
   const [mode, setMode] = useState("create" as "create" | "edit");
   const [userData, setUserData] = useState(null);
   const { auth, sendPasswordResetEmail } = useAuth();
-  const { callAlert, alertError, alertErrorProm } = useAlert();
+  const { callAlert, alertError, alertErrorProm, resetAlertState } = useAlert();
   const { confirmDelete, confirm } = useConfirm();
   const {users: usersQuery, breweries: breweriesQuery, APIRequest} = useAPI(["users", "breweries"]);
   
@@ -99,8 +99,8 @@ const Users = function ({
       }
     );
     const qty = uidsToDelete.length;
-    const confirm = await confirmDelete(qty, "user");
-    if (!confirm) {
+    const confirmResult = await confirmDelete(qty, "user");
+    if (!confirmResult) {
       return;
     }
     if (uidsToDelete.includes(auth?.user?.uid)) {
@@ -110,24 +110,30 @@ const Users = function ({
       });
       return;
     }
-    if (qty > 1) {
-      startLoading();
-    }
     if (qty > 4) {
-      callAlert("Please be patient, this may take a little while...");
+      const secondConfirm = await confirm("Please be patient, this may take a little while...", x => x);
+      console.log("secondConfirm:", secondConfirm)
+      if (!secondConfirm) {
+        return;
+      }
     }
+    startLoading();
+    let count = 1;
     for (const uid of uidsToDelete) {
       console.log("attempting to delete user:", uid);
+      callAlert({message: `Deleting ${count} of ${uidsToDelete.length} users...`, showCloseButton: false});
       await deleteSingleUser(uid);
+      count ++;
     }
-    usersQuery.refresh();
+    await resetAlertState();
+    usersQuery.refetch();
     doneLoading();
   };
 
   const onUserModalFormSubmit = async (formData: any) => {
     const { resetLink } = await createOrUpdateUser(formData);
-    console.log("new user password reset link:", resetLink);
     if (resetLink) {
+      console.log("new user password reset link:", resetLink);
       // was create operation
       // confirm password reset email
       const sendEmail = await confirm(
@@ -148,7 +154,7 @@ const Users = function ({
         });
       }
     }
-    usersQuery.refresh();
+    usersQuery.refetch();
     setShowUserModal(false);
   };
 

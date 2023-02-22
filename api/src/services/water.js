@@ -23,11 +23,7 @@ export const createWater = async (breweryUuid, waterData) => {
   return newWater.waterUuid;
 };
 
-export const updateWater = async (
-  breweryUuid,
-  waterUuid,
-  updateData
-) => {
+export const updateWater = async (breweryUuid, waterUuid, updateData) => {
   const result = await Tables.water.update(updateData, {
     breweryUuid,
     waterUuid,
@@ -47,8 +43,11 @@ export const deleteWater = async (breweryUuid, waterUuid) => {
       waterUuid)
     );
   }
+  localCache.invalidate("water");
   return result;
 };
 
-export const isExistingWaterAttribute =
-  localCache.isExistingTableAttribute("water", getWaters);
+export const isExistingWaterAttribute = localCache.isExistingTableAttribute(
+  "water",
+  getWaters
+);

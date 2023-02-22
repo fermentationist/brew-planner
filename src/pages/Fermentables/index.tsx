@@ -25,9 +25,9 @@ const Fermentables = ({
   const [mode, setMode]: [mode: Mode, setMode: Dispatch<SetStateAction<Mode>>] =
     useState("create" as Mode);
   const [modalData, setModalData] = useState(null);
-  const { callAlert, alertError, alertErrorProm } = useAlert();
+  const { callAlert, alertError, alertErrorProm, resetAlertState } = useAlert();
   const { auth } = useAuth();
-  const { confirmDelete } = useConfirm();
+  const { confirmDelete, confirm } = useConfirm();
   const {
     isLoading,
     enable: enableFermentablesQuery,
@@ -121,20 +121,25 @@ const Fermentables = ({
       }
     );
     const qty = fermentableUuidsToDelete.length;
-    const confirm = await confirmDelete(qty, "fermentable");
-    if (!confirm) {
+    const confirmResult = await confirmDelete(qty, "fermentable");
+    if (!confirmResult) {
       return;
     }
-    if (qty > 1) {
-      startLoading();
-    }
     if (qty > 4) {
-      callAlert("Please be patient, this may take a little while...");
+      const secondConfirm = await confirm("Please be patient, this may take a little while...");
+      if (!secondConfirm) {
+        return;
+      }
     }
+    startLoading();
+    let count = 1;
     for (const uuid of fermentableUuidsToDelete) {
       console.log("attempting to delete fermentable:", uuid);
+      callAlert({message: `Deleting ${count} of ${fermentableUuidsToDelete.length} fermentables...`, showCloseButton: false});
       await deleteFermentable(uuid);
+      count ++;
     }
+    resetAlertState();
     refresh();
     doneLoading();
   };

@@ -10,7 +10,7 @@ import useAlert from "../../hooks/useAlert";
 import useConfirm from "../../hooks/useConfirm";
 import useAuth from "../../hooks/useAuth";
 import useConvertUnits from "../../hooks/useConvertUnits";
-import YeastModal, { yeastInputs } from "./YeastModal/index.tsx";
+import YeastModal, { yeastInputs } from "./YeastModal";
 import { YeastData, Mode, APIError } from "../../types";
 
 const Yeasts = ({
@@ -25,9 +25,9 @@ const Yeasts = ({
   const [mode, setMode]: [mode: Mode, setMode: Dispatch<SetStateAction<Mode>>] =
     useState("create" as Mode);
   const [modalData, setModalData] = useState(null);
-  const { callAlert, alertError, alertErrorProm } = useAlert();
+  const { callAlert, alertError, alertErrorProm, resetAlertState } = useAlert();
   const { auth } = useAuth();
-  const { confirmDelete } = useConfirm();
+  const { confirmDelete, confirm } = useConfirm();
   const {
     isLoading,
     enable: enableYeastsQuery,
@@ -120,24 +120,28 @@ const Yeasts = ({
       }
     );
     const qty = yeastUuidsToDelete.length;
-    const confirm = await confirmDelete(qty, "yeast");
-    if (!confirm) {
+    const confirmResult = await confirmDelete(qty, "yeast");
+    if (!confirmResult) {
       return;
     }
-    if (qty > 1) {
-      startLoading();
-    }
     if (qty > 4) {
-      callAlert("Please be patient, this may take a little while...");
+      const secondConfirm = await confirm("Please be patient, this may take a little while...");
+      if (!secondConfirm) {
+        return;
+      }
     }
+    startLoading();
+    let count = 1;
     for (const uuid of yeastUuidsToDelete) {
       console.log("attempting to delete yeast:", uuid);
+      callAlert({message: `Deleting ${count} of ${yeastUuidsToDelete.length} yeasts...`, showCloseButton: false});
       await deleteYeast(uuid);
+      count ++;
     }
+    resetAlertState();
     refresh();
     doneLoading();
   };
-
   const generatedColumns = generateColumnsFromInputs(yeastInputs);
   const columns = [
     {

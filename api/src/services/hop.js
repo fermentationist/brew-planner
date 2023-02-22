@@ -25,11 +25,7 @@ export const createHop = async (breweryUuid, hopData) => {
   return newHop.hopUuid;
 };
 
-export const updateHop = async (
-  breweryUuid,
-  hopUuid,
-  updateData
-) => {
+export const updateHop = async (breweryUuid, hopUuid, updateData) => {
   const result = await Tables.hop.update(updateData, {
     breweryUuid,
     hopUuid,
@@ -49,8 +45,11 @@ export const deleteHop = async (breweryUuid, hopUuid) => {
       hopUuid)
     );
   }
+  localCache.invalidate("hop");
   return result;
 };
 
-export const isExistingHopAttribute =
-  localCache.isExistingTableAttribute("hop", getHops);
+export const isExistingHopAttribute = localCache.isExistingTableAttribute(
+  "hop",
+  getHops
+);

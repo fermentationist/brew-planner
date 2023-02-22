@@ -37,6 +37,7 @@ export const deleteBrewhouse = async (breweryUuid, brewhouseUuid) => {
   if (!result.affectedRows) {
     throw(`The brewery with the breweryUuid ${breweryUuid} has no brewhouse with the brewhouseUuid`, brewhouseUuid);
   }
+  localCache.invalidate("brewhouse");
   return result;
 };
 

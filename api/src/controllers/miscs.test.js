@@ -221,7 +221,7 @@ export default describe("misc routes", function () {
     const testData = await getMiscTestData();
     const invalidTestData = {
       name: [randomString(101), randomMiscNames[0]],
-      type: [randomFloat(0, 100), randomString(8)],
+      type: [randomFloat(0, 100), randomString(8), ""],
       notes: [randomFloat(0, 1000)],
       useFor: [randomFloat(0, 1000)]
     }
@@ -254,7 +254,7 @@ export default describe("misc routes", function () {
       makeDeleteMiscRequest(missingmiscUuid, validmiscUuid)
     );
 
-    const invalidBreweryUuid = "invalidmiscUuid";
+    const invalidBreweryUuid = "invalidBreweryUuid";
     await expectError(
       makeDeleteMiscRequest(invalidBreweryUuid, validmiscUuid)
     );

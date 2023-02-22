@@ -52,6 +52,7 @@ export const deleteMisc = async (breweryUuid, miscUuid) => {
       miscUuid)
     );
   }
+  localCache.invalidate("misc");
   return result;
 };
 

@@ -34,7 +34,9 @@ const StyledCollapse = muiStyled(Collapse)`
 `;
 
 const MenuOption = function (props: MenuOptionProps) {
+  props.subMenu?.length && console.log("menuOption props:", props)
   const defaultPath = useLocation().pathname;
+  props.subMenu?.length && console.log("path::", defaultPath)
   const [path, setPath] = useState(defaultPath);
   useEffect(() => {
     setPath(defaultPath);
@@ -55,7 +57,8 @@ const MenuOption = function (props: MenuOptionProps) {
     });
     const result = activeChildren.length
       ? true
-      : props.collapsedState && props.collapsedState[props.title];
+      : (props.collapsedState?.[props.title] || false);
+    props.subMenu?.length && console.log("getCollapsedState result:", result)
     return result;
   };
   

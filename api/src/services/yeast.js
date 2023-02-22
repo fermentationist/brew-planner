@@ -53,6 +53,7 @@ export const deleteYeast = async (breweryUuid, yeastUuid) => {
       yeastUuid)
     );
   }
+  localCache.invalidate("yeast");
   return result;
 };
 

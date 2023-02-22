@@ -79,7 +79,7 @@ const ConfirmDialog = () => {
           {textField}
         </StyledBox>
         <ButtonContainer>
-          <Button onClick={cancel}>Close</Button>
+          <Button onClick={cancel}>Cancel</Button>
           <Button onClick={submit}>Confirm</Button>
         </ButtonContainer>
       </Stack>

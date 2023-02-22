@@ -1,5 +1,4 @@
 import { createContext, useCallback, useState } from "react";
-import { ChildProps, WaterData, YeastData } from "../../types";
 import {
   QueryFunction,
   QueryKey,
@@ -14,9 +13,12 @@ import {
   APIError,
   BreweryData,
   BrewhouseData,
+  ChildProps,
   FermentableData,
   HopData,
-  MiscData,
+  WaterData,
+  YeastData,
+  MiscAdditionData,
 } from "../../types";
 import useDeeperMemo from "../../hooks/useDeeperMemo";
 
@@ -171,11 +173,11 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
     },
 
     miscs: {
-      ...useQuery<MiscData, ErrorData>(["miscs", auth?.currentBrewery, auth?.accessToken],
+      ...useQuery<MiscAdditionData, ErrorData>(["miscs", auth?.currentBrewery, auth?.accessToken],
       apiRequest({
         baseURL: BREWERY_ROUTE,
         url: "miscs",
-      }) as QueryFunction<MiscData, QueryKey>,
+      }) as QueryFunction<MiscAdditionData, QueryKey>,
       {
         staleTime: 60 * 1000 * 10,
         enabled: Boolean(enabledQueries.miscs),

@@ -35,6 +35,10 @@ const menuItems: IMenuItem[] = [
       {
         title: "Water Profiles",
         link: "/ingredients/water_profiles"
+      },
+      {
+        title: "Miscellaneous Additions",
+        link: "/ingredients/misc_additions"
       }
     ]
   }

@@ -35,8 +35,8 @@ const Brewhouses = ({ startLoading, doneLoading }: { startLoading: () => void; d
     APIRequest,
     enable: enableBrewhouseQuery,
   } = useAPI("brewhouses");
-  const { alertError, alertErrorProm, callAlert } = useAlert();
-  const { confirmDelete } = useConfirm();
+  const { alertError, alertErrorProm, callAlert, resetAlertState } = useAlert();
+  const { confirmDelete, confirm } = useConfirm();
   const { auth } = useAuth();
   const {
     renameTempPreferredUnits,
@@ -126,20 +126,25 @@ const Brewhouses = ({ startLoading, doneLoading }: { startLoading: () => void; d
       }
     );
     const qty = brewhouseUuidsToDelete.length;
-    const confirm = await confirmDelete(qty, "brewhouse");
-    if (!confirm) {
+    const confirmResult = await confirmDelete(qty, "brewhouse");
+    if (!confirmResult) {
       return;
     }
-    if (qty > 1) {
-      startLoading();
-    }
     if (qty > 4) {
-      callAlert("Please be patient, this may take a little while...");
+      const secondConfirm = await confirm("Please be patient, this may take a little while...");
+      if (!secondConfirm) {
+        return;
+      }
     }
+    startLoading();
+    let count = 1;
     for (const uuid of brewhouseUuidsToDelete) {
       console.log("attempting to delete brewhouse:", uuid);
+      callAlert({message: `Deleting ${count} of ${brewhouseUuidsToDelete.length} brewhouses...`, showCloseButton: false});
       await deleteBrewhouse(uuid);
+      count ++;
     }
+    resetAlertState();
     refresh();
     doneLoading();
   };
