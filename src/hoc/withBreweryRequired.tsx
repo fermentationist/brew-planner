@@ -2,8 +2,9 @@ import Page from "../components/Page";
 import ErrorPage from "../pages/ErrorPage";
 import StyledSpinner from "../components/styled/StyledSpinner";
 import useAuth from "../hooks/useAuth";
+import { ComponentType } from "react";
 
-const withBreweryRequired = (Component: React.FunctionComponent) => {
+const withBreweryRequired = (Component: ComponentType) => {
   return (props: any) => {
     const { auth } = useAuth();
     if (!auth.loaded) {

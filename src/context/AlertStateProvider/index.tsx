@@ -30,7 +30,8 @@ const initialState: AlertState = {
   title: null,
   confirmCallback: null,
   promptForInput: false,
-  child: null
+  child: null,
+  showCloseButton: true,
 };
 
 export const AlertStateContext = createContext({

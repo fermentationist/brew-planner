@@ -1,204 +1,95 @@
-import { useState, useEffect, useMemo, Dispatch, SetStateAction } from "react";
-import Tooltip from "@mui/material/Tooltip";
-import IconButton from "@mui/material/IconButton";
-import AddIcon from "@mui/icons-material/AddCircle";
-import useAPI from "../../hooks/useAPI";
-import DataTable, { columnOptions } from "../../components/DataTable";
-import Page from "../../components/Page";
-import withLoadingSpinner from "../../hoc/withLoadingSpinner";
-import useAlert from "../../hooks/useAlert";
-import useConfirm from "../../hooks/useConfirm";
-import useAuth from "../../hooks/useAuth";
-import useConvertUnits from "../../hooks/useConvertUnits";
-import WaterModal, { waterInputs } from "./WaterModal";
-import { WaterData, Mode, APIError } from "../../types";
+import breweryEntityPageFactory from "../../componentFactories/breweryEntityPageFactory";
+import { WaterData } from "../../types";
+import {required, requiredMessage, positiveNumber, positiveNumberMessage} from "../../utils/validationHelpers";
 
-const Waters = ({
-  startLoading,
-  doneLoading,
-}: {
-  startLoading: () => void;
-  doneLoading: () => void;
-}) => {
-  const [tableData, setTableData] = useState([]);
-  const [showWaterModal, setShowWaterModal] = useState(false);
-  const [mode, setMode]: [mode: Mode, setMode: Dispatch<SetStateAction<Mode>>] =
-    useState("create" as Mode);
-  const [modalData, setModalData] = useState(null);
-  const { callAlert, alertError, alertErrorProm, resetAlertState } = useAlert();
-  const { auth } = useAuth();
-  const { confirmDelete, confirm } = useConfirm();
-  const {
-    isLoading,
-    enable: enableWatersQuery,
-    data: watersData,
-    error: watersError,
-    refetch: refresh,
-    APIRequest,
-    BREWERY_ROUTE,
-  } = useAPI("waters");
-  const {
-    renameTempPreferredUnits,
-    generateColumnsFromInputs,
-    preferredUnits,
-  } = useConvertUnits();
-  useEffect(() => {
-    if (isLoading && !watersData) {
-      enableWatersQuery();
-    }
-    if (!isLoading) {
-      if (watersData) {
-        const dataWithNestedRowData = watersData.data?.waters?.map(
-          (row: WaterData) => {
-            const rowCopy = { ...row };
-            rowCopy.data = { ...row };
-            return rowCopy;
-          }
-        );
-        setTableData(dataWithNestedRowData);
-      }
-      if (watersError) {
-        console.error(watersError);
-        alertError(watersError);
-      }
-      doneLoading();
-    }
-  }, [
-    watersData,
-    isLoading,
-    watersError,
-    doneLoading,
-    alertError,
-    enableWatersQuery,
-  ]);
-
-  const createOrUpdateWater = async (formData: WaterData) => {
-    const editMode = mode === "edit";
-    const reqBody = editMode
-      ? formData
-      : { ...formData, createdBy: auth?.user?.uid };
-    const url = editMode
-      ? "/waters/" + modalData.waterUuid
-      : "/waters";
-    const apiReq = new APIRequest({
-      baseURL: BREWERY_ROUTE,
-      url,
-      method: editMode ? "patch" : "post",
-      data: reqBody,
-    });
-    const response = await apiReq.request().catch(async (error: APIError) => {
-      await alertErrorProm(error);
-    });
-    // if response.data?.waterUuid is undefined, renameTempPreferredUnits will just delete the preferredUnits that were temporarily created by the WaterModal, otherwise it will rename them
-    renameTempPreferredUnits(response.data?.waterUuid);
-    refresh();
-    setShowWaterModal(false);
-  };
-
-  const addWater = () => {
-    setModalData(null);
-    setMode("create");
-    setShowWaterModal(true);
-  };
-
-  const editWater = (rowData: WaterData) => {
-    setModalData(rowData);
-    setMode("edit");
-    setShowWaterModal(true);
-  };
-
-  const deleteWater = async (waterUuid: string) => {
-    const deleteWaterRequest = new APIRequest({
-      baseURL: BREWERY_ROUTE,
-      url: `/waters/${waterUuid}`,
-      method: "delete",
-    });
-    return deleteWaterRequest.request().catch(async (error: APIError) => {
-      await alertErrorProm(error);
-    });
-  };
-
-  const deleteRows = async (rowsDeleted: any) => {
-    const waterUuidsToDelete = rowsDeleted.data.map(
-      (row: { index: number; dataIndex: number }) => {
-        return tableData[row.dataIndex].waterUuid;
-      }
-    );
-    const qty = waterUuidsToDelete.length;
-    const confirmResult = await confirmDelete(qty, "water profile");
-    if (!confirmResult) {
-      return;
-    }
-    if (qty > 4) {
-      const secondConfirm = await confirm("Please be patient, this may take a little while...");
-      if (!secondConfirm) {
-        return;
-      }
-    }
-    startLoading();
-    let count = 1;
-    for (const uuid of waterUuidsToDelete) {
-      console.log("attempting to delete water profile:", uuid);
-      callAlert({message: `Deleting ${count} of ${waterUuidsToDelete.length} water profiles...`, showCloseButton: false});
-      await deleteWater(uuid);
-      count ++;
-    }
-    resetAlertState();
-    refresh();
-    doneLoading();
-  };
-
-  const generatedColumns = generateColumnsFromInputs(waterInputs);
-  const columns = [
-    {
-      label: "Water ID",
-      name: "waterUuid",
-      options: {
-        ...columnOptions.options,
-        display: false,
-      },
+export const waterInputs = [
+  {
+    name: "name",
+    label: "Name",
+    type: "text",
+    validation: {...required, maxLength: 100},
+    errorMessages: {...requiredMessage, maxLength: "Maximum length - 100 characters"},
+    width: "250px",
+  },
+  {
+    name: "calcium",
+    label: "Calcium",
+    type: "numberWithUnits",
+    validation: positiveNumber,
+    errorMessages: positiveNumberMessage,
+    converUnitOnChange: true,
+    preferredUnitKeyField: "waterUuid",
+    width: "250px",
+  },
+  {
+    name: "bicarbonate",
+    label: "Bicarbonate",
+    type: "numberWithUnits",
+    validation: positiveNumber,
+    errorMessages: positiveNumberMessage,
+    converUnitOnChange: true,
+    preferredUnitKeyField: "waterUuid",
+    width: "250px",
+  },
+  {
+    name: "sulfate",
+    label: "Sulfate",
+    type: "numberWithUnits",
+    validation: positiveNumber,
+    errorMessages: positiveNumberMessage,
+    converUnitOnChange: true,
+    preferredUnitKeyField: "waterUuid",
+    width: "250px",
+  },
+  {
+    name: "chloride",
+    label: "Chloride",
+    type: "numberWithUnits",
+    validation: positiveNumber,
+    errorMessages: positiveNumberMessage,
+    converUnitOnChange: true,
+    preferredUnitKeyField: "waterUuid",
+    width: "250px",
+  },
+  {
+    name: "sodium",
+    label: "Sodium",
+    type: "numberWithUnits",
+    validation: positiveNumber,
+    errorMessages: positiveNumberMessage,
+    converUnitOnChange: true,
+    preferredUnitKeyField: "waterUuid",
+    width: "250px",
+  },
+  {
+    name: "magnesium",
+    label: "Magnesium",
+    type: "numberWithUnits",
+    validation: positiveNumber,
+    errorMessages: positiveNumberMessage,
+    converUnitOnChange: true,
+    preferredUnitKeyField: "waterUuid",
+    width: "250px",
+  },
+  {
+    name: "ph",
+    label: "pH",
+    type: "number",
+    validation: positiveNumber,
+    errorMessages: positiveNumberMessage,
+    width: "250px",
+  },
+  {
+    name: "notes",
+    label: "Notes",
+    type: "textarea",
+    width: "250px",
+    tableOptions: {
+      display: false,
     },
-    ...generatedColumns,
-    {
-      name: "data",
-      options: columnOptions.rowDataOptions,
-    },
-    {
-      name: "",
-      options: columnOptions.createRenderEditButtonOptions(
-        "edit water profile",
-        editWater
-      ),
-    },
-  ];
-  return (
-    <Page>
-      <Tooltip title="add water profile">
-        <IconButton onClick={addWater}>
-          <AddIcon />
-        </IconButton>
-      </Tooltip>
-      <DataTable
-        columns={useMemo(() => columns, [preferredUnits])}
-        data={tableData}
-        refresh={refresh}
-        options={{
-          selectableRows: "multiple",
-          selectableRowsHeader: true,
-          onRowsDelete: deleteRows,
-        }}
-      />
-      {showWaterModal ? (
-        <WaterModal
-          showModal={showWaterModal}
-          closeModal={() => setShowWaterModal(false)}
-          mode={mode}
-          data={modalData}
-          onSubmit={createOrUpdateWater}
-        />
-      ) : null}
-    </Page>
-  );
-};
+  },
+];
 
-export default withLoadingSpinner(Waters);
+const Waters = breweryEntityPageFactory<WaterData>("water", waterInputs, "water profile");
+
+export default Waters;

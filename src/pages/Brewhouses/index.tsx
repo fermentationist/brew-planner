@@ -1,206 +1,196 @@
-import {
-  useState,
-  useEffect,
-  SetStateAction,
-  Dispatch,
-  memo,
-  useMemo,
-} from "react";
-import IconButton from "@mui/material/IconButton";
-import AddIcon from "@mui/icons-material/AddCircle";
-import Tooltip from "@mui/material/Tooltip";
-import useAPI from "../../hooks/useAPI";
-import useAlert from "../../hooks/useAlert";
-import useAuth from "../../hooks/useAuth";
-import useConvertUnits from "../../hooks/useConvertUnits";
-import DataTable, { columnOptions } from "../../components/DataTable";
-import Page from "../../components/Page";
-import withLoadingSpinner from "../../hoc/withLoadingSpinner";
-import BrewhouseModal, { brewhouseInputs } from "./BrewhouseModal";
-import { APIError, BrewhouseData, Mode } from "../../types";
-import useConfirm from "../../hooks/useConfirm";
+import breweryEntityPageFactory from "../../componentFactories/breweryEntityPageFactory";
+import { BrewhouseData } from "../../types";
+import { required, requiredMessage } from "../../utils/validationHelpers";
 
-const Brewhouses = ({ startLoading, doneLoading }: { startLoading: () => void; doneLoading: () => void }) => {
-  const [tableData, setTableData] = useState([]);
-  const [showBrewhouseModal, setShowBrewhouseModal] = useState(false);
-  const [mode, setMode]: [mode: Mode, setMode: Dispatch<SetStateAction<Mode>>] =
-    useState("create" as Mode);
-  const [modalData, setModalData] = useState(null);
-  const {
-    data: brewhousesData,
-    isLoading,
-    error,
-    refetch: refresh,
-    BREWERY_ROUTE,
-    APIRequest,
-    enable: enableBrewhouseQuery,
-  } = useAPI("brewhouses");
-  const { alertError, alertErrorProm, callAlert, resetAlertState } = useAlert();
-  const { confirmDelete, confirm } = useConfirm();
-  const { auth } = useAuth();
-  const {
-    renameTempPreferredUnits,
-    generateColumnsFromInputs,
-    preferredUnits,
-  } = useConvertUnits();
-  useEffect(() => {
-    if (isLoading && !brewhousesData) {
-      enableBrewhouseQuery();
-    }
-    if (!isLoading) {
-      if (brewhousesData) {
-        const dataWithNestedRowData = brewhousesData.data?.brewhouses?.map(
-          (row: BrewhouseData) => {
-            const rowCopy = { ...row };
-            rowCopy.data = { ...row };
-            return rowCopy;
-          }
-        );
-        setTableData(dataWithNestedRowData);
-      }
-      if (error) {
-        console.error(error);
-        alertError(error);
-      }
-      doneLoading();
-    }
-  }, [
-    brewhousesData,
-    isLoading,
-    error,
-    doneLoading,
-    alertError,
-    enableBrewhouseQuery,
-  ]);
-
-  const addBrewhouse = () => {
-    setShowBrewhouseModal(true);
-    setMode("create" as Mode);
-    setModalData(null);
-  };
-
-  const editBrewhouse = (rowData: BrewhouseData) => {
-    setModalData(rowData?.data ?? rowData);
-    setMode("edit" as Mode);
-    setShowBrewhouseModal(true);
-  };
-
-  const createOrUpdateBrewhouse = async (formData: BrewhouseData) => {
-    const editMode = mode === "edit";
-    const reqBody = editMode
-      ? formData
-      : { ...formData, createdBy: auth?.user?.uid };
-    const url = editMode
-      ? "/brewhouses/" + modalData.brewhouseUuid
-      : "/brewhouses";
-    const apiReq = new APIRequest({
-      baseURL: BREWERY_ROUTE,
-      url,
-      method: editMode ? "patch" : "post",
-      data: reqBody,
-    });
-    const response = await apiReq.request().catch(async (error: APIError) => {
-      await alertErrorProm(error);
-    });
-    // if response.data?.brewhouseUuid is undefined, renameTempPreferredUnits will just delete the preferredUnits that were temporarily created by the BrewhouseModal, otherwise it will rename them
-    renameTempPreferredUnits(response.data?.brewhouseUuid);
-    refresh();
-    setShowBrewhouseModal(false);
-  };
-
-  const deleteBrewhouse = async (brewhouseUuid: string) => {
-    const deleteBrewhouseRequest = new APIRequest({
-      baseURL: BREWERY_ROUTE,
-      url: `/brewhouses/${brewhouseUuid}`,
-      method: "delete"
-    });
-    return deleteBrewhouseRequest.request().catch(async(error: APIError) => {
-      await alertErrorProm(error);
-    })
-  }
-
-  const deleteRows = async (rowsDeleted: any) => {
-    const brewhouseUuidsToDelete = rowsDeleted.data.map(
-      (row: { index: number; dataIndex: number }) => {
-        return tableData[row.dataIndex].brewhouseUuid;
-      }
-    );
-    const qty = brewhouseUuidsToDelete.length;
-    const confirmResult = await confirmDelete(qty, "brewhouse");
-    if (!confirmResult) {
-      return;
-    }
-    if (qty > 4) {
-      const secondConfirm = await confirm("Please be patient, this may take a little while...");
-      if (!secondConfirm) {
-        return;
-      }
-    }
-    startLoading();
-    let count = 1;
-    for (const uuid of brewhouseUuidsToDelete) {
-      console.log("attempting to delete brewhouse:", uuid);
-      callAlert({message: `Deleting ${count} of ${brewhouseUuidsToDelete.length} brewhouses...`, showCloseButton: false});
-      await deleteBrewhouse(uuid);
-      count ++;
-    }
-    resetAlertState();
-    refresh();
-    doneLoading();
-  };
-
-  const generatedColumns = generateColumnsFromInputs(brewhouseInputs);
-
-  const columns = [
-    {
-      label: "Brewhouse ID",
-      name: "brewhouseUuid",
-      options: {
-        ...columnOptions.options,
-        display: false,
-      },
+export const brewhouseInputs = [
+  {
+    name: "name",
+    label: "Name",
+    type: "text",
+    validation: required,
+    errorMessages: requiredMessage,
+    width: "250px",
+  },
+  {
+    name: "batchSize",
+    label: "Batch Volume",
+    type: "numberWithUnits",
+    convertOnUnitChange: true,
+    validation: required,
+    errorMessages: requiredMessage,
+    maxDecPlaces: 2,
+    preferredUnitKeyField: "brewhouseUuid",
+    width: "250px",
+  },
+  {
+    name: "kettleVol",
+    label: "Kettle Volume",
+    type: "numberWithUnits",
+    convertOnUnitChange: true,
+    validation: required,
+    errorMessages: requiredMessage,
+    maxDecPlaces: 2,
+    preferredUnitKeyField: "brewhouseUuid",
+    width: "250px",
+    tableOptions: {
+      display: false,
     },
-    ...generatedColumns,
-    {
-      name: "data",
-      options: columnOptions.rowDataOptions,
+  },
+  {
+    name: "tunVolume",
+    label: "Mash Tun Volume",
+    type: "numberWithUnits",
+    convertOnUnitChange: true,
+    validation: required,
+    errorMessages: requiredMessage,
+    maxDecPlaces: 2,
+    preferredUnitKeyField: "brewhouseUuid",
+    width: "250px",
+    tableOptions: {
+      display: false,
     },
-    {
-      name: "",
-      options: columnOptions.createRenderEditButtonOptions(
-        "edit brewhouse",
-        editBrewhouse
-      ),
+  },
+  {
+    name: "tunWeight",
+    label: "Mash Tun Weight",
+    type: "numberWithUnits",
+    convertOnUnitChange: true,
+    validation: required,
+    errorMessages: requiredMessage,
+    maxDecPlaces: 2,
+    preferredUnitKeyField: "brewhouseUuid",
+    width: "250px",
+    tableOptions: {
+      display: false,
     },
-  ];
-  return (
-    <Page>
-      <Tooltip title="Add Brewhouse">
-        <IconButton onClick={addBrewhouse}>
-          <AddIcon />
-        </IconButton>
-      </Tooltip>
-      <DataTable
-        data={tableData}
-        columns={useMemo(() => columns, [preferredUnits])}
-        refresh={refresh}
-        options={{
-          selectableRows: "multiple",
-          selectableRowsHeader: true,
-          onRowsDelete: deleteRows
-        }}
-      />
-      {showBrewhouseModal ? (
-        <BrewhouseModal
-          showModal={showBrewhouseModal}
-          closeModal={() => setShowBrewhouseModal(false)}
-          mode={mode}
-          data={modalData}
-          onSubmit={createOrUpdateBrewhouse}
-        />
-      ) : null}
-    </Page>
-  );
-};
+  },
+  {
+    name: "tunLoss",
+    label: "Mash Tun Loss",
+    type: "numberWithUnits",
+    convertOnUnitChange: true,
+    maxDecPlaces: 2,
+    preferredUnitKeyField: "brewhouseUuid",
+    width: "250px",
+    tableOptions: {
+      display: false,
+    },
+  },
+  {
+    name: "tunSpecificHeat",
+    label: "Mash Tun Specific Heat",
+    type: "numberWithUnits",
+    convertOnUnitChange: true,
+    defaultValue: 300,
+    validation: required,
+    errorMessages: requiredMessage,
+    maxDecPlaces: 2,
+    preferredUnitKeyField: "brewhouseUuid",
+    width: "250px",
+    tableOptions: {
+      display: false,
+    },
+  },
+  {
+    name: "lauterDeadspace",
+    label: "Lauter Tun Loss",
+    type: "numberWithUnits",
+    convertOnUnitChange: true,
+    maxDecPlaces: 2,
+    preferredUnitKeyField: "brewhouseUuid",
+    width: "250px",
+    tableOptions: {
+      display: false,
+    },
+  },
+  {
+    name: "topUpWater",
+    label: "Top Up Water",
+    type: "numberWithUnits",
+    convertOnUnitChange: true,
+    maxDecPlaces: 2,
+    preferredUnitKeyField: "brewhouseUuid",
+    width: "250px",
+    tableOptions: {
+      display: false,
+    },
+  },
+  {
+    name: "trubChillerLoss",
+    label: "Post Boil Loss",
+    type: "numberWithUnits",
+    convertOnUnitChange: true,
+    maxDecPlaces: 2,
+    preferredUnitKeyField: "brewhouseUuid",
+    width: "250px",
+    tableOptions: {
+      display: false,
+    },
+  },
+  {
+    name: "evaporationRate",
+    label: "Evaporation Rate",
+    type: "numberWithUnits",
+    convertOnUnitChange: true,
+    validation: required,
+    errorMessages: requiredMessage,
+    maxDecPlaces: 2,
+    preferredUnitKeyField: "brewhouseUuid",
+    width: "250px",
+    tableOptions: {
+      display: false,
+    },
+  },
+  {
+    name: "miscLoss",
+    label: "Miscellaneous Loss",
+    type: "numberWithUnits",
+    convertOnUnitChange: true,
+    width: "250px",
+    maxDecPlaces: 2,
+    preferredUnitKeyField: "brewhouseUuid",
+    tableOptions: {
+      display: false,
+    },
+  },
+  {
+    name: "extractEfficiency",
+    label: "Extract Efficiency (%)",
+    type: "number",
+    defaultValue: 75,
+    validation: { required: true, min: 0, max: 100 },
+    errorMessages: {
+      ...requiredMessage,
+      min: "The minimum allowed value is 0",
+      max: "The maximum allowed value is 100",
+    },
+    width: "250px",
+  },
 
-export default withLoadingSpinner(memo(Brewhouses, () => true));
+  {
+    name: "grainAbsorptionRate",
+    label: "Grain Absorption Rate",
+    type: "numberWithUnits",
+    convertOnUnitChange: true,
+    defaultValue: 2.5,
+    maxDecPlaces: 2,
+    preferredUnitKeyField: "brewhouseUuid",
+    tableOptions: {
+      display: false,
+    },
+  },
+  {
+    name: "hopUtilization",
+    label: "Hop Utilization (%)",
+    type: "number",
+    defaultValue: 75,
+    maxDecPlaces: 2,
+    tableOptions: {
+      display: false,
+    },
+  },
+];
+
+const Brewhouses = breweryEntityPageFactory<BrewhouseData>("brewhouse", brewhouseInputs);
+
+export default Brewhouses;

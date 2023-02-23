@@ -1,198 +1,115 @@
-import { useState, useEffect, useMemo, Dispatch, SetStateAction } from "react";
-import Tooltip from "@mui/material/Tooltip";
-import IconButton from "@mui/material/IconButton";
-import AddIcon from "@mui/icons-material/AddCircle";
-import useAPI from "../../hooks/useAPI";
-import DataTable, { columnOptions } from "../../components/DataTable";
-import Page from "../../components/Page";
-import withLoadingSpinner from "../../hoc/withLoadingSpinner";
-import useAlert from "../../hooks/useAlert";
-import useConfirm from "../../hooks/useConfirm";
-import useAuth from "../../hooks/useAuth";
-import useConvertUnits from "../../hooks/useConvertUnits";
-import YeastModal, { yeastInputs } from "./YeastModal";
-import { YeastData, Mode, APIError } from "../../types";
+import breweryEntityPageFactory from "../../componentFactories/breweryEntityPageFactory";
+import { YeastData } from "../../types";
+import {required, requiredMessage, percentage, percentageMessage} from "../../utils/validationHelpers";
 
-const Yeasts = ({
-  startLoading,
-  doneLoading,
-}: {
-  startLoading: () => void;
-  doneLoading: () => void;
-}) => {
-  const [tableData, setTableData] = useState([]);
-  const [showYeastModal, setShowYeastModal] = useState(false);
-  const [mode, setMode]: [mode: Mode, setMode: Dispatch<SetStateAction<Mode>>] =
-    useState("create" as Mode);
-  const [modalData, setModalData] = useState(null);
-  const { callAlert, alertError, alertErrorProm, resetAlertState } = useAlert();
-  const { auth } = useAuth();
-  const { confirmDelete, confirm } = useConfirm();
-  const {
-    isLoading,
-    enable: enableYeastsQuery,
-    data: yeastsData,
-    error: yeastsError,
-    refetch: refresh,
-    APIRequest,
-    BREWERY_ROUTE,
-  } = useAPI("yeasts");
-  const { generateColumnsFromInputs } = useConvertUnits();
-  useEffect(() => {
-    if (isLoading && !yeastsData) {
-      enableYeastsQuery();
-    }
-    if (!isLoading) {
-      if (yeastsData) {
-        const dataWithNestedRowData = yeastsData.data?.yeasts?.map(
-          (row: YeastData) => {
-            const rowCopy = { ...row };
-            rowCopy.data = { ...row };
-            return rowCopy;
-          }
-        );
-        setTableData(dataWithNestedRowData);
-      }
-      if (yeastsError) {
-        console.error(yeastsError);
-        alertError(yeastsError);
-      }
-      doneLoading();
-    }
-  }, [
-    yeastsData,
-    isLoading,
-    yeastsError,
-    doneLoading,
-    alertError,
-    enableYeastsQuery,
-  ]);
-
-  const createOrUpdateYeast = async (formData: YeastData) => {
-    const editMode = mode === "edit";
-    const reqBody = editMode
-      ? formData
-      : { ...formData, createdBy: auth?.user?.uid };
-    const url = editMode
-      ? "/yeasts/" + modalData.yeastUuid
-      : "/yeasts";
-    const apiReq = new APIRequest({
-      baseURL: BREWERY_ROUTE,
-      url,
-      method: editMode ? "patch" : "post",
-      data: reqBody,
-    });
-    const response = await apiReq.request().catch(async (error: APIError) => {
-      await alertErrorProm(error);
-    });
-    console.log("response:", response);
-    refresh();
-    setShowYeastModal(false);
-  };
-
-  const addYeast = () => {
-    setModalData(null);
-    setMode("create");
-    setShowYeastModal(true);
-  };
-
-  const editYeast = (rowData: YeastData) => {
-    setModalData(rowData);
-    setMode("edit");
-    setShowYeastModal(true);
-  };
-
-  const deleteYeast = async (yeastUuid: string) => {
-    const deleteYeastRequest = new APIRequest({
-      baseURL: BREWERY_ROUTE,
-      url: `/yeasts/${yeastUuid}`,
-      method: "delete",
-    });
-    return deleteYeastRequest.request().catch(async (error: APIError) => {
-      await alertErrorProm(error);
-    });
-  };
-
-  const deleteRows = async (rowsDeleted: any) => {
-    const yeastUuidsToDelete = rowsDeleted.data.map(
-      (row: { index: number; dataIndex: number }) => {
-        return tableData[row.dataIndex].yeastUuid;
-      }
-    );
-    const qty = yeastUuidsToDelete.length;
-    const confirmResult = await confirmDelete(qty, "yeast");
-    if (!confirmResult) {
-      return;
-    }
-    if (qty > 4) {
-      const secondConfirm = await confirm("Please be patient, this may take a little while...");
-      if (!secondConfirm) {
-        return;
-      }
-    }
-    startLoading();
-    let count = 1;
-    for (const uuid of yeastUuidsToDelete) {
-      console.log("attempting to delete yeast:", uuid);
-      callAlert({message: `Deleting ${count} of ${yeastUuidsToDelete.length} yeasts...`, showCloseButton: false});
-      await deleteYeast(uuid);
-      count ++;
-    }
-    resetAlertState();
-    refresh();
-    doneLoading();
-  };
-  const generatedColumns = generateColumnsFromInputs(yeastInputs);
-  const columns = [
-    {
-      label: "Yeast ID",
-      name: "yeastUuid",
-      options: {
-        ...columnOptions.options,
-        display: false,
-      },
+export const yeastInputs = [
+  {
+    name: "name",
+    label: "Name",
+    type: "text",
+    validation: {...required, maxLength: 100},
+    errorMessages: {...requiredMessage, maxLength: "Maximum length - 100 characters"},
+    width: "250px",
+  },
+  {
+    name: "type",
+    label: "Type",
+    type: "select",
+    selectOptions: ["Ale", "Lager", "Wheat", "Wine", "Champagne", "Kveik"],
+    selectRestricted: true,
+    validation: required,
+    errorMessages: requiredMessage,
+    width: "250px",
+  },
+  {
+    name: "laboratory",
+    label: "Manufacturer",
+    type: "text",
+    width: "250px",
+    validation: {maxLength: 100},
+    errorMessages: {maxLength: "Maximum length - 100 characters"},
+  },
+  {
+    name: "productId",
+    label: "Product ID",
+    type: "text",
+    validation: {maxLength: 36},
+    errorMessages: {maxLength: "Maximum length - 36 characters"},
+    width: "250px",
+  },
+  {
+    name: "minTemperature",
+    label: "Min temperature",
+    type: "number",
+    width: "250px",
+    tableOptions: {
+      display: false,
     },
-    ...generatedColumns,
-    {
-      name: "data",
-      options: columnOptions.rowDataOptions,
+  },
+  {
+    name: "maxTemperature",
+    label: "Max temperature",
+    type: "number",
+    width: "250px",
+    tableOptions: {
+      display: false,
     },
-    {
-      name: "",
-      options: columnOptions.createRenderEditButtonOptions(
-        "edit yeast",
-        editYeast
-      ),
+  },
+  {
+    name: "flocculation",
+    label: "Flocculation",
+    type: "select",
+    selectOptions: ["Low", "Medium", "High", "Very High"],
+    selectRestricted: true,
+    width: "250px",
+    tableOptions: {
+      display: false,
     },
-  ];
-  return (
-    <Page>
-      <Tooltip title="add yeast">
-        <IconButton onClick={addYeast}>
-          <AddIcon />
-        </IconButton>
-      </Tooltip>
-      <DataTable
-        columns={useMemo(() => columns, [])}
-        data={tableData}
-        refresh={refresh}
-        options={{
-          selectableRows: "multiple",
-          selectableRowsHeader: true,
-          onRowsDelete: deleteRows,
-        }}
-      />
-      {showYeastModal ? (
-        <YeastModal
-          showModal={showYeastModal}
-          closeModal={() => setShowYeastModal(false)}
-          mode={mode}
-          data={modalData}
-          onSubmit={createOrUpdateYeast}
-        />
-      ) : null}
-    </Page>
-  );
-};
+  },
+  {
+    name: "attenuation",
+    label: "Attenuation (%)",
+    type: "number",
+    width: "250px",
+    validation: percentage,
+    errorMessages: percentageMessage,
+    tableOptions: {
+      display: false,
+    },
+  },
+  {
+    name: "notes",
+    label: "Notes",
+    type: "textarea",
+    width: "250px",
+    tableOptions: {
+      display: false,
+    },
+  },
+  {
+    name: "bestFor",
+    label: "Styles",
+    type: "text",
+    width: "250px",
+    tableOptions: {
+      display: false,
+    },
+  },
+  {
+    name: "maxReuse",
+    label: "Max repitches",
+    type: "number",
+    step: "1",
+    width: "250px",
+    validation: {min: 0},
+    errorMessages: {min: "Please enter a positive integer"},
+    tableOptions: {
+      display: false,
+    },
+  },
+  
+];
 
-export default withLoadingSpinner(Yeasts);
+const Yeasts = breweryEntityPageFactory<YeastData>("yeast", yeastInputs);
+
+export default Yeasts;
