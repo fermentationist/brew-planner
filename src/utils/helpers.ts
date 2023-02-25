@@ -104,3 +104,5 @@ export const parseObjectWithFunctions = (jsonString: string, keysToParseAsFuncti
     return value;
   })
 }
+
+export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));

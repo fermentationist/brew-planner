@@ -14,7 +14,7 @@ export interface CustomAutocompleteProps {
   label?: string;
   name?: string;
   options: any[];
-  callback?: (newValue: any) => void;
+  callback?: (newValue: any, callRHFSetValueFn?: boolean) => void;
   defaultValue?: string | number;
   getOptionLabel?: (option: any) => string;
   restricted?: boolean;
@@ -42,14 +42,14 @@ const CustomAutocomplete = forwardRef(
     }: CustomAutocompleteProps,
     forwardedRef: Ref<any>
   ) => {
-    const [value, setValue] = useState(defaultValue);
+    const [value, setValue] = useState(defaultValue ?? "");
     useEffect(() => {
       // if in restricted mode, clear input if value is no longer included in options (when options change)
       const selections = optionKey
         ? options.map(option => option[optionKey])
         : options;
       if (restricted && !selections.includes(value)) {
-        setValue(void 0);
+        setValue("");
         callback(void 0);
       }
     }, [options, optionKey, restricted]);
@@ -59,7 +59,7 @@ const CustomAutocomplete = forwardRef(
       const newValue = target.value;
       setValue(newValue);
       if (callback) {
-        callback(newValue);
+        callback(newValue, true);
       }
     };
 

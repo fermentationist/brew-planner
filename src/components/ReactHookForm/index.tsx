@@ -4,11 +4,11 @@ import React, {
   useRef,
   createElement,
   ChangeEvent,
-  FunctionComponent,
   ComponentPropsWithoutRef,
   memo, 
   Ref,
-  FormEvent
+  FormEvent,
+  ComponentType
 } from "react";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
@@ -24,9 +24,8 @@ import CustomAutocomplete, {
 } from "../CustomAutocomplete";
 import CustomSwitch, { CustomSwitchProps } from "../CustomSwitch";
 import FormError from "../FormError";
-import { ChildProps } from "../../types";
 
-const COMPONENT_TYPES: Record<string, FunctionComponent> = {
+const COMPONENT_TYPES: Record<string, ComponentType> = {
   text: CustomTextField,
   textarea: CustomTextField,
   number: CustomNumberField,
@@ -50,7 +49,7 @@ export interface FormInputOptions {
   errorMessages?: Record<string, any>;
   width?: string;
   ref?: Ref<any>;
-  component?: FunctionComponent;
+  component?: ComponentType;
   componentProps?: Record<string, any>;
   step?: string;
   unitSelections?: Record<string, string[]>;
@@ -97,7 +96,7 @@ const Form = function (props: FormProps) {
     inputName: string,
     transformFn?: (val: any) => any
   ) => {
-    return (value: any, callRHFSetValueFn = true) => {
+    return (value: any, callRHFSetValueFn = false) => {
       const transformedValue = transformFn ? transformFn(value) : value;
       if (callRHFSetValueFn) {
         setInputValue(inputName, transformedValue);
@@ -154,7 +153,7 @@ const Form = function (props: FormProps) {
           restricted: input.selectRestricted,
           label: input.label ?? input.name,
           optionKey: input.selectOptionKey,
-          defaultValue: typeof input.defaultValue === "boolean" ? String(input.defaultValue) : input.defaultValue
+          defaultValue: typeof input.defaultValue === "boolean" ? String(input.defaultValue) : input.defaultValue 
         } as CustomAutocompleteProps;
         break;
 
@@ -228,7 +227,7 @@ const Form = function (props: FormProps) {
               const target = event.target as HTMLInputElement;
               const value =
                 input.type === "switch" ? target.checked : target.value;
-              setInputValue(input.name, value);
+              setInputValue(input.name, value); 
               input.onChange && input.onChange(event);
               if (Object.keys(formState.errors).length) {
                 triggerFormValidation(); // if there are currently validation errors, re-validate form

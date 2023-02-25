@@ -13,6 +13,7 @@ import useConvertUnits from "../../hooks/useConvertUnits";
 import EntityModal from "./EntityModal";
 import { Mode, APIError } from "../../types";
 import { FormInputOptions } from "../../components/FormModal";
+import useDeeperMemo from "../../hooks/useDeeperMemo";
 
 function EntityPage<EntityType>({
   startLoading,
@@ -35,6 +36,7 @@ function EntityPage<EntityType>({
   const { callAlert, alertError, alertErrorProm, resetAlertState } = useAlert();
   const { auth } = useAuth();
   const { confirmDelete, confirm } = useConfirm();
+  const deepMemoize = useDeeperMemo();
   const {
     isLoading,
     enable: enableEntitiesQuery,
@@ -44,7 +46,7 @@ function EntityPage<EntityType>({
     APIRequest,
     BREWERY_ROUTE,
   } = useAPI(`${entityName}s`);
-  const { generateColumnsFromInputs } = useConvertUnits();
+  const { generateColumnsFromInputs, preferredUnits } = useConvertUnits();
   useEffect(() => {
     if (isLoading && !entitiesData) {
       enableEntitiesQuery();
@@ -90,7 +92,7 @@ function EntityPage<EntityType>({
       method: editMode ? "patch" : "post",
       data: reqBody,
     });
-    const response = await apiReq.request().catch(async (error: APIError) => {
+    await apiReq.request().catch(async (error: APIError) => {
       await alertErrorProm(error);
     });
     refresh();
@@ -188,7 +190,7 @@ function EntityPage<EntityType>({
         </IconButton>
       </Tooltip>
       <DataTable
-        columns={useMemo(() => columns, [])}
+        columns={deepMemoize(columns, `${entityName}Columns`)}
         data={tableData}
         refresh={refresh}
         options={{

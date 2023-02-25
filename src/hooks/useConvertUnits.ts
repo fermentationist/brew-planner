@@ -1,5 +1,5 @@
 import convert from "convert-units";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import useGlobalState from "./useGlobalState";
 import {
   DataTableColumnOptions,
@@ -39,7 +39,7 @@ const useConvertUnits = () => {
         preferredUnitKey?: string
       ) => {
         const value =
-          (stringOrNumber ?? "") && (Number(stringOrNumber) as number | "");
+          (stringOrNumber ?? "") && (Number(stringOrNumber) as number | string);
         const canonicalTarget = target === "canonical";
         const canonicalUnit = unitDefaults[field]?.canonical;
         const preferredUnit =

@@ -18,7 +18,7 @@ import {
   HopData,
   WaterData,
   YeastData,
-  MiscAdditionData,
+  MiscData,
 } from "../../types";
 import useDeeperMemo from "../../hooks/useDeeperMemo";
 
@@ -173,11 +173,11 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
     },
 
     miscs: {
-      ...useQuery<MiscAdditionData, ErrorData>(["miscs", auth?.currentBrewery, auth?.accessToken],
+      ...useQuery<MiscData, ErrorData>(["miscs", auth?.currentBrewery, auth?.accessToken],
       apiRequest({
         baseURL: BREWERY_ROUTE,
         url: "miscs",
-      }) as QueryFunction<MiscAdditionData, QueryKey>,
+      }) as QueryFunction<MiscData, QueryKey>,
       {
         staleTime: 60 * 1000 * 10,
         enabled: Boolean(enabledQueries.miscs),

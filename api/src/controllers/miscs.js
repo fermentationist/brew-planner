@@ -190,7 +190,7 @@ export const updateMisc = [updateMiscValidation, updateMiscController];
 
 // deleteMisc
 /**
- * @api {delete} /breweries/:breweryUuid/miscs/:miscUuid Delete misc (admin)
+ * @api {delete} /breweries/:breweryUuid/miscs/:miscUuid Delete misc
  * @apiName DeleteMisc
  * @apiGroup Miscs
  * @apiDescription Delete a misc

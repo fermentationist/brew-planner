@@ -73,7 +73,7 @@ const AlertStateProvider = function ({children}:{children: ChildProps}) {
   const [alertState, setAlertState] = useState(initialState);
 
   const callAlert = (args: CallAlertArgs) => {
-    let message, title, confirmCallback, closeCallback, promptForInput, child, showCloseButton = true;
+    let message, title, confirmCallback, closeCallback, promptForInput, child, showCloseButton;
     if (typeof args === "string") {
       message = args;
     } else {
@@ -87,6 +87,7 @@ const AlertStateProvider = function ({children}:{children: ChildProps}) {
         showCloseButton
       } = args);
     }
+    showCloseButton = showCloseButton ?? true;
     setAlertState({
       isOpen: true,
       message: typeof message === "string" ? message : JSON.stringify(message),

@@ -27,9 +27,9 @@ CREATE TABLE IF NOT EXISTS water_version (
   CONSTRAINT fk_water_version_water_uuid FOREIGN KEY (water_uuid) REFERENCES water (water_uuid) ON DELETE CASCADE, -- reference to current version
   brewery_uuid BINARY (16) NOT NULL,
   CONSTRAINT fk_water_version_brewery_uuid FOREIGN KEY (brewery_uuid) REFERENCES brewery (brewery_uuid) ON DELETE CASCADE,
+  version INT NOT NULL,
   UNIQUE KEY (water_uuid, version),
   name VARCHAR (100) NOT NULL,
-  version INT NOT NULL,
   created_by VARCHAR(36) NOT NULL,
   calcium DECIMAL (6, 2), -- parts per million
   bicarbonate DECIMAL (6, 2), -- parts per million

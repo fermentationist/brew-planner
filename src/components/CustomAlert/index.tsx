@@ -3,7 +3,7 @@ import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
 import CustomDialog from "../CustomDialog";
 import Typography from "@mui/material/Typography";
-import {styled as muiStyled} from "@mui/material/styles";
+import { styled as muiStyled } from "@mui/material/styles";
 import useAlert from "../../hooks/useAlert";
 
 const StyledBox = muiStyled(Box)`
@@ -11,11 +11,11 @@ const StyledBox = muiStyled(Box)`
 `;
 
 const CustomAlert = () => {
-  const {alertState, resetAlertState} = useAlert();
+  const { alertState, resetAlertState } = useAlert();
   const closeDialog = () => {
     resetAlertState();
     alertState.closeCallback && alertState.closeCallback(true);
-  }
+  };
   return (
     <CustomDialog
       showDialog={alertState?.isOpen}
@@ -24,17 +24,15 @@ const CustomAlert = () => {
     >
       <Stack>
         <StyledBox>
-          <Typography>
-            {alertState?.message}
-          </Typography>
-            {alertState?.child}
+          <Typography>{alertState?.message}</Typography>
+          {alertState?.child}
         </StyledBox>
-        { alertState?.showCloseButton ? (
+        {alertState?.showCloseButton ? (
           <Button onClick={closeDialog}>Close</Button>
         ) : null}
       </Stack>
     </CustomDialog>
   );
-}
+};
 
 export default CustomAlert;

@@ -32,7 +32,7 @@ const CustomNumberFieldWithUnits = forwardRef(
         : initialDefaultValue;
     }, []);
     const memoizedInitialDefaultUnit = useMemo(() => initialDefaultUnit, []);
-    const [controlledValue, setControlledValue] = useState<number | "">(
+    const [controlledValue, setControlledValue] = useState<number | string>(
       memoizedInitialDefaultValue
     );
 
@@ -49,10 +49,9 @@ const CustomNumberFieldWithUnits = forwardRef(
 
     const callOnChange = (event: ChangeEvent<HTMLInputElement>) => {
       const target = event.target as HTMLInputElement;
-      const value = Number(target.value);
+      const value = target.value;
       const convertFn = createConvertFunction("canonical", unitRef?.current);
-      console.log("props.preferredUnitKey in callOnChange:", props.preferredUnitKey)
-      const { value: convertedValue } = convertFn(props.name, value, props.preferredUnitKey);
+      const { value: convertedValue } = convertFn(props.name, Number(value), props.preferredUnitKey);
       const newValue =
         props.maxDecPlaces ?? null
           ? Number(Number(convertedValue).toFixed(props.maxDecPlaces))
@@ -122,7 +121,7 @@ const CustomNumberFieldWithUnits = forwardRef(
 
 interface InternalComponentProps extends CustomNumberFieldWithUnitsProps {
   label: string;
-  controlledValue: number | "";
+  controlledValue: number | string;
   unitSelections: Record<string, string[]>;
   defaultUnit: string;
   parseUnit: (unit: string) => string[][];

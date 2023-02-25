@@ -1,10 +1,9 @@
-/*global it, describe, before, after, console */
+/*global it, describe, before, after */
 import assert from "assert";
 import { v1 as createUuid } from "uuid";
 import TestAPI from "../../test/TestAPI.js";
 import {
   expectError,
-  expectInvalidInput,
   runDataValidationTests,
   getEntityFactory,
   deleteEntityFactory,

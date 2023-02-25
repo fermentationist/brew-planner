@@ -1,34 +1,71 @@
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 import storage from "./storage";
 import { firebaseAuth } from "../context/AuthProvider";
 import { opError } from "./errors";
+import { sleep } from "./helpers";
 const { getStorage } = storage("brewPlanner");
 
-console.log("firebaseAuth?.currentUser:", firebaseAuth?.currentUser)
 export const API_URL = import.meta.env.VITE_API_URL;
 
 export default class APIRequest {
-  config: any;
+  config: Record<string, any>;
   abortController: AbortController;
+  axiosInstance: AxiosInstance;
+  retries: number;
+  retryDelay: number;
+  axiosInterceptors: any;
 
   constructor(config: any) {
     this.config = config;
     this.abortController = new AbortController();
-    this.config.signal = this.abortController.signal;
+    this.config.signal = config.signal || this.abortController.signal;
     this.config.baseURL = config.baseURL;
+    this.axiosInstance = axios.create();
+    this.retries = config.retries ?? 3;
+    this.retryDelay = config.retryDelay ?? 3000;
+    // adding axios interceptors to retry failed requests
+    this.axiosInterceptors = this.axiosInstance.interceptors.response.use(
+      config.requestInterceptor,
+      config.errorInterceptor ||
+        ((error) => {
+          const axiosErrorMessage = error?.message?.toLowerCase();
+          if (
+            error.response?.data?.error?.message
+              .toLowerCase()
+              .includes("invalid token") &&
+            this.retries
+          ) {
+            firebaseAuth.updateCurrentUser(firebaseAuth.currentUser);
+            return this.retry();
+          }
+          if (
+            (axiosErrorMessage.includes("timeout") ||
+              axiosErrorMessage.includes("network error")) &&
+            this.retries
+          ) {
+            return this.retry();
+          }
+          return Promise.reject(error);
+        })
+    );
 
     // so methods still work if passed as higher-order functions
     this.request = this.request.bind(this);
+    this.retry = this.retry.bind(this);
     this.abort = this.abort.bind(this);
   }
 
-  async request<ResponseType>(additionalConfig = {}): (Promise<ResponseType | Error>) {
+  async request<ResponseType>(
+    additionalConfig = {}
+  ): Promise<ResponseType | Error> {
     const globalState = getStorage("globalState");
     const authState = getStorage("authState");
 
     // accessToken check
     if (!authState?.accessToken) {
-      return Promise.reject(opError("API Request unauthorized - access token needed"));
+      return Promise.reject(
+        opError("API Request unauthorized - access token needed")
+      );
     }
     // safeMode check
     if (globalState?.safeMode && this.config?.method?.toLowerCase() !== "get") {
@@ -37,15 +74,17 @@ export default class APIRequest {
 
     const requestConfig = {
       ...this.config,
-      baseURL: this.config.baseURL ?? (authState?.user?.role === "admin"
+      baseURL:
+        this.config.baseURL ??
+        (authState?.user?.role === "admin"
           ? `${API_URL}/admin`
           : `${API_URL}/breweries/${authState?.currentBrewery}`),
       headers: {
         ...this.config.headers,
-        "Firebase-Token": authState?.accessToken
+        "Firebase-Token": authState?.accessToken,
       },
       timeout: 20000,
-      ...additionalConfig
+      ...additionalConfig,
     };
 
     // log request
@@ -53,14 +92,15 @@ export default class APIRequest {
     console.log(requestConfig);
 
     // return axios promise
-    return axios(requestConfig)
+    return this.axiosInstance
+      .request(requestConfig)
       .then((response: any) => {
         // log response
         console.log("RESPONSE:");
         console.log(response);
         return response;
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("ERROR in APIRequest:", error);
         if (requestConfig?.signal?.aborted) {
           // ignore "CanceledError"
@@ -69,33 +109,27 @@ export default class APIRequest {
           let errorOutput = opError("Request failed", { name: "bad request" });
           const realError = error.response?.data?.error;
           if (realError) {
-            if (error.response.data.error.message.toLowerCase().includes("invalid token")) {
-              console.log("\ntry to renew token?\n");
-              // ignore invalid token errors
-              console.log("authState:", authState); 
-              console.log("firebaseAuth:", firebaseAuth);
-              // firebaseAuth.currentUser will probably be undefined, but this might trigger token renewal anyway?
-              firebaseAuth.updateCurrentUser(firebaseAuth.currentUser);
-              return Promise.resolve(null);
-            }
             errorOutput = opError(realError.message, {
               name: realError.name,
-              status: error.response.status
+              status: error.response.status,
             });
           } else if (error.message && error.response) {
             errorOutput = opError(error.message, {
               name: error.response.statusText,
-              status: error.response.status
+              status: error.response.status,
             });
           } else if (error.message || error.code) {
-            if (error.message.includes("timeout") && error.name === "AxiosError") {
+            if (
+              error.message.includes("timeout") &&
+              error.name === "AxiosError"
+            ) {
               errorOutput = opError("The server took too long to respond", {
                 name: "Network error",
-                status: 500
+                status: 500,
               });
             } else {
               errorOutput = opError(error.message || "Request failed", {
-                name: error.name || error.code || "bad request"
+                name: error.name || error.code || "bad request",
               });
             }
           } else {
@@ -108,6 +142,15 @@ export default class APIRequest {
           return Promise.reject(errorOutput);
         }
       });
+  }
+
+  async retry() {
+    if (this.retries) {
+      console.log(`retrying request in ${this.retryDelay} milliseconds`);
+      this.retries--;
+      await sleep(this.retryDelay);
+      return this.request();
+    }
   }
 
   abort() {

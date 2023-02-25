@@ -254,7 +254,7 @@ export const updateYeast = [updateYeastValidation, updateYeastController];
 
 // deleteYeast
 /**
- * @api {delete} /breweries/:breweryUuid/yeasts/:yeastUuid Delete yeast (admin)
+ * @api {delete} /breweries/:breweryUuid/yeasts/:yeastUuid Delete yeast
  * @apiName DeleteYeast
  * @apiGroup Yeasts
  * @apiDescription Delete a yeast

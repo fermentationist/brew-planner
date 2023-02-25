@@ -1,6 +1,5 @@
 import { useRef } from "react";
 import {
-  stringDiff,
   stringifyObjectWithFunctions as stringify,
 } from "../utils/helpers";
 

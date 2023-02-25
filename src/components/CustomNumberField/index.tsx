@@ -5,7 +5,7 @@ import styled from "styled-components";
 export type CustomNumberFieldProps = Omit<
   CustomTextFieldProps,
   "type" | "defaultValue"
-> & { defaultValue?: number | "" };
+> & { defaultValue?: number | string };
 
 const StyledNumberField = styled(CustomTextField)`
   /* These styles hide the up/down buttons in number inputs */
