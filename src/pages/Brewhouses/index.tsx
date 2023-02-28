@@ -1,4 +1,4 @@
-import breweryEntityPageFactory from "../../componentFactories/breweryEntityPageFactory";
+import entityPageFactory from "../../componentFactories/entityPageFactory";
 import { BrewhouseData } from "../../types";
 import { required, requiredMessage } from "../../utils/validationHelpers";
 
@@ -191,6 +191,6 @@ export const brewhouseInputs = [
   },
 ];
 
-const Brewhouses = breweryEntityPageFactory<BrewhouseData>("brewhouse", brewhouseInputs);
+const Brewhouses = entityPageFactory<BrewhouseData>("brewhouse", brewhouseInputs);
 
 export default Brewhouses;

@@ -27,8 +27,9 @@ const useAPI = (apisToInclude?: string | string[]) => {
     refetchAll: api.refetchAll,
     invalidateAll: api.invalidateAll,
     queryClient: api.queryClient,
-    BREWERY_ROUTE: api.BREWERY_ROUTE,
+    BREWERY_PATH: api.BREWERY_PATH,
     CURRENT_BREWERY: api.CURRENT_BREWERY,
+    ADMIN_PATH: api.ADMIN_PATH,
     API_URL: api.API_URL,
     APIRequest: api.APIRequest,
   }

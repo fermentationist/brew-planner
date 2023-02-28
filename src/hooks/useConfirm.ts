@@ -43,12 +43,12 @@ const useConfirm = () => {
     });
   };
   
-  const confirmDelete = async (quantity: number, typeOfEntity: string) => {
+  const confirmDelete = async (quantity: number, typeOfEntity: string, pluralTypeOfEntity?: string) => {
     const confirmDelete = await confirmWithInput(
       `Are you sure you want to delete ${quantity > 1 ? "these " : "this "}${
         quantity > 1 ? quantity + " " : ""
       }${
-        quantity > 1 ? typeOfEntity + "s" : typeOfEntity
+        quantity > 1 ? (pluralTypeOfEntity || typeOfEntity + "s") : typeOfEntity
       }? This cannot be undone. Please type "delete" to confirm.`,
       "delete"
     );

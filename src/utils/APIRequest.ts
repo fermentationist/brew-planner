@@ -1,11 +1,13 @@
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance, AxiosError } from "axios";
 import storage from "./storage";
 import { firebaseAuth } from "../context/AuthProvider";
 import { opError } from "./errors";
 import { sleep } from "./helpers";
+import { APIError } from "../types";
 const { getStorage } = storage("brewPlanner");
 
 export const API_URL = import.meta.env.VITE_API_URL;
+export const ADMIN_PATH = `${API_URL}/admin`;
 
 export default class APIRequest {
   config: Record<string, any>;
@@ -13,46 +15,49 @@ export default class APIRequest {
   axiosInstance: AxiosInstance;
   retries: number;
   retryDelay: number;
-  axiosInterceptors: any;
+  axiosRequestInterceptors: any;
+  axiosResponseInterceptors: any;
 
   constructor(config: any) {
     this.config = config;
     this.abortController = new AbortController();
-    this.config.signal = config.signal || this.abortController.signal;
-    this.config.baseURL = config.baseURL;
+    this.config.signal = this.abortController.signal;
+    this.config.baseURL = config.baseURL || API_URL;
+    this.config.timeout = config.timeout ?? 20000;
     this.axiosInstance = axios.create();
     this.retries = config.retries ?? 3;
     this.retryDelay = config.retryDelay ?? 3000;
-    // adding axios interceptors to retry failed requests
-    this.axiosInterceptors = this.axiosInstance.interceptors.response.use(
-      config.requestInterceptor,
-      config.errorInterceptor ||
-        ((error) => {
-          const axiosErrorMessage = error?.message?.toLowerCase();
-          if (
-            error.response?.data?.error?.message
-              .toLowerCase()
-              .includes("invalid token") &&
-            this.retries
-          ) {
-            firebaseAuth.updateCurrentUser(firebaseAuth.currentUser);
-            return this.retry();
-          }
-          if (
-            (axiosErrorMessage.includes("timeout") ||
-              axiosErrorMessage.includes("network error")) &&
-            this.retries
-          ) {
-            return this.retry();
-          }
-          return Promise.reject(error);
-        })
-    );
-
-    // so methods still work if passed as higher-order functions
+    // adding axios error response interceptor to retry failed requests
+    this.axiosResponseInterceptors =
+      this.axiosInstance.interceptors.response.use(
+        config.successResponseInterceptor,
+        config.errorResponseInterceptor || this.defaultErrorResponseInterceptor.bind(this)
+      );
+    
     this.request = this.request.bind(this);
     this.retry = this.retry.bind(this);
     this.abort = this.abort.bind(this);
+  }
+
+  defaultErrorResponseInterceptor(error: AxiosError<APIError>) {
+    const axiosErrorMessage = error?.message?.toLowerCase();
+    if (
+      error.response?.data?.error?.message
+        .toLowerCase()
+        .includes("invalid token") &&
+      this.retries
+    ) {
+      firebaseAuth.updateCurrentUser(firebaseAuth.currentUser);
+      return this.retry();
+    }
+    if (
+      (axiosErrorMessage.includes("timeout") ||
+        axiosErrorMessage.includes("network error")) &&
+      this.retries
+    ) {
+      return this.retry();
+    }
+    return Promise.reject(error);
   }
 
   async request<ResponseType>(
@@ -74,16 +79,10 @@ export default class APIRequest {
 
     const requestConfig = {
       ...this.config,
-      baseURL:
-        this.config.baseURL ??
-        (authState?.user?.role === "admin"
-          ? `${API_URL}/admin`
-          : `${API_URL}/breweries/${authState?.currentBrewery}`),
       headers: {
         ...this.config.headers,
         "Firebase-Token": authState?.accessToken,
       },
-      timeout: 20000,
       ...additionalConfig,
     };
 
@@ -102,7 +101,7 @@ export default class APIRequest {
       })
       .catch((error) => {
         console.error("ERROR in APIRequest:", error);
-        if (requestConfig?.signal?.aborted) {
+        if (this.config?.signal?.aborted) {
           // ignore "CanceledError"
           console.log("pending request aborted by client:", requestConfig);
         } else {

@@ -1,4 +1,4 @@
-import breweryEntityPageFactory from "../../componentFactories/breweryEntityPageFactory";
+import entityPageFactory from "../../componentFactories/entityPageFactory";
 import { HopData } from "../../types";
 import {percentage, percentageMessage, required, requiredMessage} from "../../utils/validationHelpers";
 
@@ -111,6 +111,6 @@ export const hopInputs = [
   },
 ];
 
-const Hops = breweryEntityPageFactory<HopData>("hop", hopInputs);
+const Hops = entityPageFactory<HopData>("hop", hopInputs);
 
 export default Hops;

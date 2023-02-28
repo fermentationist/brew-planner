@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, Dispatch, SetStateAction } from "react";
+import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import AddIcon from "@mui/icons-material/AddCircle";
@@ -21,12 +21,16 @@ function EntityPage<EntityType>({
   entityName,
   inputList = [],
   title,
+  baseURL,
+  pluralEntityName
 }: {
   startLoading: () => void;
   doneLoading: () => void;
   entityName: string;
   inputList: FormInputOptions[];
   title?: string;
+  baseURL?: string;
+  pluralEntityName?: string;
 }) {
   const [tableData, setTableData] = useState([]);
   const [showEntityModal, setShowEntityModal] = useState(false);
@@ -44,9 +48,9 @@ function EntityPage<EntityType>({
     error: entitiesError,
     refetch: refresh,
     APIRequest,
-    BREWERY_ROUTE,
-  } = useAPI(`${entityName}s`);
-  const { generateColumnsFromInputs, preferredUnits } = useConvertUnits();
+    BREWERY_PATH,
+  } = useAPI(pluralEntityName || `${entityName}s`);
+  const { generateColumnsFromInputs } = useConvertUnits();
   useEffect(() => {
     if (isLoading && !entitiesData) {
       enableEntitiesQuery();
@@ -54,7 +58,7 @@ function EntityPage<EntityType>({
     if (!isLoading) {
       if (entitiesData) {
         const dataWithNestedRowData = entitiesData.data?.[
-          `${entityName}s`
+          pluralEntityName || `${entityName}s`
         ]?.map((row: EntityType & { data?: any }) => {
           const rowCopy = { ...row };
           rowCopy.data = { ...row };
@@ -76,6 +80,7 @@ function EntityPage<EntityType>({
     alertError,
     enableEntitiesQuery,
     entityName,
+    pluralEntityName
   ]);
 
   const createOrUpdateEntity = async (formData: EntityType) => {
@@ -84,10 +89,10 @@ function EntityPage<EntityType>({
       ? formData
       : { ...formData, createdBy: auth?.user?.uid };
     const url = editMode
-      ? `/${entityName}s/` + modalData[`${entityName}Uuid`]
-      : `/${entityName}s`;
+      ? `/${pluralEntityName || entityName + "s"}/` + modalData[`${entityName}Uuid`]
+      : `/${pluralEntityName || entityName + "s"}`;
     const apiReq = new APIRequest({
-      baseURL: BREWERY_ROUTE,
+      baseURL: baseURL || BREWERY_PATH,
       url,
       method: editMode ? "patch" : "post",
       data: reqBody,
@@ -113,8 +118,8 @@ function EntityPage<EntityType>({
 
   const deleteEntity = async (entityUuid: string) => {
     const deleteEntityRequest = new APIRequest({
-      baseURL: BREWERY_ROUTE,
-      url: `/${entityName}s/${entityUuid}`,
+      baseURL: baseURL || BREWERY_PATH,
+      url: `/${pluralEntityName || entityName + "s"}/${entityUuid}`,
       method: "delete",
     });
     return deleteEntityRequest.request().catch(async (error: APIError) => {
@@ -130,7 +135,7 @@ function EntityPage<EntityType>({
     );
     console.log("entityUuidsToDelete:", entityUuidsToDelete);
     const qty = entityUuidsToDelete.length;
-    const confirmResult = await confirmDelete(qty, title || entityName);
+    const confirmResult = await confirmDelete(qty, title || entityName, pluralEntityName);
     if (!confirmResult) {
       return;
     }
@@ -148,8 +153,8 @@ function EntityPage<EntityType>({
       console.log(`attempting to delete ${title || entityName}:`, uuid);
       callAlert({
         message: `Deleting ${count} of ${entityUuidsToDelete.length} ${
-          title || entityName
-        }s...`,
+          pluralEntityName || title + "s" || entityName + "s"
+        }`,
         showCloseButton: false,
       });
       await deleteEntity(uuid);

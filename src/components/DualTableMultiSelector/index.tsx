@@ -202,7 +202,7 @@ const DualTableMultiSelector = ({
                 <br />
                 <Divider />
                 <br />
-                <InputLabel>{`Available${
+                <InputLabel>{`Available ${
                   pluralTitle ? pluralTitle : title ? `${title}s` : ""
                 }`}</InputLabel>
                 <ResponsiveDataTable

@@ -1,6 +1,6 @@
-import breweryEntityPageFactory from "../../componentFactories/breweryEntityPageFactory";
+import entityPageFactory from "../../componentFactories/entityPageFactory";
 import { YeastData } from "../../types";
-import {required, requiredMessage, percentage, percentageMessage} from "../../utils/validationHelpers";
+import {required, requiredMessage, percentage, percentageMessage, maxLengthErrorMessageFactory} from "../../utils/validationHelpers";
 
 export const yeastInputs = [
   {
@@ -27,14 +27,14 @@ export const yeastInputs = [
     type: "text",
     width: "250px",
     validation: {maxLength: 100},
-    errorMessages: {maxLength: "Maximum length - 100 characters"},
+    errorMessages: maxLengthErrorMessageFactory(100),
   },
   {
     name: "productId",
     label: "Product ID",
     type: "text",
     validation: {maxLength: 36},
-    errorMessages: {maxLength: "Maximum length - 36 characters"},
+    errorMessages: maxLengthErrorMessageFactory(36),
     width: "250px",
   },
   {
@@ -110,6 +110,6 @@ export const yeastInputs = [
   
 ];
 
-const Yeasts = breweryEntityPageFactory<YeastData>("yeast", yeastInputs);
+const Yeasts = entityPageFactory<YeastData>("yeast", yeastInputs);
 
 export default Yeasts;

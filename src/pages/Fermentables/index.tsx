@@ -1,4 +1,4 @@
-import breweryEntityPageFactory from "../../componentFactories/breweryEntityPageFactory";
+import entityPageFactory from "../../componentFactories/entityPageFactory";
 import { FermentableData } from "../../types";
 import {percentage, percentageMessage, required, requiredMessage} from "../../utils/validationHelpers";
 
@@ -146,6 +146,6 @@ export const fermentableInputs = [
   }
 ];
 
-const Fermentables = breweryEntityPageFactory<FermentableData>("fermentable", fermentableInputs);
+const Fermentables = entityPageFactory<FermentableData>("fermentable", fermentableInputs);
 
 export default Fermentables;

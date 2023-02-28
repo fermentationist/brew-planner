@@ -14,6 +14,10 @@ const menuItems: IMenuItem[] = [
     link: "/users"
   },
   {
+    title: "Breweries",
+    link: "/breweries"
+  },
+  {
     title: "Brewhouses",
     link: "/brewhouses"
   },

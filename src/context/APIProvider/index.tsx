@@ -6,7 +6,7 @@ import {
   useQueryClient,
   UseQueryResult,
 } from "@tanstack/react-query";
-import APIRequest, { API_URL } from "../../utils/APIRequest";
+import APIRequest, { API_URL, ADMIN_PATH } from "../../utils/APIRequest";
 import useAuth from "../../hooks/useAuth";
 import {
   UserData,
@@ -33,7 +33,7 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
   const { auth } = useAuth();
   const deepMemoize = useDeeperMemo();
   const CURRENT_BREWERY = auth?.currentBrewery;
-  const BREWERY_ROUTE = `${API_URL}/breweries/${CURRENT_BREWERY}`;
+  const BREWERY_PATH = `${API_URL}/breweries/${CURRENT_BREWERY}`;
   const [enabledQueries, setEnabledQueries] = useState(
     {} as Record<string, boolean>
   );
@@ -77,8 +77,11 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
     // API Requests
     users: {
       ...useQuery<UsersData, ErrorData>(
-        ["users", auth?.accessToken], // a react-query queryKey is like the dependency array of a useEffect hook, a change in one of the elements will trigger a refetch
-        apiRequest({ url: "/users" }) as QueryFunction<UsersData, QueryKey>,
+        ["users", auth?.accessToken, auth?.user?.role], // a react-query queryKey is like the dependency array of a useEffect hook, a change in one of the elements will trigger a refetch
+        apiRequest({
+          baseURL: auth?.user?.role === "admin" ? ADMIN_PATH : BREWERY_PATH,
+          url: "/users",
+        }) as QueryFunction<UsersData, QueryKey>,
         {
           staleTime: 60 * 1000 * 5,
           enabled: Boolean(enabledQueries.users),
@@ -89,99 +92,112 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
     },
 
     breweries: {
-      ...useQuery<BreweriesData, ErrorData>(["breweries", auth?.accessToken],
-      apiRequest({
-        baseURL: API_URL,
-        url: "/breweries",
-      }) as QueryFunction<BreweriesData, QueryKey>,
-      {
-        staleTime: 60 * 1000 * 10,
-        enabled: Boolean(enabledQueries.breweries),
-      }),
+      ...useQuery<BreweriesData, ErrorData>(
+        ["breweries", auth?.accessToken],
+        apiRequest({
+          url: "/breweries",
+        }) as QueryFunction<BreweriesData, QueryKey>,
+        {
+          staleTime: 60 * 1000 * 10,
+          enabled: Boolean(enabledQueries.breweries),
+        }
+      ),
       enable: useCallback(toggleQueryFn("breweries", true), []),
       disable: useCallback(toggleQueryFn("breweries", false), []),
     },
 
     brewhouses: {
-      ...useQuery<BrewhousesData, ErrorData>(["brewhouses", auth?.currentBrewery, auth?.accessToken],
-      apiRequest({
-        baseURL: BREWERY_ROUTE,
-        url: "/brewhouses",
-      }) as QueryFunction<BrewhousesData, QueryKey>,
-      {
-        staleTime: 60 * 1000 * 10,
-        enabled: Boolean(enabledQueries.brewhouses),
-      }),
+      ...useQuery<BrewhousesData, ErrorData>(
+        ["brewhouses", CURRENT_BREWERY, auth?.accessToken],
+        apiRequest({
+          baseURL: BREWERY_PATH,
+          url: "/brewhouses",
+        }) as QueryFunction<BrewhousesData, QueryKey>,
+        {
+          staleTime: 60 * 1000 * 10,
+          enabled: Boolean(enabledQueries.brewhouses),
+        }
+      ),
       enable: useCallback(toggleQueryFn("brewhouses", true), []),
       disable: useCallback(toggleQueryFn("brewhouses", false), []),
     },
 
     fermentables: {
-      ...useQuery<FermentableData, ErrorData>(["fermentables", auth?.currentBrewery, auth?.accessToken],
-      apiRequest({
-        baseURL: BREWERY_ROUTE,
-        url: "fermentables",
-      }) as QueryFunction<FermentableData, QueryKey>,
-      {
-        staleTime: 60 * 1000 * 10,
-        enabled: Boolean(enabledQueries.fermentables),
-      }),
+      ...useQuery<FermentableData, ErrorData>(
+        ["fermentables", CURRENT_BREWERY, auth?.accessToken],
+        apiRequest({
+          baseURL: BREWERY_PATH,
+          url: "fermentables",
+        }) as QueryFunction<FermentableData, QueryKey>,
+        {
+          staleTime: 60 * 1000 * 10,
+          enabled: Boolean(enabledQueries.fermentables),
+        }
+      ),
       enable: useCallback(toggleQueryFn("fermentables", true), []),
       disable: useCallback(toggleQueryFn("fermentables", false), []),
     },
 
     hops: {
-      ...useQuery<HopData, ErrorData>(["hops", auth?.currentBrewery, auth?.accessToken],
-      apiRequest({
-        baseURL: BREWERY_ROUTE,
-        url: "hops",
-      }) as QueryFunction<HopData, QueryKey>,
-      {
-        staleTime: 60 * 1000 * 10,
-        enabled: Boolean(enabledQueries.hops),
-      }),
+      ...useQuery<HopData, ErrorData>(
+        ["hops", CURRENT_BREWERY, auth?.accessToken],
+        apiRequest({
+          baseURL: BREWERY_PATH,
+          url: "hops",
+        }) as QueryFunction<HopData, QueryKey>,
+        {
+          staleTime: 60 * 1000 * 10,
+          enabled: Boolean(enabledQueries.hops),
+        }
+      ),
       enable: useCallback(toggleQueryFn("hops", true), []),
       disable: useCallback(toggleQueryFn("hops", false), []),
     },
 
     waters: {
-      ...useQuery<WaterData, ErrorData>(["waters", auth?.currentBrewery, auth?.accessToken],
-      apiRequest({
-        baseURL: BREWERY_ROUTE,
-        url: "waters",
-      }) as QueryFunction<WaterData, QueryKey>,
-      {
-        staleTime: 60 * 1000 * 10,
-        enabled: Boolean(enabledQueries.waters),
-      }),
+      ...useQuery<WaterData, ErrorData>(
+        ["waters", CURRENT_BREWERY, auth?.accessToken],
+        apiRequest({
+          baseURL: BREWERY_PATH,
+          url: "waters",
+        }) as QueryFunction<WaterData, QueryKey>,
+        {
+          staleTime: 60 * 1000 * 10,
+          enabled: Boolean(enabledQueries.waters),
+        }
+      ),
       enable: useCallback(toggleQueryFn("waters", true), []),
       disable: useCallback(toggleQueryFn("waters", false), []),
     },
 
     yeasts: {
-      ...useQuery<YeastData, ErrorData>(["yeasts", auth?.currentBrewery, auth?.accessToken],
-      apiRequest({
-        baseURL: BREWERY_ROUTE,
-        url: "yeasts",
-      }) as QueryFunction<YeastData, QueryKey>,
-      {
-        staleTime: 60 * 1000 * 10,
-        enabled: Boolean(enabledQueries.yeasts),
-      }),
+      ...useQuery<YeastData, ErrorData>(
+        ["yeasts", CURRENT_BREWERY, auth?.accessToken],
+        apiRequest({
+          baseURL: BREWERY_PATH,
+          url: "yeasts",
+        }) as QueryFunction<YeastData, QueryKey>,
+        {
+          staleTime: 60 * 1000 * 10,
+          enabled: Boolean(enabledQueries.yeasts),
+        }
+      ),
       enable: useCallback(toggleQueryFn("yeasts", true), []),
       disable: useCallback(toggleQueryFn("yeasts", false), []),
     },
 
     miscs: {
-      ...useQuery<MiscData, ErrorData>(["miscs", auth?.currentBrewery, auth?.accessToken],
-      apiRequest({
-        baseURL: BREWERY_ROUTE,
-        url: "miscs",
-      }) as QueryFunction<MiscData, QueryKey>,
-      {
-        staleTime: 60 * 1000 * 10,
-        enabled: Boolean(enabledQueries.miscs),
-      }),
+      ...useQuery<MiscData, ErrorData>(
+        ["miscs", CURRENT_BREWERY, auth?.accessToken],
+        apiRequest({
+          baseURL: BREWERY_PATH,
+          url: "miscs",
+        }) as QueryFunction<MiscData, QueryKey>,
+        {
+          staleTime: 60 * 1000 * 10,
+          enabled: Boolean(enabledQueries.miscs),
+        }
+      ),
       enable: useCallback(toggleQueryFn("miscs", true), []),
       disable: useCallback(toggleQueryFn("miscs", false), []),
     },
@@ -219,8 +235,9 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
     disableAll,
     queryClient,
     API_URL,
-    BREWERY_ROUTE,
+    BREWERY_PATH,
     CURRENT_BREWERY,
+    ADMIN_PATH,
     APIRequest,
   };
 

@@ -6,6 +6,7 @@ import WatersPage from "../pages/Waters";
 import YeastsPage from "../pages/Yeasts";
 import MiscsPage from "../pages/Miscs";
 import Users from "../pages/Users";
+import Breweries from "../pages/Breweries";
 import withBreweryRequired from "../hoc/withBreweryRequired";
 
 const Brewhouses = withBreweryRequired(BrewhousesPage);
@@ -30,6 +31,10 @@ const routes: Routes = {
   "/home": {
     roles: ["user", "manager", "admin"],
     component: <Home />
+  },
+  "/breweries": {
+    roles: ["admin"],
+    component: <Breweries />
   },
   "/brewhouses": {
     roles: ["user", "manager", "admin"],

@@ -1,6 +1,6 @@
-import breweryEntityPageFactory from "../../componentFactories/breweryEntityPageFactory";
+import entityPageFactory from "../../componentFactories/entityPageFactory";
 import { MiscData } from "../../types";
-import {required, requiredMessage} from "../../utils/validationHelpers";
+import {maxLengthErrorMessageFactory, required, requiredMessage} from "../../utils/validationHelpers";
 
 export const miscInputs = [
   {
@@ -8,7 +8,7 @@ export const miscInputs = [
     label: "Name",
     type: "text",
     validation: {...required, maxLength: 100},
-    errorMessages: {...requiredMessage, maxLength: "Maximum length - 100 characters"},
+    errorMessages: {...requiredMessage, ...maxLengthErrorMessageFactory(100)},
     width: "250px",
   },
   {
@@ -42,6 +42,6 @@ export const miscInputs = [
   
 ];
 
-const Miscs = breweryEntityPageFactory<MiscData>("misc", miscInputs, "miscellaneous addition");
+const Miscs = entityPageFactory<MiscData>({entityName: "misc", inputList: miscInputs, title: "miscellaneous addition"});
 
 export default Miscs;

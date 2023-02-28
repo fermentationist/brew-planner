@@ -1,6 +1,6 @@
-import breweryEntityPageFactory from "../../componentFactories/breweryEntityPageFactory";
+import entityPageFactory from "../../componentFactories/entityPageFactory";
 import { WaterData } from "../../types";
-import {required, requiredMessage, positiveNumber, positiveNumberMessage} from "../../utils/validationHelpers";
+import {required, requiredMessage, positiveNumber, positiveNumberMessage, maxLengthErrorMessageFactory} from "../../utils/validationHelpers";
 
 export const waterInputs = [
   {
@@ -8,7 +8,7 @@ export const waterInputs = [
     label: "Name",
     type: "text",
     validation: {...required, maxLength: 100},
-    errorMessages: {...requiredMessage, maxLength: "Maximum length - 100 characters"},
+    errorMessages: {...requiredMessage, ...maxLengthErrorMessageFactory(100)},
     width: "250px",
   },
   {
@@ -90,6 +90,6 @@ export const waterInputs = [
   },
 ];
 
-const Waters = breweryEntityPageFactory<WaterData>("water", waterInputs, "water profile");
+const Waters = entityPageFactory<WaterData>({entityName: "water", inputList: waterInputs, title: "water profile"});
 
 export default Waters;
