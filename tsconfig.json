@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "lib": ["es2022"],
     "module": "system", 
     "noImplicitAny": true,
     "jsx": "preserve",
