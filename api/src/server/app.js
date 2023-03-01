@@ -14,8 +14,7 @@ import { opError, inputError } from "./errors.js";
 
 const app = express();
 
-const TEST_MODE = process.env.TEST_MODE === "false" ? false : true;
-const SERVE_MODE = (process.env.PROD_MODE === "true" || process.env.SERVE_MODE === "true") ? true : false;
+const PROD_MODE = process.env.PROD_MODE === "true" ? true : false;
 // const STATIC_FOLDER = SERVE_MODE ? "../client" : "./";
 const PORT = process.env.SERVER_PORT;
 
@@ -47,7 +46,10 @@ app.set("query parser", str => {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-if (TEST_MODE) {
+if (PROD_MODE) {
+  // serve static assets from build/client
+  app.use(express.static("build/client"));
+} else {
   //serve documentation
   app.use("/docs", express.static("doc"));
 }
@@ -66,9 +68,10 @@ app.use((req, res, next) => {
 
 app.use("/api", router);
 
-app.get("/*", (req, res, next) => {// catch-all route
-  const clientPath = SERVE_MODE ? "../client/index.html" : "../../../index.html";
+app.get("/*", (req, res, next) => {// catch-all route, serve SPA
+  const clientPath = PROD_MODE ? "../../../build/client/index.html" : "../../../index.html";
   const newPath = path.join(dirName, clientPath);
+  res.setHeader("Content-Type", "text/html");
   res.sendFile(newPath);
 });
 
