@@ -22,12 +22,12 @@ const opt = { checkFalsy: true };
  * @apiSuccess {String} breweries.breweryUuid A unique identifier for the brewery
  * @apiSuccess {String} breweries.name A unique name for the brewery
  * @apiSuccess {Object} breweries.address
- * @apiSuccess {String} breweries.address.street
- * @apiSuccess {String} breweries.address.unit
- * @apiSuccess {String} breweries.address.city
- * @apiSuccess {String} breweries.address.state
- * @apiSuccess {String} breweries.address.zip
- * @apiSuccess {String} breweries.address.country
+ * @apiSuccess {String} breweries.street
+ * @apiSuccess {String} breweries.unit
+ * @apiSuccess {String} breweries.city
+ * @apiSuccess {String} breweries.state
+ * @apiSuccess {String} breweries.zip
+ * @apiSuccess {String} breweries.country
  */
 
 export const getBreweries = async (req, res, next) => {
@@ -126,13 +126,12 @@ export const createBrewery = [createBreweryValidation, createBreweryFunction];
  * @apiUse authHeader
  * @apiParam {String} breweryUuid The brewery's unique identifier
  * @apiBody {String} [name] A unique name for the brewery
- * @apiBody {Object} [address] The brewery's physical address
- * @apiBody {String} [address.street]
- * @apiBody {String} [address.unit]
- * @apiBody {String} [address.city]
- * @apiBody {String{length: 2 characters}} [address.state]
- * @apiBody {String} [address.zip]
- * @apiBody {String} [address.country]
+ * @apiBody {String} [street]
+ * @apiBody {String} [unit]
+ * @apiBody {String} [city]
+ * @apiBody {String{length: 2 characters}} [state]
+ * @apiBody {String} [zip]
+ * @apiBody {String} [country]
  * @apiUse successResponse
  * @apiSuccess {String} breweryUuid
  */

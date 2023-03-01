@@ -1,4 +1,4 @@
-import Tables from "../models/Tables.js";
+import Models from "../models/Models.js";
 import localCache from "./localCache/index.js";
 
 export const MISC_TYPES = [
@@ -11,7 +11,7 @@ export const MISC_TYPES = [
 ];
 
 export const getMiscs = (breweryUuid) => {
-  return Tables.misc.select(breweryUuid && { breweryUuid });
+  return Models.misc.select(breweryUuid && { breweryUuid });
 };
 
 export const createMisc = async (breweryUuid, miscData) => {
@@ -20,12 +20,12 @@ export const createMisc = async (breweryUuid, miscData) => {
     breweryUuid,
     ...miscData,
   };
-  const { insertId } = await Tables.misc.insert([miscRow], false);
+  const { insertId } = await Models.misc.insert([miscRow], false);
   if (miscUuid) {
     // if user passed a UUID for the new misc
     return miscUuid;
   }
-  const [newMisc] = await Tables.misc.select({
+  const [newMisc] = await Models.misc.select({
     miscKey: insertId,
   });
   localCache.invalidate("misc");
@@ -33,7 +33,7 @@ export const createMisc = async (breweryUuid, miscData) => {
 };
 
 export const updateMisc = async (breweryUuid, miscUuid, updateData) => {
-  const result = await Tables.misc.update(updateData, {
+  const result = await Models.misc.update(updateData, {
     breweryUuid,
     miscUuid,
   });
@@ -42,7 +42,7 @@ export const updateMisc = async (breweryUuid, miscUuid, updateData) => {
 };
 
 export const deleteMisc = async (breweryUuid, miscUuid) => {
-  const result = await Tables.misc.delete({
+  const result = await Models.misc.delete({
     breweryUuid,
     miscUuid,
   });

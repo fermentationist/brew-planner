@@ -32,8 +32,8 @@ export type ReactQueryResult = UseQueryResult<any, any> & {
 const APIProvider = ({ children }: { children: ChildProps }) => {
   const { auth } = useAuth();
   const deepMemoize = useDeeperMemo();
-  const CURRENT_BREWERY = auth?.currentBrewery;
-  const BREWERY_PATH = `${API_URL}/breweries/${CURRENT_BREWERY}`;
+  const currentBrewery = auth?.currentBrewery;
+  const breweryPath = `${API_URL}/breweries/${currentBrewery}`;
   const [enabledQueries, setEnabledQueries] = useState(
     {} as Record<string, boolean>
   );
@@ -79,7 +79,7 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
       ...useQuery<UsersData, ErrorData>(
         ["users", auth?.accessToken, auth?.user?.role], // a react-query queryKey is like the dependency array of a useEffect hook, a change in one of the elements will trigger a refetch
         apiRequest({
-          baseURL: auth?.user?.role === "admin" ? ADMIN_PATH : BREWERY_PATH,
+          baseURL: auth?.user?.role === "admin" ? ADMIN_PATH : breweryPath,
           url: "/users",
         }) as QueryFunction<UsersData, QueryKey>,
         {
@@ -108,9 +108,9 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
 
     brewhouses: {
       ...useQuery<BrewhousesData, ErrorData>(
-        ["brewhouses", CURRENT_BREWERY, auth?.accessToken],
+        ["brewhouses", currentBrewery, auth?.accessToken],
         apiRequest({
-          baseURL: BREWERY_PATH,
+          baseURL: breweryPath,
           url: "/brewhouses",
         }) as QueryFunction<BrewhousesData, QueryKey>,
         {
@@ -124,9 +124,9 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
 
     fermentables: {
       ...useQuery<FermentableData, ErrorData>(
-        ["fermentables", CURRENT_BREWERY, auth?.accessToken],
+        ["fermentables", currentBrewery, auth?.accessToken],
         apiRequest({
-          baseURL: BREWERY_PATH,
+          baseURL: breweryPath,
           url: "fermentables",
         }) as QueryFunction<FermentableData, QueryKey>,
         {
@@ -140,9 +140,9 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
 
     hops: {
       ...useQuery<HopData, ErrorData>(
-        ["hops", CURRENT_BREWERY, auth?.accessToken],
+        ["hops", currentBrewery, auth?.accessToken],
         apiRequest({
-          baseURL: BREWERY_PATH,
+          baseURL: breweryPath,
           url: "hops",
         }) as QueryFunction<HopData, QueryKey>,
         {
@@ -156,9 +156,9 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
 
     waters: {
       ...useQuery<WaterData, ErrorData>(
-        ["waters", CURRENT_BREWERY, auth?.accessToken],
+        ["waters", currentBrewery, auth?.accessToken],
         apiRequest({
-          baseURL: BREWERY_PATH,
+          baseURL: breweryPath,
           url: "waters",
         }) as QueryFunction<WaterData, QueryKey>,
         {
@@ -172,9 +172,9 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
 
     yeasts: {
       ...useQuery<YeastData, ErrorData>(
-        ["yeasts", CURRENT_BREWERY, auth?.accessToken],
+        ["yeasts", currentBrewery, auth?.accessToken],
         apiRequest({
-          baseURL: BREWERY_PATH,
+          baseURL: breweryPath,
           url: "yeasts",
         }) as QueryFunction<YeastData, QueryKey>,
         {
@@ -188,9 +188,9 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
 
     miscs: {
       ...useQuery<MiscData, ErrorData>(
-        ["miscs", CURRENT_BREWERY, auth?.accessToken],
+        ["miscs", currentBrewery, auth?.accessToken],
         apiRequest({
-          baseURL: BREWERY_PATH,
+          baseURL: breweryPath,
           url: "miscs",
         }) as QueryFunction<MiscData, QueryKey>,
         {
@@ -235,8 +235,8 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
     disableAll,
     queryClient,
     API_URL,
-    BREWERY_PATH,
-    CURRENT_BREWERY,
+    breweryPath,
+    currentBrewery,
     ADMIN_PATH,
     APIRequest,
   };

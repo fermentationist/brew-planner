@@ -1,4 +1,4 @@
-import EntityPage from "../pages/EntityPage";
+import EntityPage from "../components/EntityPage";
 import { FormInputOptions } from "../components/FormModal";
 import { ComponentType } from "react";
 

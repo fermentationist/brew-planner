@@ -1,5 +1,5 @@
 import db from "../src/services/db/index.js";
-import {convertObjectUUIDsToBuffers, convertUuidToBuffer} from "../src/models/Table.js";
+import {convertObjectUUIDsToBuffers, convertUuidToBuffer} from "../src/models/Model.js";
 import assert from "assert";
 
 export const expectError = function (p, errorName, testDescription) {

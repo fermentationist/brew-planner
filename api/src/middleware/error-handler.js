@@ -1,4 +1,7 @@
-/* eslint no-unused-vars: "off" */
+/* 
+global process, console
+eslint no-unused-vars: off
+*/
 const errorHandler = (err, req, res, next) => {
   res.error = err;
   if (!err.isCustomError) {

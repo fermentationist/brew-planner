@@ -1,4 +1,4 @@
-/* global describe, before, it, after */
+/* global describe, before, it, after, process, setTimeout */
 import db from "../index.js";
 import assert from "assert";
 import {randomInt, randomString} from "../../../utils/helpers.js";
@@ -430,7 +430,7 @@ export default describe("database", () => {
             );
 
             assert(
-              results[0].hasOwnProperty("message"),
+              Object.hasOwn(results[0], "message"),
               "Result should have a message"
             );
 
@@ -463,7 +463,7 @@ export default describe("database", () => {
       );
 
       assert(
-        result.hasOwnProperty("message"),
+        Object.hasOwn(result, "message"),
         "Result should have a message"
       );
     });

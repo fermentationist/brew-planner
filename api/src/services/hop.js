@@ -1,10 +1,10 @@
-import Tables from "../models/Tables.js";
+import Models from "../models/Models.js";
 import localCache from "./localCache/index.js";
 
 export const HOP_FORMS = ["Pellet", "Plug", "Leaf"];
 
 export const getHops = (breweryUuid) => {
-  return Tables.hop.select(breweryUuid && { breweryUuid });
+  return Models.hop.select(breweryUuid && { breweryUuid });
 };
 
 export const createHop = async (breweryUuid, hopData) => {
@@ -13,12 +13,12 @@ export const createHop = async (breweryUuid, hopData) => {
     breweryUuid,
     ...hopData,
   };
-  const { insertId } = await Tables.hop.insert([hopRow], false);
+  const { insertId } = await Models.hop.insert([hopRow], false);
   if (hopUuid) {
     // if user passed a UUID for the new hop
     return hopUuid;
   }
-  const [newHop] = await Tables.hop.select({
+  const [newHop] = await Models.hop.select({
     hopKey: insertId,
   });
   localCache.invalidate("hop");
@@ -26,7 +26,7 @@ export const createHop = async (breweryUuid, hopData) => {
 };
 
 export const updateHop = async (breweryUuid, hopUuid, updateData) => {
-  const result = await Tables.hop.update(updateData, {
+  const result = await Models.hop.update(updateData, {
     breweryUuid,
     hopUuid,
   });
@@ -35,7 +35,7 @@ export const updateHop = async (breweryUuid, hopUuid, updateData) => {
 };
 
 export const deleteHop = async (breweryUuid, hopUuid) => {
-  const result = await Tables.hop.delete({
+  const result = await Models.hop.delete({
     breweryUuid,
     hopUuid,
   });

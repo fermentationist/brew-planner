@@ -48,7 +48,7 @@ function EntityPage<EntityType>({
     error: entitiesError,
     refetch: refresh,
     APIRequest,
-    BREWERY_PATH,
+    breweryPath,
   } = useAPI(pluralEntityName || `${entityName}s`);
   const { generateColumnsFromInputs } = useConvertUnits();
   useEffect(() => {
@@ -92,7 +92,7 @@ function EntityPage<EntityType>({
       ? `/${pluralEntityName || entityName + "s"}/` + modalData[`${entityName}Uuid`]
       : `/${pluralEntityName || entityName + "s"}`;
     const apiReq = new APIRequest({
-      baseURL: baseURL || BREWERY_PATH,
+      baseURL: baseURL || breweryPath,
       url,
       method: editMode ? "patch" : "post",
       data: reqBody,
@@ -118,7 +118,7 @@ function EntityPage<EntityType>({
 
   const deleteEntity = async (entityUuid: string) => {
     const deleteEntityRequest = new APIRequest({
-      baseURL: baseURL || BREWERY_PATH,
+      baseURL: baseURL || breweryPath,
       url: `/${pluralEntityName || entityName + "s"}/${entityUuid}`,
       method: "delete",
     });

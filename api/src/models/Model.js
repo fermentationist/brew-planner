@@ -55,7 +55,7 @@ const cleanResults = (resultsArray) => {
   });
 }
 
-export default class Table {
+export default class Model {
   constructor (tableName) {
     this.tableName = tableName;
     this.columns = [];

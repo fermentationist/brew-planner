@@ -264,7 +264,7 @@ const useConvertUnits = () => {
     renameTempPreferredUnits,
     createColumn,
     generateColumnsFromInputs,
-    unitDefaults,
+    UNIT_DEFAULTS: unitDefaults,
     preferredUnits: memoizedPreferredUnits,
   };
 };

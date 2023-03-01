@@ -1,4 +1,4 @@
-import Tables from "../models/Tables.js";
+import Models from "../models/Models.js";
 import localCache from "./localCache/index.js";
 
 export const YEAST_TYPES = [
@@ -12,7 +12,7 @@ export const YEAST_TYPES = [
 export const FLOCCULATION_TYPES = ["Low", "Medium", "High", "Very High"];
 
 export const getYeasts = (breweryUuid) => {
-  return Tables.yeast.select(breweryUuid && { breweryUuid });
+  return Models.yeast.select(breweryUuid && { breweryUuid });
 };
 
 export const createYeast = async (breweryUuid, yeastData) => {
@@ -21,12 +21,12 @@ export const createYeast = async (breweryUuid, yeastData) => {
     breweryUuid,
     ...yeastData,
   };
-  const { insertId } = await Tables.yeast.insert([yeastRow], false);
+  const { insertId } = await Models.yeast.insert([yeastRow], false);
   if (yeastUuid) {
     // if user passed a UUID for the new yeast
     return yeastUuid;
   }
-  const [newYeast] = await Tables.yeast.select({
+  const [newYeast] = await Models.yeast.select({
     yeastKey: insertId,
   });
   localCache.invalidate("yeast");
@@ -34,7 +34,7 @@ export const createYeast = async (breweryUuid, yeastData) => {
 };
 
 export const updateYeast = async (breweryUuid, yeastUuid, updateData) => {
-  const result = await Tables.yeast.update(updateData, {
+  const result = await Models.yeast.update(updateData, {
     breweryUuid,
     yeastUuid,
   });
@@ -43,7 +43,7 @@ export const updateYeast = async (breweryUuid, yeastUuid, updateData) => {
 };
 
 export const deleteYeast = async (breweryUuid, yeastUuid) => {
-  const result = await Tables.yeast.delete({
+  const result = await Models.yeast.delete({
     breweryUuid,
     yeastUuid,
   });

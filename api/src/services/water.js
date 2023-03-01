@@ -1,8 +1,8 @@
-import Tables from "../models/Tables.js";
+import Models from "../models/Models.js";
 import localCache from "./localCache/index.js";
 
 export const getWaters = (breweryUuid) => {
-  return Tables.water.select(breweryUuid && { breweryUuid });
+  return Models.water.select(breweryUuid && { breweryUuid });
 };
 
 export const createWater = async (breweryUuid, waterData) => {
@@ -11,12 +11,12 @@ export const createWater = async (breweryUuid, waterData) => {
     breweryUuid,
     ...waterData,
   };
-  const { insertId } = await Tables.water.insert([waterRow], false);
+  const { insertId } = await Models.water.insert([waterRow], false);
   if (waterUuid) {
     // if user passed a UUID for the new water
     return waterUuid;
   }
-  const [newWater] = await Tables.water.select({
+  const [newWater] = await Models.water.select({
     waterKey: insertId,
   });
   localCache.invalidate("water");
@@ -24,7 +24,7 @@ export const createWater = async (breweryUuid, waterData) => {
 };
 
 export const updateWater = async (breweryUuid, waterUuid, updateData) => {
-  const result = await Tables.water.update(updateData, {
+  const result = await Models.water.update(updateData, {
     breweryUuid,
     waterUuid,
   });
@@ -33,7 +33,7 @@ export const updateWater = async (breweryUuid, waterUuid, updateData) => {
 };
 
 export const deleteWater = async (breweryUuid, waterUuid) => {
-  const result = await Tables.water.delete({
+  const result = await Models.water.delete({
     breweryUuid,
     waterUuid,
   });

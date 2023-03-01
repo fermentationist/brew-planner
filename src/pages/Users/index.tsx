@@ -27,7 +27,7 @@ const Users = function ({
   const { auth, sendPasswordResetEmail } = useAuth();
   const { callAlert, alertError, alertErrorProm, resetAlertState } = useAlert();
   const { confirmDelete, confirm } = useConfirm();
-  const {users: usersQuery, breweries: breweriesQuery, APIRequest, ADMIN_PATH, BREWERY_PATH} = useAPI(["users", "breweries"]);
+  const {users: usersQuery, breweries: breweriesQuery, APIRequest, ADMIN_PATH, breweryPath} = useAPI(["users", "breweries"]);
   
   useEffect(() => {
     if (usersQuery && breweriesQuery) {
@@ -79,7 +79,7 @@ const Users = function ({
 
   const deleteSingleUser = async (uid: string) => {
     const deleteUser = new APIRequest({
-      baseURL: auth?.user?.role === "admin" ? ADMIN_PATH : BREWERY_PATH,
+      baseURL: auth?.user?.role === "admin" ? ADMIN_PATH : breweryPath,
       url: `/users/${uid}`,
       method: "delete"
     });
@@ -175,7 +175,7 @@ const Users = function ({
           };
     console.log("ADMIN_PATH:", ADMIN_PATH)
     const apiReq = new APIRequest({
-      baseURL: auth?.user?.role === "admin" ? ADMIN_PATH : BREWERY_PATH,
+      baseURL: auth?.user?.role === "admin" ? ADMIN_PATH : breweryPath,
       url: mode === "create" ? "/users" : "/users/" + userData?.uid,
       method: mode === "create" ? "post" : "patch",
       data: reqBody
