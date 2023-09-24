@@ -10,6 +10,7 @@ import { AuthObject, ChildProps } from "../../types";
 import firebaseConfig from "../../config/firebaseConfig";
 import storage from "../../utils/storage";
 import useDeeperMemo from "../../hooks/useDeeperMemo";
+import { stringifyObjectWithFunctions } from "../../utils/helpers";
 const { setStorage, getStorage } = storage("brewPlanner");
 
 // Initialize Firebase
@@ -35,7 +36,7 @@ export const AuthContext = createContext<IAuthContext>({
 const AuthProvider = ({children}:{children: ChildProps}) => {
   const initialState = getStorage("authState") || { loaded: false };
   const [authState, setAuthState] = useState(initialState as AuthObject);
-  const [tokenRefresh, setTokenRefresh] = useState(false);
+  // const [tokenRefresh, setTokenRefresh] = useState(false);
   const deepMemoize = useDeeperMemo();
 
   const setAuth = useCallback((newState: AuthObject | ((prevState: any) => any)) => {
@@ -44,13 +45,13 @@ const AuthProvider = ({children}:{children: ChildProps}) => {
 
   useEffect(() => {
     // when authState is updated, save it to localStorage
-    console.log("authState updated:", authState)
+    console.log("saving authState to localStorage:", authState)
     setStorage("authState", (authState));
-  }, [authState]);
+  }, [stringifyObjectWithFunctions(authState)]); // stringifying dependency (authState) so that useEffect will only be called when it actually changes
 
   const resetAuth = useCallback(() => {
     console.log("resetting auth");
-    setTokenRefresh(true);
+    // setTokenRefresh(true);
     setAuth({
       firebaseUser: null,
       user: null,
@@ -62,29 +63,25 @@ const AuthProvider = ({children}:{children: ChildProps}) => {
   }, [setAuth]);
 
   useEffect(() => {
-    console.log("AuthProvider useEffect");
-    const tokenExpired =
-      tokenRefresh ||
-      (authState.tokenExpiration && Date.now() >= authState.tokenExpiration)
-        ? true
-        : false;
-    if (tokenExpired) {
-      console.log("token expired");
-      // logout();
-      firebaseAuth.updateCurrentUser(authState.firebaseUser);
-    } else {
-      console.log("token not expired");
-    }
+    // const tokenExpired =
+    //   // tokenRefresh ||
+    //   (authState.tokenExpiration && Date.now() >= authState.tokenExpiration)
+    //     ? true
+    //     : false;
+    // if (tokenExpired) {
+    //   // logout();
+    //   firebaseAuth.updateCurrentUser(authState.firebaseUser);
+    // } 
     // was previously using firebaseAuth.onAuthStateChanged
+    console.log("useEffect adding onIdTokenChanged listener...")
     const removeListener = firebaseAuth.onIdTokenChanged((authUser: any) => {
-      console.log("idTokenChanged.");
-      console.log("tokenExpired:", tokenExpired)
-      console.log("authUser:", authUser)
+      console.log("authUser in onIdTokenChanged:", authUser)
       if (!authUser) {
         resetAuth();
       } else {
-        authUser.getIdTokenResult(tokenExpired).then((result: any) => {
-          setTokenRefresh(false);
+        authUser.getIdTokenResult(
+          // tokenExpired
+          ).then((result: any) => {
           setAuth(prevState => ({
             ...prevState,
             firebaseUser: authUser,
@@ -109,7 +106,7 @@ const AuthProvider = ({children}:{children: ChildProps}) => {
       console.log("removing auth state listener");
       removeListener();
     };
-  }, [authState.currentBrewery, authState.tokenExpiration, authState.accessToken, authState.firebaseUser, tokenRefresh, resetAuth, setAuth]);
+  }, [resetAuth, setAuth]);
 
   const login = useCallback(async (email: string, password: string) => {
     console.log("login called.");
@@ -121,6 +118,13 @@ const AuthProvider = ({children}:{children: ChildProps}) => {
       console.log(`Error logging in user ${email}`);
       console.error(err);
     });
+    setAuthState(prevState => {
+      return {
+        ...prevState,
+        loaded: false,
+        accessToken: credentials?.user?.accessToken || null
+      }
+    })
     return credentials?.user?.accessToken || false;
   }, []);
 

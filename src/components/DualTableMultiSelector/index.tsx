@@ -175,8 +175,12 @@ const DualTableMultiSelector = ({
     <StyledBox className={className}>
       <Stack>
         <FlexRow>
-          <InputLabel>{pluralTitle ? pluralTitle : title ? `${title}s` : ""}</InputLabel>
-          <Tooltip title={`Edit${title ? " " + title + "s" : ""}`}>
+          <InputLabel>{
+                  pluralTitle ? ` ${pluralTitle}` : title ? ` ${title}s` : ""
+                }</InputLabel>
+          <Tooltip title={`Edit${
+                  pluralTitle ? ` ${pluralTitle}` : title ? ` ${title}s` : ""
+                }`}>
             <IconButton onClick={() => setShowSelectorModal(true)}>
               <CreateIcon />
             </IconButton>
@@ -191,7 +195,7 @@ const DualTableMultiSelector = ({
             >
               <>
                 <InputLabel>{`Selected${
-                  pluralTitle ? pluralTitle : title ? `${title}s` : ""
+                  pluralTitle ? ` ${pluralTitle}` : title ? ` ${title}s` : ""
                 }`}</InputLabel>
                 <StyledSimpleTable
                   columns={selectedColumns}
@@ -202,8 +206,8 @@ const DualTableMultiSelector = ({
                 <br />
                 <Divider />
                 <br />
-                <InputLabel>{`Available ${
-                  pluralTitle ? pluralTitle : title ? `${title}s` : ""
+                <InputLabel>{`Available${
+                  pluralTitle ? ` ${pluralTitle}` : title ? ` ${title}s` : ""
                 }`}</InputLabel>
                 <ResponsiveDataTable
                   data={availableOptions}

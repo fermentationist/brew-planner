@@ -8,6 +8,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import Tooltip from "@mui/material/Tooltip";
 import DatePopper from "../DatePopper";
 import { memo } from "react";
+import { deepEquals } from "../../utils/helpers";
 
 let cols: any[] = [];
 
@@ -63,7 +64,6 @@ const DataTable = ({
   refresh?: () => void;
   className?: string;
 }) => {
-  console.log("\nDataTable loading...\n")
   cols = columns;
   const tableOptions: MUIDataTableOptions = {
     jumpToPage: true,
@@ -103,8 +103,11 @@ const DataTable = ({
 };
 
 export default memo(DataTable, (prevProps, nextProps) => {
-  return prevProps.columns === nextProps.columns && prevProps.data === nextProps.data && prevProps.options === nextProps.options;
+  return deepEquals(prevProps, nextProps);
 });
+
+
+
 
 export type DataTableColumn = MUIDataTableColumn;
 export type DataTableColumnOptions = MUIDataTableColumnOptions;

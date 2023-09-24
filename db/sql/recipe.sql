@@ -1,13 +1,13 @@
 CREATE TABLE IF NOT EXISTS recipe (
   recipe_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  recipe_uuid BINARY (16) NOT NULL,
-  brewery_uuid BINARY (16) NOT NULL UNIQUE,
-  CONSTRAINT fk_brewery_uuid FOREIGN KEY (brewery_uuid) REFERENCES brewery (brewery_uuid),
+  recipe_uuid BINARY (16) NOT NULL UNIQUE,
+  brewery_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_recipe_brewery_uuid FOREIGN KEY (brewery_uuid) REFERENCES brewery (brewery_uuid) ON DELETE CASCADE,
   name VARCHAR (100) NOT NULL,
   UNIQUE KEY (brewery_uuid, name),
   type ENUM ("Extract", "Partial Mash", "All Grain") DEFAULT "All Grain",
-  brewer VARCHAR (100),
-  asst_brewer VARCHAR (100),
+  -- brewer VARCHAR (100),
+  -- asst_brewer VARCHAR (100),
   batch_size DECIMAL (10, 4), -- liters
   og DECIMAL (4, 3), -- specific gravity (SG)
   fg DECIMAL (4, 3), -- specific gravity (SG)
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS recipe (
   taste_rating DECIMAL (4, 2), -- a number between 0 and 50
   age INT, -- days to age after packaging
   age_temp DECIMAL (5, 2), -- degrees Celcius
-  date TIMESTAMP, -- beerxml uses string
+  -- date TIMESTAMP, -- beerxml uses string
   carbonation DECIMAL (5, 2), -- in volumes of CO2
   forced_carbonation BOOLEAN,
   priming_sugar_name VARCHAR (25), -- type of priming sugar

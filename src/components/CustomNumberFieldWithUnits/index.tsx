@@ -32,6 +32,7 @@ const CustomNumberFieldWithUnits = forwardRef(
         : initialDefaultValue;
     }, []);
     const memoizedInitialDefaultUnit = useMemo(() => initialDefaultUnit, []);
+
     const [controlledValue, setControlledValue] = useState<number | string>(
       memoizedInitialDefaultValue
     );
@@ -40,10 +41,11 @@ const CustomNumberFieldWithUnits = forwardRef(
       () => getAltUnitSelections(memoizedInitialDefaultUnit),
       []
     );
-    
+
     const label = `${
       props.internalLabel || props.label || props.name
     } (${initialDefaultUnit})`;
+    
     const valueRef = useRef(memoizedInitialDefaultValue);
     const unitRef = useRef(memoizedInitialDefaultUnit);
 
@@ -58,12 +60,11 @@ const CustomNumberFieldWithUnits = forwardRef(
           : convertedValue;
       valueRef.current = value;
       setControlledValue(value);
-      props.callback && props.callback(newValue, props.convertOnUnitChange);
+      props.callback && props.callback(newValue, false);
       return props.onChange && props.onChange(event);
     };
 
     const callSetPreferredUnit = (unit: string) => {
-      console.log("props.preferredUnitKey in callSetPreferredUnit:", props.preferredUnitKey)
       const prevUnitToCanonical = createConvertFunction(
         "canonical",
         unitRef.current // previous unit    
@@ -84,6 +85,7 @@ const CustomNumberFieldWithUnits = forwardRef(
           convertedValue && (props.maxDecPlaces ?? null)
             ? Number(Number(convertedValue).toFixed(props.maxDecPlaces))
             : Number(convertedValue);
+            
         valueRef.current = newConvertedValue;
         setControlledValue(newConvertedValue);
       }
@@ -114,6 +116,7 @@ const CustomNumberFieldWithUnits = forwardRef(
         setPreferredUnit={callSetPreferredUnit}
         parseUnit={parseUnit}
         ref={forwardedRef}
+        convertOnUnitChange={props.convertOnUnitChange}
       />
     );
   }
@@ -126,6 +129,7 @@ interface InternalComponentProps extends CustomNumberFieldWithUnitsProps {
   defaultUnit: string;
   parseUnit: (unit: string) => string[][];
   setPreferredUnit: (unit: string) => void;
+  convertOnUnitChange?: boolean;
 }
 
 const InternalComponent = forwardRef(

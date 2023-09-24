@@ -4,7 +4,6 @@ import storage from "../../utils/storage";
 export const GlobalStateContext = createContext([{}, (): null => null]);
 
 const GlobalStateProvider = function (props: PropsWithChildren<any>) {
-  console.log("loading GlobalStateProvider")
   const {getStorage, setStorage} = storage("brewPlanner");
   const initialState = getStorage("globalState") || {};
   const [globalState, setState] = useState(initialState);
@@ -16,6 +15,7 @@ const GlobalStateProvider = function (props: PropsWithChildren<any>) {
 
   useEffect(() => {
     // when globalState is updated, save globalState to localStorage
+    console.log("globalState updated:", globalState)
     setStorage("globalState", globalState);
   }, [globalState, setStorage]);
 

@@ -1,5 +1,5 @@
 import { isExistingUid } from "./users.js";
-import * as hopService from "../services/hop.js";
+import * as mashService from "../services/mash.js";
 import * as validate from "../middleware/input-validation.js";
 import { isExistingBreweryUuid } from "./breweries.js";
 import { inputError } from "../server/errors.js";
@@ -9,26 +9,26 @@ import { rejectOnFalse, numberValidator } from "../utils/helpers.js";
 
 const opt = { checkFalsy: true };
 
-const hopUuidChecker = (input) =>
-  hopService.isExistingHopAttribute(input, "hopUuid");
-const isExistingHopUuid = rejectOnFalse(hopUuidChecker);
+const mashUuidChecker = (input) =>
+  mashService.isExistingMashAttribute(input, "mashUuid");
+const isExistingMashUuid = rejectOnFalse(mashUuidChecker);
 
 const isPercentage = numberValidator({ min: 0, max: 100 });
 
-const validHopFormChecker = (input) =>
-  hopService.HOP_FORMS.includes(input);
-const isValidHopForm = rejectOnFalse(validHopFormChecker);
+const validMashFormChecker = (input) =>
+  mashService.HOP_FORMS.includes(input);
+const isValidMashForm = rejectOnFalse(validMashFormChecker);
 
-const customHopNameValidator = async (req, res, next) => {
-  // ensures that Hop name is unique (for the current brewery)
-  const {breweryUuid, hopUuid} = req.params;
+const customMashNameValidator = async (req, res, next) => {
+  // ensures that Mash name is unique (for the current brewery)
+  const {breweryUuid, mashUuid} = req.params;
   const { name } = req.body;
   const nameAlreadyExists =
-    await hopService.isExistingHopAttribute(name, "name", {
+    await mashService.isExistingMashAttribute(name, "name", {
       breweryUuid,
     });
-  const nameBelongsToCurrentHop = hopUuid && await hopService.isExistingHopAttribute(name, "name", {hopUuid});
-  if (nameAlreadyExists && !nameBelongsToCurrentHop) {
+  const nameBelongsToCurrentMash = mashUuid && await mashService.isExistingMashAttribute(name, "name", {mashUuid});
+  if (nameAlreadyExists && !nameBelongsToCurrentMash) {
     return next(
       inputError([{ msg: "Invalid input", location: "body", param: "name" }])
     );
@@ -37,68 +37,68 @@ const customHopNameValidator = async (req, res, next) => {
 };
 
 /**
- * @apiDefine Hops
- * @apiGroup Routes to administer hops
+ * @apiDefine Mashes
+ * @apiGroup Routes to administer mashes
  */
 
 /**
- * @api {get} breweries/:breweryUuid/hops Get hops
- * @apiName GetHops
- * @apiGroup Hops
+ * @api {get} breweries/:breweryUuid/mashes Get mashes
+ * @apiName GetMashes
+ * @apiGroup Mashes
  * @apiUse authHeader
  * @apiParam {String} breweryUuid The brewery's unique identifier
- * @apiDescription Get all of the hops for a specific brewery
+ * @apiDescription Get all of the mashes for a specific brewery
  * @apiUse successResponse
- * @apiSuccess {Object[]} hops An array of hop objects, containing all the varieties of hops in the brewery
+ * @apiSuccess {Object[]} mashes An array of mash objects, containing all the varieties of mashes in the brewery
  */
 
-const getHopsValidation = [
+const getMashesValidation = [
   validate.param("breweryUuid").exists(opt).custom(isExistingBreweryUuid),
   validate.catchValidationErrors,
 ];
 
-const getHopsController = async (req, res, next) => {
+const getMashesController = async (req, res, next) => {
   try {
-    const hops = await hopService.getHops(
+    const mashes = await mashService.getMashes(
       req.params.breweryUuid
     );
-    return res.locals.sendResponse(res, { hops });
+    return res.locals.sendResponse(res, { mashes });
   } catch (error) {
-    return next(res.locals.opError("getHops request failed", error));
+    return next(res.locals.opError("getMashes request failed", error));
   }
 };
 
-export const getHops = [
-  getHopsValidation,
-  getHopsController,
+export const getMashes = [
+  getMashesValidation,
+  getMashesController,
 ];
 
-// createHop
+// createMash
 /**
- * @api {post} breweries/:breweryUuid/hops Create hop
- * @apiName CreateHop
- * @apiGroup Hops
- * @apiDescription Create a new hop
+ * @api {post} breweries/:breweryUuid/mashes Create mash
+ * @apiName CreateMash
+ * @apiGroup Mashes
+ * @apiDescription Create a new mash
  * @apiUse authHeader
  * @apiParam {String} breweryUuid The brewery's unique identifier
- * @apiBody {String} name A name for the hop
- * @apiBody {String} [hopUuid] A unique identifier for the hop (a v1 UUID)
- * @apiBody {String} createdBy The uid of the user who created the hop
+ * @apiBody {String} name A name for the mash
+ * @apiBody {String} [mashUuid] A unique identifier for the mash (a v1 UUID)
+ * @apiBody {String} createdBy The uid of the user who created the mash
  * @apiBody {Number} alpha Percentage Alpha Acids by weight (a whole-number percentage)
  * @apiBody {Number} [beta] Percentage Beta Acids by weight
  * @apiBody {String} [form] One of "Pellet", "Plug", or "Leaf"
  * @apiBody {String} [notes]
- * @apiBody {String} [origin] Geographical origin of the hop
+ * @apiBody {String} [origin] Geographical origin of the mash
  * @apiBody {String} [supplier] Brand name of the supplier
  * @apiBody {Number} [humulene] Percentage by weight
  * @apiBody {Number} [caryolphyllene] Percentage by weight
  * @apiBody {Number} [cohumulone] Percentage by weight
  * @apiBody {Number} [myrcene] Percentage by weight
  * @apiUse successResponse
- * @apiSuccess {String} hopUuid
+ * @apiSuccess {String} mashUuid
  */
 
-const createHopValidation = [
+const createMashValidation = [
   validate.param("breweryUuid").exists(opt).custom(isExistingBreweryUuid),
   validate
     .body("name")
@@ -106,15 +106,15 @@ const createHopValidation = [
     .isString()
     .isLength({ min: 1, max: 100 })
     .customSanitizer(validate.xssSanitize),
-  customHopNameValidator,
-  validate.body("hopUuid").optional(opt).isUUID(1),
+  customMashNameValidator,
+  validate.body("mashUuid").optional(opt).isUUID(1),
   validate.body("createdBy").exists(opt).isString().custom(isExistingUid),
   validate.body("alpha").exists().custom(isPercentage),
   validate.body("beta").optional().custom(isPercentage),
   validate
     .body("form")
     .optional()
-    .custom(isValidHopForm),
+    .custom(isValidMashForm),
   validate
     .body("notes")
     .optional()
@@ -139,40 +139,40 @@ const createHopValidation = [
   validate.catchValidationErrors,
 ];
 
-const createHopController = async (req, res, next) => {
+const createMashController = async (req, res, next) => {
   try {
-    const hopUuid = await hopService.createHop(
+    const mashUuid = await mashService.createMash(
       req.params.breweryUuid,
       validate.cleanRequestBody(req, { removeUndefined: true })
     );
-    return res.locals.sendResponse(res, { hopUuid });
+    return res.locals.sendResponse(res, { mashUuid });
   } catch (error) {
-    return next(res.locals.opError("Hop creation failed", error));
+    return next(res.locals.opError("Mash creation failed", error));
   }
 };
 
-export const createHop = [
-  createHopValidation,
-  createHopController,
+export const createMash = [
+  createMashValidation,
+  createMashController,
 ];
 
 
-// updateHop
+// updateMash
 /**
- * @api {post} breweries/:breweryUuid/hops/:hopUuid Update hop
- * @apiName UpdateHop
- * @apiGroup Hops
- * @apiDescription Update a hop
+ * @api {post} breweries/:breweryUuid/mashes/:mashUuid Update mash
+ * @apiName UpdateMash
+ * @apiGroup Mashes
+ * @apiDescription Update a mash
  * @apiUse authHeader
  * @apiParam {String} breweryUuid The brewery's unique identifier
- * @apiParam {String} hopUuid The brewery's unique identifier
- * @apiBody {String} [name] A name for the hop
- * @apiBody {String} [hopUuid] A unique identifier for the hop (a v1 UUID)
+ * @apiParam {String} mashUuid The brewery's unique identifier
+ * @apiBody {String} [name] A name for the mash
+ * @apiBody {String} [mashUuid] A unique identifier for the mash (a v1 UUID)
  * @apiBody {Number} [alpha] Percentage Alpha Acids by weight (a whole-number percentage)
  * @apiBody {Number} [beta] Percentage Beta Acids by weight
  * @apiBody {String} [form] One of "Pellet", "Plug", or "Leaf"
  * @apiBody {String} [notes]
- * @apiBody {String} [origin] Geographical origin of the hop
+ * @apiBody {String} [origin] Geographical origin of the mash
  * @apiBody {String} [supplier] Brand name of the supplier
  * @apiBody {Number} [humulene] Percentage by weight
  * @apiBody {Number} [caryolphyllene] Percentage by weight
@@ -181,25 +181,25 @@ export const createHop = [
  * @apiUse successResponse
  */
 
-const updateHopValidation = [
+const updateMashValidation = [
   validate.param("breweryUuid").exists(opt).custom(isExistingBreweryUuid),
   validate
-    .param("hopUuid")
+    .param("mashUuid")
     .exists(opt)
-    .custom(isExistingHopUuid),
+    .custom(isExistingMashUuid),
   validate
     .body("name")
     .optional()
     .isString()
     .isLength({ min: 1, max: 100 })
     .customSanitizer(validate.xssSanitize),
-  customHopNameValidator,
+  customMashNameValidator,
   validate.body("alpha").optional().custom(isPercentage),
   validate.body("beta").optional().custom(isPercentage),
   validate
     .body("form")
     .optional()
-    .custom(isValidHopForm),
+    .custom(isValidMashForm),
   validate
     .body("notes")
     .optional()
@@ -224,52 +224,52 @@ const updateHopValidation = [
   validate.catchValidationErrors,
 ];
 
-const updateHopController = async (req, res, next) => {
+const updateMashController = async (req, res, next) => {
   try {
-    const { breweryUuid, hopUuid } = req.params;
-    await hopService.updateHop(
+    const { breweryUuid, mashUuid } = req.params;
+    await mashService.updateMash(
       breweryUuid,
-      hopUuid,
+      mashUuid,
       validate.cleanRequestBody(req, { removeUndefined: true })
     );
     return res.locals.sendResponse(res);
   } catch (error) {
-    return next(res.locals.opError("Hop update failed", error));
+    return next(res.locals.opError("Mash update failed", error));
   }
 };
 
-export const updateHop = [updateHopValidation, updateHopController];
+export const updateMash = [updateMashValidation, updateMashController];
 
-// deleteHop
+// deleteMash
 /**
- * @api {delete} /breweries/:breweryUuid/hops/:hopUuid Delete hop
- * @apiName DeleteHop
- * @apiGroup Hops
- * @apiDescription Delete a hop
+ * @api {delete} /breweries/:breweryUuid/mashes/:mashUuid Delete mash
+ * @apiName DeleteMash
+ * @apiGroup Mashes
+ * @apiDescription Delete a mash
  * @apiUse authHeader
  * @apiParam {String} breweryUuid The brewery's unique identifier
- * @apiParam {String} hopUuid The hop's unique identifier
+ * @apiParam {String} mashUuid The mash's unique identifier
  * @apiUse successResponse
  */
-const deleteHopValidation = [
+const deleteMashValidation = [
   validate
     .param("breweryUuid")
     .exists(opt)
     .custom(isExistingBreweryUuid),
   validate
-    .param("hopUuid")
+    .param("mashUuid")
     .exists(opt)
-    .custom(isExistingHopUuid),
+    .custom(isExistingMashUuid),
   validate.catchValidationErrors,
 ];
 
-const deleteHopController = async (req, res, next) => {
+const deleteMashController = async (req, res, next) => {
   try {
-    await hopService.deleteHop(req.params.breweryUuid, req.params.hopUuid);
+    await mashService.deleteMash(req.params.breweryUuid, req.params.mashUuid);
     return res.locals.sendResponse(res);
   } catch (error) {
-    return next(res.locals.opError("Hop deletion failed", error));
+    return next(res.locals.opError("Mash deletion failed", error));
   }
 };
 
-export const deleteHop = [deleteHopValidation, deleteHopController];
+export const deleteMash = [deleteMashValidation, deleteMashController];

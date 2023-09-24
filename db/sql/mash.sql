@@ -1,9 +1,11 @@
 CREATE TABLE IF NOT EXISTS mash (
   mash_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   mash_uuid BINARY (16) NOT NULL UNIQUE,
+  brewery_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_mash_brewery_uuid FOREIGN KEY (brewery_uuid) REFERENCES brewery (brewery_uuid) ON DELETE CASCADE,
   created_by VARCHAR (36) NOT NULL,
   name VARCHAR (100) NOT NULL,
-  UNIQUE KEY (mash_uuid, name),
+  UNIQUE KEY (brewery_uuid, name),
   grain_temp DECIMAL (5, 2), -- degrees Celcius
   tun_temp DECIMAL (5, 2), -- degrees Celcius
   sparge_temp DECIMAL (5, 2), -- degrees Celcius
@@ -16,11 +18,19 @@ CREATE TABLE IF NOT EXISTS mash (
 
 ALTER TABLE mash ADD INDEX (mash_uuid);
 
+CREATE TABLE IF NOT EXISTS recipe_mash (
+  mash_uuid  BINARY (16) NOT NULL,
+  CONSTRAINT fk_recipe_mash_mash_uuid FOREIGN KEY (mash_uuid) REFERENCES mash(mash_uuid),
+  recipe_uuid  BINARY (16) NOT NULL UNIQUE,
+  CONSTRAINT fk_recipe_mash_recipe_uuid FOREIGN KEY (recipe_uuid) REFERENCES recipe(recipe_uuid),
+  added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS mash_step (
   mash_step_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   mash_step_uuid BINARY (16) NOT NULL UNIQUE,
   mash_uuid BINARY (16) NOT NULL,
-  CONSTRAINT fk_mash_step_mash_id FOREIGN KEY (mash_uuid) REFERENCES mash (mash_uuid),
+  CONSTRAINT fk_mash_step_mash_uuid FOREIGN KEY (mash_uuid) REFERENCES mash (mash_uuid) ON DELETE CASCADE,
   name VARCHAR (100) NOT NULL,
   UNIQUE KEY (mash_uuid, name),
   type ENUM ("Infusion", "Temperature", "Decoction") NOT NULL,

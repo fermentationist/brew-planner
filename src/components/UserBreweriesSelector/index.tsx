@@ -47,7 +47,7 @@ const UserBreweriesSelector = ({
     }
   ];
   return (
-    <StyledDualTableMultiSelector // TODO: Fix TS error caused by use of withDeepMemo in export of DualTableMultiSelector
+    <StyledDualTableMultiSelector 
       selectedOptions={defaultSelected}
       allOptions={allBreweries}
       optionKey="breweryUuid"

@@ -16,7 +16,6 @@ const useAuth = (): UseAuthObject => {
   const { auth, setAuth, login, logout, sendPasswordResetEmail } =
     useContext(AuthContext);
   const deepMemoize = useDeeperMemo();
-  console.log("useAuth called");
 
   const changeBrewery = useCallback(
     (newBrewery: string) => {
@@ -45,7 +44,6 @@ const useAuth = (): UseAuthObject => {
     changeBrewery,
     sendPasswordResetEmail,
   };
-  console.log(output.auth)
   return deepMemoize(output, "auth");
 };
 

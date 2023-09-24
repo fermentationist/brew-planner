@@ -67,7 +67,6 @@ const LoginForm = (props: LoginFormProps): JSX.Element => {
     },
   ];
   const formInputs = !resetState ? inputs : inputs.slice(0, 1);
-  console.log("formInputs:", formInputs)
   return (
     <Card>
       <Container className="login-form-inner-container">

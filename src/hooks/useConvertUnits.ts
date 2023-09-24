@@ -24,19 +24,26 @@ const useConvertUnits = () => {
   }, []);
 
   const getPreferredOrDefaultUnit = useCallback(
-    (field: string, preferredUnitKey?: string) =>
-      (preferredUnitKey
-        ? globalState?.preferredUnits?.[preferredUnitKey]?.[field]
-        : globalState?.preferredUnits?.[field]) || unitDefaults[field]?.default,
+    (field: string, preferredUnitKey?: string) => {
+      return (
+        (preferredUnitKey
+          ? globalState?.preferredUnits?.[preferredUnitKey]?.[field]
+          : globalState?.preferredUnits?.[field]) ||
+        unitDefaults[field]?.default
+      );
+    },
     [globalState]
   );
 
+  //
   const createConvertFunction = useCallback(
-    (target: "canonical" | "preferred", preferredUnitParam?: string) =>
+    (target: "canonical" | "preferred", // whether to convert to canonical or preferred unit
+     preferredUnitParam?: string, // unit to convert to, if not preferred
+     ) =>
       (
-        field: string,
-        stringOrNumber: string | number,
-        preferredUnitKey?: string
+        field: string, // name of field, used to get preferred unit
+        stringOrNumber: string | number, // value to convert
+        preferredUnitKey?: string // key to get preferred unit from global state
       ) => {
         const value =
           (stringOrNumber ?? "") && (Number(stringOrNumber) as number | string);
@@ -45,8 +52,7 @@ const useConvertUnits = () => {
         const preferredUnit =
           preferredUnitParam ||
           getPreferredOrDefaultUnit(field, preferredUnitKey);
-        if (!field || !(stringOrNumber ?? false)) {
-          // (stringOrNumber ?? false) allows for stringOrNumber to be 0
+        if (!field || !(stringOrNumber === 0 || stringOrNumber)) {
           return {
             value,
             unit: canonicalTarget ? canonicalUnit : preferredUnit,
@@ -114,7 +120,10 @@ const useConvertUnits = () => {
     [parseUnit, getPreferredOrDefaultUnit]
   );
 
-  const convertToPreferredUnit = createConvertFunction("preferred");
+  const convertToPreferredUnit = useCallback(
+    createConvertFunction("preferred"),
+    [createConvertFunction]
+  );
 
   const getAltUnitSelections = useCallback(
     (unit: string) => {
@@ -164,8 +173,6 @@ const useConvertUnits = () => {
             },
           };
         }
-        console.log("\n\nnewState:", newState);
-        console.log("\n");
         return newState;
       });
     },
@@ -213,15 +220,20 @@ const useConvertUnits = () => {
             const preferredUnitKey = getRowData(meta.rowData)[
               preferredUnitKeyField
             ];
+            console.log("value:", value);
             const { value: convertedValue, unit } = convertToPreferredUnit(
               name,
               value,
               preferredUnitKey
             );
-            const roundedValue = convertedValue
+            console.log("convertedValue:", convertedValue);
+            const roundedValue = typeof convertedValue === "number"
               ? Number(Number(convertedValue).toFixed(maxDecPlaces))
               : null;
-            return roundedValue && `${roundedValue} (${unit})`;
+            console.log("roundedValue:", roundedValue);
+            const output = roundedValue !== null ? `${roundedValue} (${unit})` : "";
+            console.log("output:", output);
+            return output;
           },
           ...columnOptions.options,
           ...options,
@@ -252,7 +264,10 @@ const useConvertUnits = () => {
     [createColumn]
   );
 
-  const memoizedPreferredUnits = deepMemoize(globalState?.preferredUnits, "preferredUnits");
+  const memoizedPreferredUnits = deepMemoize(
+    globalState?.preferredUnits,
+    "preferredUnits"
+  );
 
   return {
     parseUnit,

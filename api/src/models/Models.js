@@ -10,7 +10,8 @@ const modelNames = [
   "hop",
   "water",
   "yeast",
-  "misc"
+  "misc",
+  "mash"
 ];
 
 for (const modelName of modelNames) {

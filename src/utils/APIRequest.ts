@@ -68,6 +68,7 @@ export default class APIRequest {
 
     // accessToken check
     if (!authState?.accessToken) {
+      console.log("authState from localStorage:", authState);
       return Promise.reject(
         opError("API Request unauthorized - access token needed")
       );

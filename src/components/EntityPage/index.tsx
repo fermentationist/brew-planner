@@ -1,4 +1,4 @@
-import { useState, useEffect, Dispatch, SetStateAction } from "react";
+import { useState, useEffect, Dispatch, SetStateAction, useCallback } from "react";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import AddIcon from "@mui/icons-material/AddCircle";
@@ -36,6 +36,7 @@ function EntityPage<EntityType>({
   const [showEntityModal, setShowEntityModal] = useState(false);
   const [mode, setMode]: [mode: Mode, setMode: Dispatch<SetStateAction<Mode>>] =
     useState("create" as Mode);
+  const [columns, setColumns] = useState([]);
   const [modalData, setModalData] = useState(null);
   const { callAlert, alertError, alertErrorProm, resetAlertState } = useAlert();
   const { auth } = useAuth();
@@ -51,6 +52,47 @@ function EntityPage<EntityType>({
     breweryPath,
   } = useAPI(pluralEntityName || `${entityName}s`);
   const { generateColumnsFromInputs } = useConvertUnits();
+
+  const editEntity = useCallback((rowData: EntityType) => {
+    setModalData(rowData);
+    setMode("edit");
+    setShowEntityModal(true);
+  }, []);
+
+  useEffect(() => {
+    const generatedColumns = generateColumnsFromInputs(inputList);
+    const cols = [
+    {
+      label: `${entityName[0].toUpperCase() + entityName.slice(1)} ID`,
+      name: `${entityName}Uuid`,
+      options: {
+        ...columnOptions.options,
+        display: false,
+      },
+    },
+    ...generatedColumns,
+    {
+      name: "data",
+      options: columnOptions.rowDataOptions,
+    },
+    {
+      name: "",
+      options: columnOptions.createRenderEditButtonOptions(
+        `edit ${title || entityName}`,
+        editEntity
+      ),
+    },
+  ];
+  
+  setColumns(cols);
+  }, [
+    generateColumnsFromInputs, 
+    inputList, 
+    editEntity, 
+    entityName, 
+    title
+  ]);
+
   useEffect(() => {
     if (isLoading && !entitiesData) {
       enableEntitiesQuery();
@@ -110,12 +152,6 @@ function EntityPage<EntityType>({
     setShowEntityModal(true);
   };
 
-  const editEntity = (rowData: EntityType) => {
-    setModalData(rowData);
-    setMode("edit");
-    setShowEntityModal(true);
-  };
-
   const deleteEntity = async (entityUuid: string) => {
     const deleteEntityRequest = new APIRequest({
       baseURL: baseURL || breweryPath,
@@ -164,29 +200,7 @@ function EntityPage<EntityType>({
     refresh();
     doneLoading();
   };
-  const generatedColumns = generateColumnsFromInputs(inputList);
-  const columns = [
-    {
-      label: `${entityName[0].toUpperCase() + entityName.slice(1)} ID`,
-      name: `${entityName}Uuid`,
-      options: {
-        ...columnOptions.options,
-        display: false,
-      },
-    },
-    ...generatedColumns,
-    {
-      name: "data",
-      options: columnOptions.rowDataOptions,
-    },
-    {
-      name: "",
-      options: columnOptions.createRenderEditButtonOptions(
-        `edit ${title || entityName}`,
-        editEntity
-      ),
-    },
-  ];
+  
   return (
     <Page>
       <Tooltip title={`add ${title || entityName}`}>
@@ -195,7 +209,7 @@ function EntityPage<EntityType>({
         </IconButton>
       </Tooltip>
       <DataTable
-        columns={deepMemoize(columns, `${entityName}Columns`)}
+        columns={columns}
         data={tableData}
         refresh={refresh}
         options={{

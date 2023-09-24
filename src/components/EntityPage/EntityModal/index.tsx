@@ -7,7 +7,8 @@ const EntityModal = ({
   data,
   onSubmit,
   inputList,
-  title
+  title,
+  formId,
 }: {
   showModal: boolean;
   closeModal: () => void;
@@ -16,6 +17,7 @@ const EntityModal = ({
   onSubmit: (formData: any) => void;
   inputList: FormInputOptions[];
   title: string;
+  formId?: string;
 }) => {
   // add defaultValues from existing data (present if in "edit" mode)
   const formInputs: FormInputOptions[] = inputList.map((input) => {
@@ -35,7 +37,7 @@ const EntityModal = ({
       closeModal={closeModal}
       title={title}
       mode={mode}
-      formId="yeastForm"
+      formId={formId ?? `${mode}-${title}-form`}
       onSubmit={onSubmit}
       inputs={formInputs}
     />
