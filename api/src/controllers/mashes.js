@@ -145,7 +145,7 @@ const createMashController = async (req, res, next) => {
       req.params.breweryUuid,
       validate.cleanRequestBody(req, { removeUndefined: true })
     );
-    return res.locals.sendResponse(res, { mashUuid });
+    return res.locals.sendResponse(res, { uuid: mashUuid });
   } catch (error) {
     return next(res.locals.opError("Mash creation failed", error));
   }

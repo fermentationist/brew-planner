@@ -1,4 +1,4 @@
-/*global it, describe, before, after, console */
+/*global it, describe, before, after */
 import assert from "assert";
 import { v1 as createUuid } from "uuid";
 import TestAPI from "../../test/TestAPI.js";
@@ -166,8 +166,8 @@ export default describe("misc routes", function () {
       testData
     );
     assert.strictEqual(response.status, "ok");
-    await confirmMiscInsertion(response.miscUuid, testData);
-    miscsToDelete.push(response.miscUuid);
+    await confirmMiscInsertion(response.uuid, testData);
+    miscsToDelete.push(response.uuid);
     localCache.invalidate("misc");
   });
 
@@ -180,9 +180,9 @@ export default describe("misc routes", function () {
       testData
     );
     assert.strictEqual(response.status, "ok");
-    assert.strictEqual(response.miscUuid, miscUuid);
-    await confirmMiscInsertion(response.miscUuid, testData);
-    miscsToDelete.push(response.miscUuid);
+    assert.strictEqual(response.uuid, miscUuid);
+    await confirmMiscInsertion(response.uuid, testData);
+    miscsToDelete.push(response.uuid);
     localCache.invalidate("misc");
   });
 

@@ -1,4 +1,3 @@
-/* global console */
 import { isExistingUid } from "./users.js";
 import * as waterService from "../services/water.js";
 import * as validate from "../middleware/input-validation.js";
@@ -124,7 +123,7 @@ const createWaterController = async (req, res, next) => {
       req.params.breweryUuid,
       validate.cleanRequestBody(req, { removeUndefined: true })
     );
-    return res.locals.sendResponse(res, { waterUuid });
+    return res.locals.sendResponse(res, { uuid: waterUuid });
   } catch (error) {
     console.log(error);
     return next(res.locals.opError("Water creation failed", error));

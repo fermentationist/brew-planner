@@ -1,19 +1,28 @@
 import { memo, useState, forwardRef, Ref } from "react";
 import UnitSelector from "../UnitSelector";
-import CustomNumberField, {
-  CustomNumberFieldProps,
-} from "../CustomNumberField";
+import PseudoNumberField, {
+  PseudoNumberFieldProps,
+} from "../PseudoNumberField";
 import { ChangeEvent, useRef, useMemo } from "react";
 import useConvertUnits from "../../hooks/useConvertUnits";
+import styled from "styled-components";
 
 export interface CustomNumberFieldWithUnitsProps
-  extends CustomNumberFieldProps {
+  extends PseudoNumberFieldProps {
   callback?: (value: any, callRHFSetValueFn?: boolean) => any;
   convertOnUnitChange?: boolean;
   maxDecPlaces?: number;
   preferredUnitKey?: string;
   unitsToExclude?: string[];
 }
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  margin: 0;
+`;
 
 // split into an inner and an outer component. The inner component is memoized to prevent it from re-rendering, unless the preferredUnit for the specific field is updated in globalState
 const CustomNumberFieldWithUnits = forwardRef(
@@ -144,8 +153,8 @@ interface InternalComponentProps extends CustomNumberFieldWithUnitsProps {
 const InternalComponent = forwardRef(
   (props: InternalComponentProps, forwardedRef: Ref<any>) => {
     return (
-      <>
-        <CustomNumberField
+      <Container>
+        <PseudoNumberField
           internalLabel={props.label}
           name={props.name}
           step={props.step}
@@ -177,7 +186,7 @@ const InternalComponent = forwardRef(
               : ""
           }
         />
-      </>
+      </Container>
     );
   }
 );

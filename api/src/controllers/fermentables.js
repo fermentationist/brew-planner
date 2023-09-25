@@ -155,7 +155,7 @@ const createFermentableController = async (req, res, next) => {
       req.params.breweryUuid,
       validate.cleanRequestBody(req, { removeUndefined: true })
     );
-    return res.locals.sendResponse(res, { fermentableUuid });
+    return res.locals.sendResponse(res, { uuid: fermentableUuid });
   } catch (error) {
     console.log(error);
     return next(res.locals.opError("Fermentable creation failed", error));

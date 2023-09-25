@@ -42,6 +42,7 @@ export interface CustomTextFieldProps {
   multiline?: boolean;
   minRows?: number;
   maxRows?: number;
+  inputmode?: string;
 }
 
 const CustomLabel = styled.label`

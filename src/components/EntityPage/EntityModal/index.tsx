@@ -9,6 +9,7 @@ const EntityModal = ({
   inputList,
   title,
   formId,
+  refresh,
 }: {
   showModal: boolean;
   closeModal: () => void;
@@ -18,6 +19,7 @@ const EntityModal = ({
   inputList: FormInputOptions[];
   title: string;
   formId?: string;
+  refresh?: () => void;
 }) => {
   // add defaultValues from existing data (present if in "edit" mode)
   const formInputs: FormInputOptions[] = inputList.map((input) => {
@@ -31,10 +33,15 @@ const EntityModal = ({
     return inputCopy;
   });
 
+  const refreshOnClose = () => {
+    refresh && refresh();
+    closeModal();
+  }
+
   return (
     <FormModal
       showModal={showModal}
-      closeModal={closeModal}
+      closeModal={refreshOnClose}
       title={title}
       mode={mode}
       formId={formId ?? `${mode}-${title}-form`}

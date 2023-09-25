@@ -1,4 +1,4 @@
-/*global it, describe, before, after, console */
+/*global it, describe, before, after */
 import assert from "assert";
 import { v1 as createUuid } from "uuid";
 import TestAPI from "../../test/TestAPI.js";
@@ -173,8 +173,8 @@ export default describe("yeast routes", function () {
       testData
     );
     assert.strictEqual(response.status, "ok");
-    await confirmYeastInsertion(response.yeastUuid, testData);
-    yeastsToDelete.push(response.yeastUuid);
+    await confirmYeastInsertion(response.uuid, testData);
+    yeastsToDelete.push(response.uuid);
     localCache.invalidate("yeast");
   });
 
@@ -187,9 +187,9 @@ export default describe("yeast routes", function () {
       testData
     );
     assert.strictEqual(response.status, "ok");
-    assert.strictEqual(response.yeastUuid, yeastUuid);
-    await confirmYeastInsertion(response.yeastUuid, testData);
-    yeastsToDelete.push(response.yeastUuid);
+    assert.strictEqual(response.uuid, yeastUuid);
+    await confirmYeastInsertion(response.uuid, testData);
+    yeastsToDelete.push(response.uuid);
     localCache.invalidate("yeast");
   });
 

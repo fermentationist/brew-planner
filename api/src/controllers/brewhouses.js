@@ -119,7 +119,7 @@ const createBrewhouseFunction = async (req, res, next) => {
       req.params.breweryUuid,
       validate.cleanRequestBody(req, { removeUndefined: true })
     );
-    return res.locals.sendResponse(res, { brewhouseUuid });
+    return res.locals.sendResponse(res, { uuid: brewhouseUuid });
   } catch (error) {
     console.log(error);
     return next(res.locals.opError("Brewhouse creation failed", error));

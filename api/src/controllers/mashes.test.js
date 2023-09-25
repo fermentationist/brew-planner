@@ -19,7 +19,6 @@ import {
   objectKeysToSnakeCase,
 } from "../utils/helpers.js";
 import * as userService from "../services/user.js";
-import { HOP_FORMS } from "../services/mash.js";
 import localCache from "../services/localCache/index.js";
 
 const api = new TestAPI();
@@ -172,8 +171,8 @@ export default describe("mash routes", function () {
       testData
     );
     assert.strictEqual(response.status, "ok");
-    await confirmMashInsertion(response.mashUuid, testData);
-    mashesToDelete.push(response.mashUuid);
+    await confirmMashInsertion(response.uuid, testData);
+    mashesToDelete.push(response.uuid);
     localCache.invalidate("mash");
   });
 
@@ -186,9 +185,9 @@ export default describe("mash routes", function () {
       testData
     );
     assert.strictEqual(response.status, "ok");
-    assert.strictEqual(response.mashUuid, mashUuid);
-    await confirmMashInsertion(response.mashUuid, testData);
-    mashesToDelete.push(response.mashUuid);
+    assert.strictEqual(response.uuid, mashUuid);
+    await confirmMashInsertion(response.uuid, testData);
+    mashesToDelete.push(response.uuid);
     localCache.invalidate("mash");
   });
 

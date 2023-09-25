@@ -14,7 +14,7 @@ export const hopInputs = [
   {
     name: "alpha",
     label: "Alpha acids (%)",
-    type: "number",
+    type: "fakeNumber",
     validation: { ...required, ...percentage },
     errorMessages: { ...requiredMessage, ...percentageMessage },
     width: "250px",
@@ -22,7 +22,7 @@ export const hopInputs = [
   {
     name: "beta",
     label: "Beta acids (%)",
-    type: "number",
+    type: "fakeNumber",
     width: "250px",
     validation: percentage,
     errorMessages: percentageMessage,
@@ -68,7 +68,7 @@ export const hopInputs = [
   {
     name: "humulene",
     label: "Humulene (%)",
-    type: "number",
+    type: "fakeNumber",
     width: "250px",
     validation: percentage,
     errorMessages: percentageMessage,
@@ -79,7 +79,7 @@ export const hopInputs = [
   {
     name: "caryophyllene",
     label: "Caryophyllene (%)",
-    type: "number",
+    type: "fakeNumber",
     width: "250px",
     validation: percentage,
     errorMessages: percentageMessage,
@@ -90,7 +90,7 @@ export const hopInputs = [
   {
     name: "cohumulone",
     label: "Cohumulone (%)",
-    type: "number",
+    type: "fakeNumber",
     width: "250px",
     validation: percentage,
     errorMessages: percentageMessage,
@@ -101,7 +101,7 @@ export const hopInputs = [
   {
     name: "myrcene",
     label: "Myrcene (%)",
-    type: "number",
+    type: "fakeNumber",
     width: "250px",
     validation: percentage,
     errorMessages: percentageMessage,

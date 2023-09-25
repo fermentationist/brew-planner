@@ -13,7 +13,6 @@ import useConvertUnits from "../../hooks/useConvertUnits";
 import EntityModal from "./EntityModal";
 import { Mode, APIError } from "../../types";
 import { FormInputOptions } from "../../components/FormModal";
-import useDeeperMemo from "../../hooks/useDeeperMemo";
 
 function EntityPage<EntityType>({
   startLoading,
@@ -38,20 +37,27 @@ function EntityPage<EntityType>({
     useState("create" as Mode);
   const [columns, setColumns] = useState([]);
   const [modalData, setModalData] = useState(null);
+  const [refreshNumber, setRefreshNumber] = useState(0);
   const { callAlert, alertError, alertErrorProm, resetAlertState } = useAlert();
   const { auth } = useAuth();
   const { confirmDelete, confirm } = useConfirm();
-  const deepMemoize = useDeeperMemo();
   const {
     isLoading,
     enable: enableEntitiesQuery,
     data: entitiesData,
     error: entitiesError,
-    refetch: refresh,
+    refetch,
     APIRequest,
     breweryPath,
   } = useAPI(pluralEntityName || `${entityName}s`);
-  const { generateColumnsFromInputs } = useConvertUnits();
+  const { generateColumnsFromInputs, renameTempPreferredUnits } = useConvertUnits();
+
+  const refresh = useCallback(() => {
+    console.log("refreshing...");
+    setTableData([]);
+    refetch();
+    setRefreshNumber(refreshNumber + Math.random());
+  }, [refetch, refreshNumber, setRefreshNumber, setTableData]);
 
   const editEntity = useCallback((rowData: EntityType) => {
     setModalData(rowData);
@@ -60,6 +66,7 @@ function EntityPage<EntityType>({
   }, []);
 
   useEffect(() => {
+    console.log("generating columns...");
     const generatedColumns = generateColumnsFromInputs(inputList);
     const cols = [
     {
@@ -90,7 +97,8 @@ function EntityPage<EntityType>({
     inputList, 
     editEntity, 
     entityName, 
-    title
+    title,
+    refreshNumber
   ]);
 
   useEffect(() => {
@@ -139,9 +147,10 @@ function EntityPage<EntityType>({
       method: editMode ? "patch" : "post",
       data: reqBody,
     });
-    await apiReq.request().catch(async (error: APIError) => {
+    const response = await apiReq.request().catch(async (error: APIError) => {
       await alertErrorProm(error);
     });
+    renameTempPreferredUnits(response?.data?.uuid);
     refresh();
     setShowEntityModal(false);
   };
@@ -169,7 +178,6 @@ function EntityPage<EntityType>({
         return tableData[row.dataIndex][`${entityName}Uuid`];
       }
     );
-    console.log("entityUuidsToDelete:", entityUuidsToDelete);
     const qty = entityUuidsToDelete.length;
     const confirmResult = await confirmDelete(qty, title || entityName, pluralEntityName);
     if (!confirmResult) {
@@ -230,6 +238,7 @@ function EntityPage<EntityType>({
             (title || entityName)[0].toUpperCase() +
             (title || entityName).slice(1)
           }
+          refresh={refresh}
         />
       ) : null}
     </Page>

@@ -145,7 +145,7 @@ const createHopController = async (req, res, next) => {
       req.params.breweryUuid,
       validate.cleanRequestBody(req, { removeUndefined: true })
     );
-    return res.locals.sendResponse(res, { hopUuid });
+    return res.locals.sendResponse(res, { uuid: hopUuid });
   } catch (error) {
     return next(res.locals.opError("Hop creation failed", error));
   }

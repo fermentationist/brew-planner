@@ -1,11 +1,11 @@
 // import { ReducerAction } from "react";
 
-export interface ReducerAction<T> {
+export interface ReducerAction {
   type: string;
-  payload: T;
+  payload: any;
 }
 
-const globalReducer = (state: any, action: ReducerAction<any>) => {
+const globalReducer = (state: any, action: ReducerAction) => {
   switch (action.type) {
     case "TOGGLE_THEME":
       return {
@@ -76,9 +76,12 @@ const globalReducer = (state: any, action: ReducerAction<any>) => {
             ...(state.preferredUnits || {}),
           }
         };
+        console.log("RENAME_TEMP_PREFERRED_UNITS called");
+        console.log("action.payload:", action.payload);
         if (action.payload) {
           newState.preferredUnits[action.payload] = state.preferredUnits?.temp;
         }
+        console.log("newState.preferredUnits.temp:", newState.preferredUnits.temp);
         newState.preferredUnits.temp && delete newState.preferredUnits.temp;
         return newState;
       }

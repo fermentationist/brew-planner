@@ -1,4 +1,3 @@
-/* global console */
 import { isExistingUid } from "./users.js";
 import * as yeastService from "../services/yeast.js";
 import * as validate from "../middleware/input-validation.js";
@@ -157,7 +156,7 @@ const createYeastController = async (req, res, next) => {
       req.params.breweryUuid,
       validate.cleanRequestBody(req, { removeUndefined: true })
     );
-    return res.locals.sendResponse(res, { yeastUuid });
+    return res.locals.sendResponse(res, { uuid: yeastUuid });
   } catch (error) {
     console.log(error);
     return next(res.locals.opError("Yeast creation failed", error));

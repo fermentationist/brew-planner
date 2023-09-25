@@ -1,11 +1,10 @@
-/* global */
 
 // Because of a setting in .mocharc.cjs, this file will run first, before any other tests
 import dotenv from "dotenv";
 dotenv.config();
 
-const TEST_MODE = process.env.TEST_MODE === "true" ? true : false;
+const PROD_MODE = process.env.PROD_MODE === "false" ? false : true;
 
-if (!TEST_MODE) {
-  throw new Error("Not in TEST_MODE! Aborting tests!");
+if (PROD_MODE) {
+  throw new Error("Running in PROD_MODE! Aborting tests!");
 }

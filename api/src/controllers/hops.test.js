@@ -172,8 +172,8 @@ export default describe("hop routes", function () {
       testData
     );
     assert.strictEqual(response.status, "ok");
-    await confirmHopInsertion(response.hopUuid, testData);
-    hopsToDelete.push(response.hopUuid);
+    await confirmHopInsertion(response.uuid, testData);
+    hopsToDelete.push(response.uuid);
     localCache.invalidate("hop");
   });
 
@@ -186,9 +186,9 @@ export default describe("hop routes", function () {
       testData
     );
     assert.strictEqual(response.status, "ok");
-    assert.strictEqual(response.hopUuid, hopUuid);
-    await confirmHopInsertion(response.hopUuid, testData);
-    hopsToDelete.push(response.hopUuid);
+    assert.strictEqual(response.uuid, hopUuid);
+    await confirmHopInsertion(response.uuid, testData);
+    hopsToDelete.push(response.uuid);
     localCache.invalidate("hop");
   });
 

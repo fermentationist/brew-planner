@@ -127,8 +127,6 @@ const useConvertUnits = () => {
 
   const getAltUnitSelections = useCallback(
     (unit: string, unitsToExclude: string[] = []) => {
-      console.log("unit:", unit);
-      console.log("unitsToExclude:", unitsToExclude);
       const [units] = parseUnit(unit);
       const safeUnits = units.map((unitPart) =>
         unitPart.toLowerCase() === "cal" ? "J" : unitPart
@@ -142,12 +140,10 @@ const useConvertUnits = () => {
             possibilities.push("cal");
           }
           map[unit] = Array.from(new Set([unit, ...possibilities.filter((x: string) => !unitsToExclude.includes(x))]));
-          console.log("map:", map);
           return map;
         },
         {}
       );
-      console.log("selections:", selections);
       return selections;
     },
     [parseUnit]
@@ -162,31 +158,7 @@ const useConvertUnits = () => {
           unit,
           preferredUnitKey,
         },
-      })
-      // setGlobalState((prevState: any) => {
-      //   let newState;
-      //   if (preferredUnitKey) {
-      //     newState = {
-      //       ...prevState,
-      //       preferredUnits: {
-      //         ...(prevState.preferredUnits || {}),
-      //         [preferredUnitKey]: {
-      //           ...(prevState.preferredUnits?.[preferredUnitKey] || {}),
-      //           [field]: unit,
-      //         },
-      //       },
-      //     };
-      //   } else {
-      //     newState = {
-      //       ...prevState,
-      //       preferredUnits: {
-      //         ...(prevState.preferredUnits || {}),
-      //         [field]: unit,
-      //       },
-      //     };
-      //   }
-      //   return newState;
-      // });
+      });
     },
     [dispatch]
   );
@@ -196,20 +168,7 @@ const useConvertUnits = () => {
       dispatch({
         type: "RENAME_TEMP_PREFERRED_UNITS",
         payload: key,
-      })
-      // setGlobalState((prevState: any) => {
-      //   const newState = {
-      //     ...prevState,
-      //     preferredUnits: {
-      //       ...(prevState.preferredUnits || {}),
-      //     },
-      //   };
-      //   if (key) {
-      //     newState.preferredUnits[key] = prevState.preferredUnits?.temp;
-      //   }
-      //   newState.preferredUnits.temp && delete newState.preferredUnits.temp;
-      //   return newState;
-      // });
+      });
     },
     [dispatch]
   );
@@ -236,19 +195,15 @@ const useConvertUnits = () => {
             const preferredUnitKey = getRowData(meta.rowData)[
               preferredUnitKeyField
             ];
-            console.log("value:", value);
             const { value: convertedValue, unit } = convertToPreferredUnit(
               name,
               value,
               preferredUnitKey
             );
-            console.log("convertedValue:", convertedValue);
             const roundedValue = typeof convertedValue === "number"
               ? Number(Number(convertedValue).toFixed(maxDecPlaces))
               : null;
-            console.log("roundedValue:", roundedValue);
             const output = roundedValue !== null ? `${roundedValue} (${unit})` : "";
-            console.log("output:", output);
             return output;
           },
           ...columnOptions.options,

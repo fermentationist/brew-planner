@@ -19,7 +19,6 @@ const Users = function ({
   startLoading: () => void;
   doneLoading: () => void;
 }) {
-  console.log("\nloading Users\n")
   const [tableData, setTableData] = useState([]);
   const [showUserModal, setShowUserModal] = useState(false);
   const [mode, setMode] = useState("create" as "create" | "edit");

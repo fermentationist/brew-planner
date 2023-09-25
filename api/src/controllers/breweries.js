@@ -108,7 +108,7 @@ const createBreweryFunction = async (req, res, next) => {
     const breweryUuid = await breweryService.createBrewery(
       validate.cleanRequestBody(req, {removeUndefined: true})
     );
-    return res.locals.sendResponse(res, { breweryUuid });
+    return res.locals.sendResponse(res, { uuid: breweryUuid });
   } catch (error) {
     console.log(error);
     return next(res.locals.opError("Brewery creation failed", error));

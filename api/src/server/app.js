@@ -1,4 +1,3 @@
-/* global process, console */
 import "dotenv/config";
 import express from "express";
 import ip from "ip";

@@ -24,7 +24,7 @@ export const fermentableInputs = [
   {
     name: "yield",
     label: "Yield (%)",
-    type: "number",
+    type: "fakeNumber",
     validation: {...required, ...percentage},
     errorMessages: {...requiredMessage, ...percentageMessage},
     maxDecPlaces: 2,
@@ -33,8 +33,7 @@ export const fermentableInputs = [
   {
     name: "color",
     label: "Color (ºL)",
-    type: "number",
-    step: 0.01,
+    type: "fakeNumber",
     validation: {...required, min: 0},
     errorMessages: {...requiredMessage, min: "Please enter a positive number"},
     width: "250px",
@@ -60,7 +59,7 @@ export const fermentableInputs = [
   {
     name: "coarseFineDiff",
     label: "Coarse/Fine Difference (%)",
-    type: "number",
+    type: "fakeNumber",
     width: "250px",
     validation: percentage,
     errorMessages: percentageMessage,
@@ -71,7 +70,7 @@ export const fermentableInputs = [
   {
     name: "moisture",
     label: "Moisture (%)",
-    type: "number",
+    type: "fakeNumber",
     width: "250px",
     validation: percentage,
     errorMessages: percentageMessage,
@@ -82,7 +81,7 @@ export const fermentableInputs = [
   {
     name: "disataticPower",
     label: "Diastatic power (ºL)",
-    type: "number",
+    type: "fakeNumber",
     width: "250px",
     validation: percentage,
     errorMessages: percentageMessage,
@@ -93,7 +92,7 @@ export const fermentableInputs = [
   {
     name: "protein",
     label: "Protein (%)",
-    type: "number",
+    type: "fakeNumber",
     width: "250px",
     validation: percentage,
     errorMessages: percentageMessage,
@@ -104,7 +103,7 @@ export const fermentableInputs = [
   {
     name: "maxInBatch",
     label: "Max per batch (%)",
-    type: "number",
+    type: "fakeNumber",
     width: "250px",
     validation: percentage,
     errorMessages: percentageMessage,

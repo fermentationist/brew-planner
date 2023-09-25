@@ -130,12 +130,12 @@ export default describe("brewery routes", function () {
   });
 
   it("/admin/breweries POST", async function () {
-    const { breweryUuid } = await api.request({
+    const { uuid } = await api.request({
       url: "/admin/breweries",
       method: "post",
       data: testData
     });
-    assert.strictEqual(breweryUuid, testData.breweryUuid);
+    assert.strictEqual(uuid, testData.breweryUuid);
     await confirmBreweryData(testData);
     localCache.invalidate("brewery");
   });
@@ -150,7 +150,6 @@ export default describe("brewery routes", function () {
       postalCode: "60613",
       country: "United States"
     };
-    console.log("testData.breweryUuid", testData.breweryUuid);
     const response = await patchBrewery(testData.breweryUuid, updatedData);
     assert.strictEqual(response.status, "ok");
     await confirmBreweryData({ ...updatedData, breweryUuid: testData.breweryUuid });

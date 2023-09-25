@@ -1,4 +1,4 @@
-/*global it, describe, before, after, console */
+/*global it, describe, before, after */
 import assert from "assert";
 import { v1 as createUuid } from "uuid";
 import TestAPI from "../../test/TestAPI.js";
@@ -169,8 +169,8 @@ export default describe("water routes", function () {
       testData
     );
     assert.strictEqual(response.status, "ok");
-    await confirmWaterInsertion(response.waterUuid, testData);
-    watersToDelete.push(response.waterUuid);
+    await confirmWaterInsertion(response.uuid, testData);
+    watersToDelete.push(response.uuid);
     localCache.invalidate("water");
   });
 
@@ -183,9 +183,9 @@ export default describe("water routes", function () {
       testData
     );
     assert.strictEqual(response.status, "ok");
-    assert.strictEqual(response.waterUuid, waterUuid);
-    await confirmWaterInsertion(response.waterUuid, testData);
-    watersToDelete.push(response.waterUuid);
+    assert.strictEqual(response.uuid, waterUuid);
+    await confirmWaterInsertion(response.uuid, testData);
+    watersToDelete.push(response.uuid);
     localCache.invalidate("water");
   });
 

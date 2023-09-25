@@ -1,4 +1,3 @@
-/* global console */
 import { isExistingUid } from "./users.js";
 import * as miscService from "../services/misc.js";
 import * as validate from "../middleware/input-validation.js";
@@ -122,7 +121,7 @@ const createMiscController = async (req, res, next) => {
       req.params.breweryUuid,
       validate.cleanRequestBody(req, { removeUndefined: true })
     );
-    return res.locals.sendResponse(res, { miscUuid });
+    return res.locals.sendResponse(res, { uuid: miscUuid });
   } catch (error) {
     console.log(error);
     return next(res.locals.opError("Misc creation failed", error));

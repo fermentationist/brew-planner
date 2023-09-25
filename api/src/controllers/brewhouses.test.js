@@ -210,8 +210,8 @@ export default describe("brewhouse routes", function () {
     await api.signInAsNewUser({ role: "user", breweries: userBreweries });
     const response = await makeCreateBrewhouseRequest(userBreweries[0], testData);
     assert.strictEqual(response.status, "ok");
-    await confirmBrewhouseInsertion(response.brewhouseUuid, testData);
-    brewhousesToDelete.push(response.brewhouseUuid);
+    await confirmBrewhouseInsertion(response.uuid, testData);
+    brewhousesToDelete.push(response.uuid);
     localCache.invalidate("brewhouse");
   });
 
@@ -221,9 +221,9 @@ export default describe("brewhouse routes", function () {
     testData.brewhouseUuid = brewhouseUuid;
     const response = await makeCreateBrewhouseRequest(userBreweries[0], testData);
     assert.strictEqual(response.status, "ok");
-    assert.strictEqual(response.brewhouseUuid, brewhouseUuid);
-    await confirmBrewhouseInsertion(response.brewhouseUuid, testData);
-    brewhousesToDelete.push(response.brewhouseUuid);
+    assert.strictEqual(response.uuid, brewhouseUuid);
+    await confirmBrewhouseInsertion(response.uuid, testData);
+    brewhousesToDelete.push(response.uuid);
     localCache.invalidate("brewhouse");
   });
 

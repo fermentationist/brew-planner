@@ -1,4 +1,4 @@
-/*global it, describe, before, after, console */
+/*global it, describe, before, after */
 import assert from "assert";
 import { v1 as createUuid } from "uuid";
 import TestAPI from "../../test/TestAPI.js";
@@ -175,8 +175,8 @@ export default describe("fermentable routes", function () {
       testData
     );
     assert.strictEqual(response.status, "ok");
-    await confirmFermentableInsertion(response.fermentableUuid, testData);
-    fermentablesToDelete.push(response.fermentableUuid);
+    await confirmFermentableInsertion(response.uuid, testData);
+    fermentablesToDelete.push(response.uuid);
     localCache.invalidate("fermentable");
   });
 
@@ -189,9 +189,9 @@ export default describe("fermentable routes", function () {
       testData
     );
     assert.strictEqual(response.status, "ok");
-    assert.strictEqual(response.fermentableUuid, fermentableUuid);
-    await confirmFermentableInsertion(response.fermentableUuid, testData);
-    fermentablesToDelete.push(response.fermentableUuid);
+    assert.strictEqual(response.uuid, fermentableUuid);
+    await confirmFermentableInsertion(response.uuid, testData);
+    fermentablesToDelete.push(response.uuid);
     localCache.invalidate("fermentable");
   });
 

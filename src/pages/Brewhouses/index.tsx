@@ -156,7 +156,7 @@ export const brewhouseInputs = [
   {
     name: "extractEfficiency",
     label: "Extract Efficiency (%)",
-    type: "number",
+    type: "fakeNumber",
     defaultValue: 75,
     validation: { required: true, min: 0, max: 100 },
     errorMessages: {
@@ -182,9 +182,10 @@ export const brewhouseInputs = [
   {
     name: "hopUtilization",
     label: "Hop Utilization (%)",
-    type: "number",
+    type: "fakeNumber",
     defaultValue: 75,
     maxDecPlaces: 2,
+    validation: { min: 0, max: 100 },
     tableOptions: {
       display: false,
     },

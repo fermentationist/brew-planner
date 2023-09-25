@@ -40,7 +40,7 @@ export const yeastInputs = [
   {
     name: "minTemperature",
     label: "Min temperature",
-    type: "number",
+    type: "fakeNumber",
     width: "250px",
     tableOptions: {
       display: false,
@@ -49,7 +49,7 @@ export const yeastInputs = [
   {
     name: "maxTemperature",
     label: "Max temperature",
-    type: "number",
+    type: "fakeNumber",
     width: "250px",
     tableOptions: {
       display: false,
@@ -69,7 +69,7 @@ export const yeastInputs = [
   {
     name: "attenuation",
     label: "Attenuation (%)",
-    type: "number",
+    type: "fakeNumber",
     width: "250px",
     validation: percentage,
     errorMessages: percentageMessage,
@@ -98,7 +98,7 @@ export const yeastInputs = [
   {
     name: "maxReuse",
     label: "Max repitches",
-    type: "number",
+    type: "fakeNumber",
     step: "1",
     width: "250px",
     validation: {min: 0},
