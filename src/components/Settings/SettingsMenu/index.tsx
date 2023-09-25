@@ -29,7 +29,7 @@ const SettingsMenu = ({ closeDrawer }: { closeDrawer: () => void }) => {
   console.log("SettingsMenu loaded")
   const [brewerySelectorIsLoading, setBrewerySelectorIsLoading] = useState(false);
   const { auth, logout, changeBrewery } = useAuth();
-  const [globalState, setGlobalState] = useGlobalState();
+  const [globalState, dispatch] = useGlobalState();
   const { resetAPI, refetch: refreshBreweries } = useAPI("breweries");
 
   const navigate = useNavigate();
@@ -43,21 +43,25 @@ const SettingsMenu = ({ closeDrawer }: { closeDrawer: () => void }) => {
   };
 
   const toggleDarkMode = () => {
-    setGlobalState(prevState => {
-      return {
-        ...prevState,
-        theme: globalState.theme === "dark" ? "light" : "dark"
-      }
-    });
+    dispatch({
+      type: "TOGGLE_THEME"
+    })
+    // setGlobalState(prevState => {
+    //   return {
+    //     ...prevState,
+    //     theme: globalState.theme === "dark" ? "light" : "dark"
+    //   }
+    // });
   };
 
   const toggleSafeMode = () => {
-    setGlobalState(prevState => {
-      return {
-        ...prevState,
-        safeMode: !globalState.safeMode
-      }
-    });
+    dispatch({type: "TOGGLE_SAFE_MODE"});
+    // setGlobalState(prevState => {
+    //   return {
+    //     ...prevState,
+    //     safeMode: !globalState.safeMode
+    //   }
+    // });
   };
 
   const callChangeBrewery = async (breweryUuid: string) => {

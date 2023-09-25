@@ -7,12 +7,12 @@ CREATE TABLE IF NOT EXISTS water (
   name VARCHAR (100) NOT NULL,
   UNIQUE KEY (brewery_uuid, name),
   version INT NOT NULL DEFAULT 1,
-  calcium DECIMAL (6, 2) DEFAULT 0, -- parts per million
-  bicarbonate DECIMAL (6, 2) DEFAULT 0, -- parts per million
-  sulfate DECIMAL (6, 2) DEFAULT 0, -- parts per million
-  chloride DECIMAL (6, 2) DEFAULT 0, -- parts per million
-  sodium DECIMAL (6, 2) DEFAULT 0, -- parts per million
-  magnesium DECIMAL (6, 2) DEFAULT 0, -- parts per million
+  calcium DECIMAL (7, 3) DEFAULT 0, -- parts per million
+  bicarbonate DECIMAL (7, 3) DEFAULT 0, -- parts per million
+  sulfate DECIMAL (7, 3) DEFAULT 0, -- parts per million
+  chloride DECIMAL (7, 3) DEFAULT 0, -- parts per million
+  sodium DECIMAL (7, 3) DEFAULT 0, -- parts per million
+  magnesium DECIMAL (7, 3) DEFAULT 0, -- parts per million
   ph DECIMAL (4, 2),
   notes TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -31,12 +31,12 @@ CREATE TABLE IF NOT EXISTS water_version (
   UNIQUE KEY (water_uuid, version),
   name VARCHAR (100) NOT NULL,
   created_by VARCHAR(36) NOT NULL,
-  calcium DECIMAL (6, 2), -- parts per million
-  bicarbonate DECIMAL (6, 2), -- parts per million
-  sulfate DECIMAL (6, 2), -- parts per million
-  chloride DECIMAL (6, 2), -- parts per million
-  sodium DECIMAL (6, 2), -- parts per million
-  magnesium DECIMAL (6, 2), -- parts per million
+  calcium DECIMAL (7, 3), -- parts per million
+  bicarbonate DECIMAL (7, 3), -- parts per million
+  sulfate DECIMAL (7, 3), -- parts per million
+  chloride DECIMAL (7, 3), -- parts per million
+  sodium DECIMAL (7, 3), -- parts per million
+  magnesium DECIMAL (7, 3), -- parts per million
   ph DECIMAL (4, 2),
   notes TEXT,
   created_at TIMESTAMP

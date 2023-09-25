@@ -12,6 +12,7 @@ export interface CustomNumberFieldWithUnitsProps
   convertOnUnitChange?: boolean;
   maxDecPlaces?: number;
   preferredUnitKey?: string;
+  unitsToExclude?: string[];
 }
 
 // split into an inner and an outer component. The inner component is memoized to prevent it from re-rendering, unless the preferredUnit for the specific field is updated in globalState
@@ -38,7 +39,9 @@ const CustomNumberFieldWithUnits = forwardRef(
     );
 
     const memoizedUnitSelections = useMemo(
-      () => getAltUnitSelections(memoizedInitialDefaultUnit),
+      () => {
+        return getAltUnitSelections(memoizedInitialDefaultUnit, props.unitsToExclude)
+      },
       []
     );
 
@@ -65,27 +68,33 @@ const CustomNumberFieldWithUnits = forwardRef(
     };
 
     const callSetPreferredUnit = (unit: string) => {
+      // create a function to convert the previous unit to canonical
       const prevUnitToCanonical = createConvertFunction(
         "canonical",
         unitRef.current // previous unit    
       );
+      // convert previous value to canonical value
       const { value: canonicalValue } = prevUnitToCanonical(
         props.name,
         valueRef.current,
         props.preferredUnitKey
       );
+      // check if we need to convert the canonical value to the new unit
       if (props.convertOnUnitChange) {
+        // create a function to convert the canonical value to the new unit
         const canonicalToNewUnit = createConvertFunction("preferred", unit);
+        // convert the canonical value to the new unit
         const { value: convertedValue } = canonicalToNewUnit(
           props.name,
           canonicalValue,
           props.preferredUnitKey
         );
+        // apply rounding if necessary
         const newConvertedValue =
           convertedValue && (props.maxDecPlaces ?? null)
             ? Number(Number(convertedValue).toFixed(props.maxDecPlaces))
             : Number(convertedValue);
-            
+        // update the valueRef and controlledValue, this will cause the new, converted value to be displayed in the input
         valueRef.current = newConvertedValue;
         setControlledValue(newConvertedValue);
       }

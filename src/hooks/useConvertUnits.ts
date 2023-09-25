@@ -14,7 +14,7 @@ import useDeeperMemo from "./useDeeperMemo";
 const DEFAULT_MAX_DECIMAL_PLACES = 2;
 
 const useConvertUnits = () => {
-  const [globalState, setGlobalState] = useGlobalState();
+  const [globalState, dispatch] = useGlobalState();
   const deepMemoize = useDeeperMemo();
 
   const parseUnit = useCallback((unit: string) => {
@@ -126,7 +126,9 @@ const useConvertUnits = () => {
   );
 
   const getAltUnitSelections = useCallback(
-    (unit: string) => {
+    (unit: string, unitsToExclude: string[] = []) => {
+      console.log("unit:", unit);
+      console.log("unitsToExclude:", unitsToExclude);
       const [units] = parseUnit(unit);
       const safeUnits = units.map((unitPart) =>
         unitPart.toLowerCase() === "cal" ? "J" : unitPart
@@ -139,11 +141,13 @@ const useConvertUnits = () => {
           if (possibilities.includes("J") || safeUnits[index] === "J") {
             possibilities.push("cal");
           }
-          map[unit] = Array.from(new Set([unit, ...possibilities]));
+          map[unit] = Array.from(new Set([unit, ...possibilities.filter((x: string) => !unitsToExclude.includes(x))]));
+          console.log("map:", map);
           return map;
         },
         {}
       );
+      console.log("selections:", selections);
       return selections;
     },
     [parseUnit]
@@ -151,51 +155,63 @@ const useConvertUnits = () => {
 
   const setPreferredUnit = useCallback(
     (field: string, unit: string, preferredUnitKey?: string) => {
-      setGlobalState((prevState: any) => {
-        let newState;
-        if (preferredUnitKey) {
-          newState = {
-            ...prevState,
-            preferredUnits: {
-              ...(prevState.preferredUnits || {}),
-              [preferredUnitKey]: {
-                ...(prevState.preferredUnits?.[preferredUnitKey] || {}),
-                [field]: unit,
-              },
-            },
-          };
-        } else {
-          newState = {
-            ...prevState,
-            preferredUnits: {
-              ...(prevState.preferredUnits || {}),
-              [field]: unit,
-            },
-          };
-        }
-        return newState;
-      });
+      dispatch({
+        type: "SET_PREFERRED_UNIT",
+        payload: {
+          field,
+          unit,
+          preferredUnitKey,
+        },
+      })
+      // setGlobalState((prevState: any) => {
+      //   let newState;
+      //   if (preferredUnitKey) {
+      //     newState = {
+      //       ...prevState,
+      //       preferredUnits: {
+      //         ...(prevState.preferredUnits || {}),
+      //         [preferredUnitKey]: {
+      //           ...(prevState.preferredUnits?.[preferredUnitKey] || {}),
+      //           [field]: unit,
+      //         },
+      //       },
+      //     };
+      //   } else {
+      //     newState = {
+      //       ...prevState,
+      //       preferredUnits: {
+      //         ...(prevState.preferredUnits || {}),
+      //         [field]: unit,
+      //       },
+      //     };
+      //   }
+      //   return newState;
+      // });
     },
-    [setGlobalState]
+    [dispatch]
   );
 
   const renameTempPreferredUnits = useCallback(
     (key?: string) => {
-      setGlobalState((prevState: any) => {
-        const newState = {
-          ...prevState,
-          preferredUnits: {
-            ...(prevState.preferredUnits || {}),
-          },
-        };
-        if (key) {
-          newState.preferredUnits[key] = prevState.preferredUnits?.temp;
-        }
-        newState.preferredUnits.temp && delete newState.preferredUnits.temp;
-        return newState;
-      });
+      dispatch({
+        type: "RENAME_TEMP_PREFERRED_UNITS",
+        payload: key,
+      })
+      // setGlobalState((prevState: any) => {
+      //   const newState = {
+      //     ...prevState,
+      //     preferredUnits: {
+      //       ...(prevState.preferredUnits || {}),
+      //     },
+      //   };
+      //   if (key) {
+      //     newState.preferredUnits[key] = prevState.preferredUnits?.temp;
+      //   }
+      //   newState.preferredUnits.temp && delete newState.preferredUnits.temp;
+      //   return newState;
+      // });
     },
-    [setGlobalState]
+    [dispatch]
   );
 
   const createColumn = useCallback(

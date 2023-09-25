@@ -30,7 +30,7 @@ const DrawerHeader = styled.div`
 `;
 
 const Menu = ({menuItems, nested}: MenuProps) => {
-  const [globalState, setGlobalState] = useGlobalState();
+  const [globalState, dispatch] = useGlobalState();
   const menuState = globalState.menu;
   const [collapsedState, setCollapsedState] = useState<CollapsedState>(
     menuState?.collapsedState
@@ -43,21 +43,14 @@ const Menu = ({menuItems, nested}: MenuProps) => {
       [title]: !titleState
     };
     setCollapsedState(newCollapsedState);
-    setGlobalState({
-      ...globalState,
-      menu: {
-        ...globalState.menu,
-        collapsedState: newCollapsedState
-      }
+    dispatch({
+      type: "SET_MENU_COLLAPSED_STATE",
+      payload: newCollapsedState
     });
   };
   const closeDrawer = () => {
-    setGlobalState({
-      ...globalState,
-      menu: {
-        ...globalState.menu,
-        isOpen: false
-      }
+    dispatch({
+      type: "CLOSE_MENU"
     });
   };
 

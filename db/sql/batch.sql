@@ -12,12 +12,12 @@ CREATE TABLE IF NOT EXISTS batch (
   actual_og DECIMAL (4, 3), -- specific gravity (SG)
   actual_fg DECIMAL (4, 3), -- specific gravity (SG)
   actual_efficiency DECIMAL (5, 2), -- percentage
-  ambient_temp DECIMAL (5, 2) -- degrees Celcius
+  ambient_temp DECIMAL (5, 2), -- degrees Celcius
   brewer VARCHAR (100),
   asst_brewer VARCHAR (100),
   actual_strike_water_vol DECIMAL (10, 4), -- liters
   actual_strike_water_temp DECIMAL (5, 2), -- degrees Celcius
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 DROP TRIGGER IF EXISTS before_insert_on_batch;

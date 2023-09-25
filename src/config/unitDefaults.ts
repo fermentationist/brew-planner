@@ -87,7 +87,7 @@ const unitDefaults: {[field: string]: {
   },
   sulfate: {
     default: "ppm",
-    canonical: "ppm"
+    canonical: "ppm",
   },
   chloride: {
     default: "ppm",

@@ -34,6 +34,7 @@ export const fermentableInputs = [
     name: "color",
     label: "Color (ºL)",
     type: "number",
+    step: 0.01,
     validation: {...required, min: 0},
     errorMessages: {...requiredMessage, min: "Please enter a positive number"},
     width: "250px",

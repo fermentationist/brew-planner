@@ -77,16 +77,19 @@ const Button = muiStyled(IconButton)`
 `;
 
 const Header = ({ children }: {children: ChildProps}) => {
-  const [globalState, setGlobalState] = useGlobalState();
+  const [globalState, dispatch] = useGlobalState();
   const location = useLocation();
   const toggleMenu = () => {
-    setGlobalState({
-      ...globalState,
-      menu: {
-        ...globalState.menu,
-        isOpen: !globalState.menu?.isOpen
-      }
+    dispatch({
+      type: globalState.menu?.isOpen ? "CLOSE_MENU" : "OPEN_MENU"
     });
+    // setGlobalState({
+    //   ...globalState,
+    //   menu: {
+    //     ...globalState.menu,
+    //     isOpen: !globalState.menu?.isOpen
+    //   }
+    // });
   };
   const pathnameToTitle = (pathname: string) => {
     const menuReducer = (map: MenuMap, item: IMenuItem) => {
