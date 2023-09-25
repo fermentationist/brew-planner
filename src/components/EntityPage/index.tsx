@@ -53,11 +53,13 @@ function EntityPage<EntityType>({
   const { generateColumnsFromInputs, renameTempPreferredUnits } = useConvertUnits();
 
   const refresh = useCallback(() => {
-    console.log("refreshing...");
-    setTableData([]);
+    // causes the table to re-render (in case the data is the same)
+    setTableData([...tableData]);
+    // causes the table to re-fetch data
     refetch();
+    // causes the table to re-generate columns
     setRefreshNumber(refreshNumber + Math.random());
-  }, [refetch, refreshNumber, setRefreshNumber, setTableData]);
+  }, [refetch, refreshNumber, setRefreshNumber, setTableData, tableData]);
 
   const editEntity = useCallback((rowData: EntityType) => {
     setModalData(rowData);
@@ -66,7 +68,6 @@ function EntityPage<EntityType>({
   }, []);
 
   useEffect(() => {
-    console.log("generating columns...");
     const generatedColumns = generateColumnsFromInputs(inputList);
     const cols = [
     {
