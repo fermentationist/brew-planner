@@ -3,7 +3,6 @@ import testController from "../controllers/testController.js";
 import { getBreweries } from "../controllers/breweries.js";
 import {
   protectBreweryRoutes,
-  protectAdminRoutes,
 } from "../middleware/auth.js";
 import {
   getBreweryUsers,

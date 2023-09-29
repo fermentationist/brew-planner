@@ -131,7 +131,7 @@ const createMashStepController = async (req, res, next) => {
     );
     return res.locals.sendResponse(res, { uuid: mashStepUuid });
   } catch (error) {
-    return next(res.locals.opError("MashStep creation failed", error));
+    return next(res.locals.opError("Mash step creation failed", error));
   }
 };
 
@@ -198,7 +198,7 @@ const updateMashStepController = async (req, res, next) => {
     );
     return res.locals.sendResponse(res);
   } catch (error) {
-    return next(res.locals.opError("MashStep update failed", error));
+    return next(res.locals.opError("Mash step update failed", error));
   }
 };
 
@@ -242,7 +242,7 @@ const deleteMashStepController = async (req, res, next) => {
     await mashStepService.deleteMashStep(breweryUuid, mashUuid, mashStepUuid);
     return res.locals.sendResponse(res);
   } catch (error) {
-    return next(res.locals.opError("MashStep deletion failed", error));
+    return next(res.locals.opError("Mash step deletion failed", error));
   }
 };
 

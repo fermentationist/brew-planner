@@ -150,5 +150,5 @@ export const createInsertionTest = tableName => async (entityUuid, data) => {
 export const createDeletionTest = tableName => async entityUuid => {
   const getExistingEntities = getEntityFactory(tableName);
   const [dbData] = await getExistingEntities(entityUuid);
-  assert.strictEqual(dbData, undefined, "Entity not deleted");
+  assert.strictEqual(dbData, void 0, "Entity not deleted");
 }
