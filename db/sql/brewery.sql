@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS brewery (
   brewery_key INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   brewery_uuid BINARY (16) NOT NULL UNIQUE,
+  created_by VARCHAR (36) NOT NULL,
   name VARCHAR (100) NOT NULL,
   street VARCHAR (200),
   unit VARCHAR (100),

@@ -53,7 +53,6 @@ export default describe("user routes", function () {
       state_or_province: "IL",
       postal_code: "60712",
       country: "United States",
-      is_private: false,
     };
     brewery1Uuid = await createBrewery(brewery1Data);
     const brewery2Data = {

@@ -266,13 +266,13 @@ export default describe("mash_step routes", function () {
       stepTime: [
         `${randomFloat(5, 60)}`,
         randomString(6),
-        randomFloat(5, 60),
+        randomFloat(5, 60, 4),
         -1 * randomInt(5, 60),
       ],
       rampTime: [
         `${randomFloat(5, 60)}`,
         randomString(6),
-        randomFloat(5, 60),
+        randomFloat(5, 60, 4),
         -1 * randomInt(5, 60),
       ],
       endTemp: [
