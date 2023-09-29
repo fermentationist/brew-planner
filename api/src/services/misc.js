@@ -21,6 +21,7 @@ export const createMisc = async (breweryUuid, miscData) => {
     ...miscData,
   };
   const { insertId } = await Models.misc.insert([miscRow], false);
+  localCache.invalidate("misc");
   if (miscUuid) {
     // if user passed a UUID for the new misc
     return miscUuid;
@@ -28,7 +29,6 @@ export const createMisc = async (breweryUuid, miscData) => {
   const [newMisc] = await Models.misc.select({
     miscKey: insertId,
   });
-  localCache.invalidate("misc");
   return newMisc.miscUuid;
 };
 

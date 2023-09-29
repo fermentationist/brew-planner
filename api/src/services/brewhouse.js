@@ -18,11 +18,11 @@ export const createBrewhouse = async (breweryUuid, brewhouseData) => {
     ...brewhouseData
   }
   const {insertId} = await Models.brewhouse.insert([brewhouseRow], false);
+  localCache.invalidate("brewhouse");
   if (brewhouseUuid) { // if user passed a UUID for the new brewhouse
     return brewhouseUuid;
   }
   const [newBrewhouse] = await Models.brewhouse.select({brewhouseKey: insertId});
-  localCache.invalidate("brewhouse");
   return newBrewhouse.brewhouseUuid;
 }
 

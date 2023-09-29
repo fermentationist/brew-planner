@@ -1,9 +1,10 @@
-/* global Buffer */
 import db from "../services/db/index.js";
 import { objectKeysToCamelCase, objectKeysToSnakeCase } from "../utils/helpers.js";
 import {parse as uuidParse} from "uuid";
 
-export const convertUuidToBuffer = uuid => Buffer.from(uuidParse(uuid));
+export const convertUuidToBuffer = uuid => {
+  return Buffer.from(uuidParse(uuid));
+};
 
 export const convertObjectUUIDsToBuffers = object => {
   const newObj = {};
@@ -57,7 +58,7 @@ const cleanResults = (resultsArray) => {
 
 export default class Model {
   constructor (tableName) {
-    this.tableName = tableName;
+    this.tableName = (tableName);
     this.columns = [];
     this.isInitialized = false;
   }

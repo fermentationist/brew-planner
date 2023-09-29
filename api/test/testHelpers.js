@@ -1,5 +1,6 @@
 import db from "../src/services/db/index.js";
 import {convertObjectUUIDsToBuffers, convertUuidToBuffer} from "../src/models/Model.js";
+import {toCamelCase, toSnakeCase} from "../src/utils/helpers.js";
 import assert from "assert";
 
 export const expectError = function (p, errorName, testDescription) {
@@ -128,3 +129,26 @@ export const assertEqualIfCondition = (condition, actual, expected) => {
     assert.strictEqual(actual, expected);
   }
 };
+
+export const createTestToVerifyPersistedData = (tableName) => async (data) => {
+  const test = createInsertionTest(tableName);
+  for (const row of data) {
+    test(row[`${toCamelCase(tableName)}Uuid`], row);
+  }
+};
+
+export const createInsertionTest = tableName => async (entityUuid, data) => {
+  const getExistingEntities = getEntityFactory(tableName);
+  const [dbData] = await getExistingEntities(entityUuid);
+  for (const attr in data) {
+    let dbValue = dbData[toSnakeCase(attr)];
+    dbValue = dbValue instanceof Date ? dbValue.getTime() : dbValue;
+    assert.strictEqual(data[attr], dbValue, `Data mismatch for ${attr}`);
+  }
+};
+
+export const createDeletionTest = tableName => async entityUuid => {
+  const getExistingEntities = getEntityFactory(tableName);
+  const [dbData] = await getExistingEntities(entityUuid);
+  assert.strictEqual(dbData, undefined, "Entity not deleted");
+}

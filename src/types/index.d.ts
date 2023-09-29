@@ -203,3 +203,17 @@ export interface MiscData {
   createdAt: number;
   data?: any;
 }
+
+export interface MashData {
+  mashUuid: string;
+  name: string;
+  createdBy: string;
+  grainTemp: number;
+  tunTemp?: number;
+  spargeTemp?: number;
+  ph?: number;
+  tunWeight?: number;
+  notes?: string;
+  tunSpecificHeat?: number;
+  equipAdjust?: boolean;// If TRUE, mash infusion and decoction calculations should take into account the temperature effects of the equipment (tun specific heat and tun weight).
+}

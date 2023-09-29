@@ -33,20 +33,23 @@ export const AuthContext = createContext<IAuthContext>({
   sendPasswordResetEmail: null,
 });
 
-const AuthProvider = ({children}:{children: ChildProps}) => {
+const AuthProvider = ({ children }: { children: ChildProps }) => {
   const initialState = getStorage("authState") || { loaded: false };
   const [authState, setAuthState] = useState(initialState as AuthObject);
   // const [tokenRefresh, setTokenRefresh] = useState(false);
   const deepMemoize = useDeeperMemo();
 
-  const setAuth = useCallback((newState: AuthObject | ((prevState: any) => any)) => {
-    setAuthState(newState);
-  }, []);
+  const setAuth = useCallback(
+    (newState: AuthObject | ((prevState: any) => any)) => {
+      setAuthState(newState);
+    },
+    []
+  );
 
   useEffect(() => {
     // when authState is updated, save it to localStorage
-    console.log("saving authState to localStorage:", authState)
-    setStorage("authState", (authState));
+    console.log("saving authState to localStorage:", authState);
+    setStorage("authState", authState);
   }, [stringifyObjectWithFunctions(authState)]); // stringifying dependency (authState) so that useEffect will only be called when it actually changes
 
   const resetAuth = useCallback(() => {
@@ -71,34 +74,37 @@ const AuthProvider = ({children}:{children: ChildProps}) => {
     // if (tokenExpired) {
     //   // logout();
     //   firebaseAuth.updateCurrentUser(authState.firebaseUser);
-    // } 
+    // }
     // was previously using firebaseAuth.onAuthStateChanged
-    console.log("useEffect adding onIdTokenChanged listener...")
+    console.log("useEffect adding onIdTokenChanged listener...");
     const removeListener = firebaseAuth.onIdTokenChanged((authUser: any) => {
-      console.log("authUser in onIdTokenChanged:", authUser)
+      console.log("authUser in onIdTokenChanged:", authUser);
       if (!authUser) {
         resetAuth();
       } else {
-        authUser.getIdTokenResult(
-          // tokenExpired
-          ).then((result: any) => {
-          setAuth(prevState => ({
-            ...prevState,
-            firebaseUser: authUser,
-            user: {
-              uid: authUser.uid,
-              email: authUser.email,
-              displayName: authUser.displayName,
-              role: result.claims.role,
-              breweries: result.claims.breweries || [],
-            },
-            accessToken: authUser.accessToken,
-            currentBrewery:
-              prevState.currentBrewery || result.claims.breweries[0],
-            tokenExpiration: new Date(result.expirationTime).getTime(),
-            loaded: true,
-          }));
-        });
+        authUser
+          .getIdTokenResult()
+          .then((result: any) => {
+            setAuth((prevState) => { 
+              console.log("result.claims.breweries:", result.claims.breweries);
+              return {
+                ...prevState,
+                firebaseUser: authUser,
+                user: {
+                  uid: authUser.uid,
+                  email: authUser.email,
+                  displayName: authUser.displayName,
+                  role: result.claims.role,
+                  breweries: result.claims.breweries || [],
+                },
+                accessToken: authUser.accessToken,
+                currentBrewery:
+                  prevState.currentBrewery || result.claims.breweries[0],
+                tokenExpiration: new Date(result.expirationTime).getTime(),
+                loaded: true,
+              };
+            });
+          });
       }
     });
     return () => {
@@ -118,13 +124,13 @@ const AuthProvider = ({children}:{children: ChildProps}) => {
       console.log(`Error logging in user ${email}`);
       console.error(err);
     });
-    setAuthState(prevState => {
+    setAuthState((prevState) => {
       return {
         ...prevState,
         loaded: false,
-        accessToken: credentials?.user?.accessToken || null
-      }
-    })
+        accessToken: credentials?.user?.accessToken || null,
+      };
+    });
     return credentials?.user?.accessToken || false;
   }, []);
 

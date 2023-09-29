@@ -22,6 +22,7 @@ export const createYeast = async (breweryUuid, yeastData) => {
     ...yeastData,
   };
   const { insertId } = await Models.yeast.insert([yeastRow], false);
+  localCache.invalidate("yeast");
   if (yeastUuid) {
     // if user passed a UUID for the new yeast
     return yeastUuid;
@@ -29,7 +30,6 @@ export const createYeast = async (breweryUuid, yeastData) => {
   const [newYeast] = await Models.yeast.select({
     yeastKey: insertId,
   });
-  localCache.invalidate("yeast");
   return newYeast.yeastUuid;
 };
 

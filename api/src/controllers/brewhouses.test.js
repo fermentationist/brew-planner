@@ -4,12 +4,11 @@ import {v1 as createUuid} from "uuid";
 import TestAPI from "../../test/TestAPI.js";
 import {
   expectError,
-  expectInvalidInput,
   runDataValidationTests,
-  getEntityFactory,
   deleteEntityFactory,
   createEntityFactory,
-  assertEqualIfCondition,
+  createInsertionTest,
+  createTestToVerifyPersistedData,
 } from "../../test/testHelpers.js";
 import {
   randomInt,
@@ -27,69 +26,10 @@ const createBrewery = createEntityFactory("brewery");
 const deleteBrewery = deleteEntityFactory("brewery");
 const createBrewhouse = createEntityFactory("brewhouse");
 const deleteBrewhouse = deleteEntityFactory("brewhouse");
-const getExistingBreweries = getEntityFactory("brewery");
-const getExistingBrewhouses = getEntityFactory("brewhouse");
 
-const verifyBrewhouseData = async (brewhousesData) => {
-  const existingBrewhouses = await getExistingBrewhouses();
-  const existingBrewhouseUuids = existingBrewhouses.map(
-    (brewhouse) => brewhouse.brewhouse_uuid
-  );
-  for (const brewhouse of brewhousesData) {
-    assertEqualIfCondition(
-      brewhouse.brewhouseUuid,
-      existingBrewhouseUuids.includes(brewhouse.brewhouseUuid),
-      true
-    );
-    const [dbData] = existingBrewhouses.filter(
-      (existingBrewhouse) =>
-        existingBrewhouse.brewhouse_uuid === brewhouse.brewhouseUuid
-    );
-    assert.strictEqual(brewhouse.name, dbData.name);
-    assert.strictEqual(brewhouse.batchSize, dbData.batch_size);
-    assert.strictEqual(brewhouse.tunVolume, dbData.tun_volume);
-    assert.strictEqual(brewhouse.tunWeight, dbData.tun_weight);
-    assert.strictEqual(brewhouse.tunLoss, dbData.tun_loss);
-    assert.strictEqual(brewhouse.tunSpecificHeat, dbData.tun_specific_heat);
-    assert.strictEqual(brewhouse.lauterDeadspace, dbData.lauter_deadspace);
-    assert.strictEqual(brewhouse.topUpWater, dbData.top_up_water);
-    assert.strictEqual(brewhouse.trubChillerLoss, dbData.trub_chiller_loss);
-    assert.strictEqual(brewhouse.evaporationRate, dbData.evaporation_rate);
-    assert.strictEqual(brewhouse.kettleVol, dbData.kettle_vol);
-    assert.strictEqual(brewhouse.miscLoss, dbData.misc_loss);
-    assert.strictEqual(brewhouse.extractEfficiency, dbData.extract_efficiency);
-    assert.strictEqual(
-      brewhouse.grainAbsorptionRate,
-      dbData.grain_absorption_rate
-    );
-    assert.strictEqual(brewhouse.hopUtilization, dbData.hop_utilization);
-  }
-};
+const verifyBrewhouseData = createTestToVerifyPersistedData("brewhouse");
 
-const confirmBrewhouseInsertion = async (brewhouseUuid, brewhouseData) => {
-  const [dbData] = await getExistingBrewhouses(brewhouseUuid);
-  assert.strictEqual(brewhouseData.name, dbData.name);
-  assert.strictEqual(brewhouseData.batchSize, dbData.batch_size);
-  assert.strictEqual(brewhouseData.tunVolume, dbData.tun_volume);
-  assert.strictEqual(brewhouseData.tunWeight, dbData.tun_weight);
-  assert.strictEqual(brewhouseData.tunLoss, dbData.tun_loss);
-  assert.strictEqual(brewhouseData.tunSpecificHeat, dbData.tun_specific_heat);
-  assert.strictEqual(brewhouseData.lauterDeadspace, dbData.lauter_deadspace);
-  assert.strictEqual(brewhouseData.topUpWater, dbData.top_up_water);
-  assert.strictEqual(brewhouseData.trubChillerLoss, dbData.trub_chiller_loss);
-  assert.strictEqual(brewhouseData.evaporationRate, dbData.evaporation_rate);
-  assert.strictEqual(brewhouseData.kettleVol, dbData.kettle_vol);
-  assert.strictEqual(brewhouseData.miscLoss, dbData.misc_loss);
-  assert.strictEqual(
-    brewhouseData.extractEfficiency,
-    dbData.extract_efficiency
-  );
-  assert.strictEqual(
-    brewhouseData.grainAbsorptionRate,
-    dbData.grain_absorption_rate
-  );
-  assert.strictEqual(brewhouseData.hopUtilization, dbData.hop_utilization);
-};
+const confirmBrewhouseInsertion = createInsertionTest("brewhouse");
 
 const getBrewhouseTestData = async () => {
   const users = await userService.getAllUsers();
@@ -202,10 +142,6 @@ export default describe("brewhouse routes", function () {
 
   it("/breweries/:breweryUuid/brewhouses POST", async () => {
     const testData = await getBrewhouseTestData();
-    const existingBreweries = await getExistingBreweries();
-    const existingBreweryUuids = existingBreweries.map(
-      (brewery) => brewery.brewery_uuid
-    );
     userBreweries = [breweriesToDelete[breweriesToDelete.length - 1]];
     await api.signInAsNewUser({ role: "user", breweries: userBreweries });
     const response = await makeCreateBrewhouseRequest(userBreweries[0], testData);
@@ -253,13 +189,14 @@ export default describe("brewhouse routes", function () {
 
   it("/breweries/:breweryUuid/brewhouses/:brewhouseUuid PATCH", async () => {
     const updateData = await getBrewhouseTestData();
+    delete updateData.createdBy;
     const brewhouseUuid = brewhousesToDelete[brewhousesToDelete.length - 1];
     const response = await api.request({
       url: `/breweries/${userBreweries[0]}/brewhouses/${brewhouseUuid}`,
       method: "patch",
       data: updateData,
     });
-    assert.strictEqual(response.status, "ok");
+    assert.strictEqual(response.status, "ok", "response status should be ok");
     await confirmBrewhouseInsertion(brewhouseUuid, updateData);
   });
 

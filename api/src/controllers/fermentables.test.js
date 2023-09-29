@@ -5,17 +5,16 @@ import TestAPI from "../../test/TestAPI.js";
 import {
   expectError,
   runDataValidationTests,
-  getEntityFactory,
   deleteEntityFactory,
   createEntityFactory,
-  assertEqualIfCondition,
+  createTestToVerifyPersistedData,
+  createInsertionTest,
 } from "../../test/testHelpers.js";
 import {
   randomInt,
   randomFloat,
   randomString,
   getRandomArrayMembers,
-  toSnakeCase,
   objectKeysToSnakeCase,
 } from "../utils/helpers.js";
 import * as userService from "../services/user.js";
@@ -31,39 +30,9 @@ const deleteBrewery = deleteEntityFactory("brewery");
 const createFermentable = createEntityFactory("fermentable");
 const deleteFermentable = deleteEntityFactory("fermentable");
 
-const getExistingFermentables = getEntityFactory("fermentable");
+const verifyFermentableData = createTestToVerifyPersistedData("fermentable");
 
-const verifyFermentableData = async (fermentablesData) => {
-  const existingFermentables = await getExistingFermentables();
-  const existingFermentableUuids = existingFermentables.map(
-    (fermentable) => fermentable.fermentable_uuid
-  );
-  for (const fermentable of fermentablesData) {
-    assertEqualIfCondition(
-      fermentable.fermentableUuid,
-      existingFermentableUuids.includes(fermentable.fermentableUuid),
-      true
-    );
-    const [dbData] = existingFermentables.filter(
-      (existingFermentable) =>
-        existingFermentable.fermentable_uuid === fermentable.fermentableUuid
-    );
-    for (const attr in fermentable) {
-      let dbValue = dbData[toSnakeCase(attr)];
-      dbValue = dbValue instanceof Date ? dbValue.getTime() : dbValue;
-      assert.strictEqual(fermentable[attr], dbValue);
-    }
-  }
-};
-
-const confirmFermentableInsertion = async (fermentableUuid, fermentableData) => {
-  const [dbData] = await getExistingFermentables(fermentableUuid);
-  for (const attr in fermentableData) {
-    let dbValue = dbData[toSnakeCase(attr)];
-    dbValue = dbValue instanceof Date ? dbValue.getTime() : dbValue;
-    assert.strictEqual(fermentableData[attr], dbValue);
-  }
-};
+const confirmFermentableInsertion = createInsertionTest("fermentable");
 
 const getFermentableTestData = async () => {
   const users = await userService.getAllUsers();

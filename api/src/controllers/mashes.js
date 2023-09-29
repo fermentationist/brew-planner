@@ -13,11 +13,7 @@ const mashUuidChecker = (input) =>
   mashService.isExistingMashAttribute(input, "mashUuid");
 const isExistingMashUuid = rejectOnFalse(mashUuidChecker);
 
-const isPercentage = numberValidator({ min: 0, max: 100 });
-
-const validMashFormChecker = (input) =>
-  mashService.HOP_FORMS.includes(input);
-const isValidMashForm = rejectOnFalse(validMashFormChecker);
+const isPositiveNumber = numberValidator({ min: 0 });
 
 const customMashNameValidator = async (req, res, next) => {
   // ensures that Mash name is unique (for the current brewery)
@@ -84,16 +80,14 @@ export const getMashes = [
  * @apiBody {String} name A name for the mash
  * @apiBody {String} [mashUuid] A unique identifier for the mash (a v1 UUID)
  * @apiBody {String} createdBy The uid of the user who created the mash
- * @apiBody {Number} alpha Percentage Alpha Acids by weight (a whole-number percentage)
- * @apiBody {Number} [beta] Percentage Beta Acids by weight
- * @apiBody {String} [form] One of "Pellet", "Plug", or "Leaf"
+ * @apiBody {Number} [grainTemp] The temperature of the grain (ºC)
+ * @apiBody {Number} [tunTemp] The temperature of the mash tun (ºC)
+ * @apiBody {Number} [spargeTemp] The temperature of the sparge water (ºC)
+ * @apiBody {Number} [ph] The (target?) pH of the mash
+ * @apiBody {Number} [tunWeight] The weight of the mash tun (kg)
+ * @apiBody {Number} [tunSpecificHeat] The specific heat of the mash tun (cal/g/ºC)
+ * @apiBody {Boolean} [equipAdjust] Whether to adjust for equipment temperature
  * @apiBody {String} [notes]
- * @apiBody {String} [origin] Geographical origin of the mash
- * @apiBody {String} [supplier] Brand name of the supplier
- * @apiBody {Number} [humulene] Percentage by weight
- * @apiBody {Number} [caryolphyllene] Percentage by weight
- * @apiBody {Number} [cohumulone] Percentage by weight
- * @apiBody {Number} [myrcene] Percentage by weight
  * @apiUse successResponse
  * @apiSuccess {String} mashUuid
  */
@@ -109,33 +103,18 @@ const createMashValidation = [
   customMashNameValidator,
   validate.body("mashUuid").optional(opt).isUUID(1),
   validate.body("createdBy").exists(opt).isString().custom(isExistingUid),
-  validate.body("alpha").exists().custom(isPercentage),
-  validate.body("beta").optional().custom(isPercentage),
-  validate
-    .body("form")
-    .optional()
-    .custom(isValidMashForm),
+  validate.body("grainTemp").optional().custom(numberValidator()),
+  validate.body("tunTemp").optional().custom(numberValidator()),
+  validate.body("spargeTemp").optional().custom(isPositiveNumber),
+  validate.body("ph").optional().custom(isPositiveNumber),
+  validate.body("tunWeight").optional().custom(isPositiveNumber),
+  validate.body("tunSpecificHeat").optional().custom(isPositiveNumber),
+  validate.body("equipAdjust").optional().isBoolean({strict: true}),
   validate
     .body("notes")
     .optional()
     .isString()
     .customSanitizer(validate.xssSanitize),
-  validate
-    .body("origin")
-    .optional()
-    .isString()
-    .isLength({ max: 100 })
-    .customSanitizer(validate.xssSanitize),
-  validate
-    .body("supplier")
-    .optional()
-    .isString()
-    .isLength({ max: 100 })
-    .customSanitizer(validate.xssSanitize),
-  validate.body("humulene").optional().custom(isPercentage),
-  validate.body("caryophyllene").optional().custom(isPercentage),
-  validate.body("cohumulone").optional().custom(isPercentage),
-  validate.body("myrcene").optional().custom(isPercentage),
   validate.catchValidationErrors,
 ];
 
@@ -165,19 +144,17 @@ export const createMash = [
  * @apiDescription Update a mash
  * @apiUse authHeader
  * @apiParam {String} breweryUuid The brewery's unique identifier
- * @apiParam {String} mashUuid The brewery's unique identifier
+ * @apiParam {String} mashUuid The unique identifier for the mash
  * @apiBody {String} [name] A name for the mash
- * @apiBody {String} [mashUuid] A unique identifier for the mash (a v1 UUID)
- * @apiBody {Number} [alpha] Percentage Alpha Acids by weight (a whole-number percentage)
- * @apiBody {Number} [beta] Percentage Beta Acids by weight
- * @apiBody {String} [form] One of "Pellet", "Plug", or "Leaf"
+ * @apiBody {String} [createdBy] The uid of the user who created the mash
+ * @apiBody {Number} [grainTemp] The temperature of the grain (ºC)
+ * @apiBody {Number} [tunTemp] The temperature of the mash tun (ºC)
+ * @apiBody {Number} [spargeTemp] The temperature of the sparge water (ºC)
+ * @apiBody {Number} [ph] The (target?) pH of the mash
+ * @apiBody {Number} [tunWeight] The weight of the mash tun (kg)
+ * @apiBody {Number} [tunSpecificHeat] The specific heat of the mash tun (cal/g/ºC)
+ * @apiBody {Boolean} [equipAdjust] Whether to adjust for equipment temperature
  * @apiBody {String} [notes]
- * @apiBody {String} [origin] Geographical origin of the mash
- * @apiBody {String} [supplier] Brand name of the supplier
- * @apiBody {Number} [humulene] Percentage by weight
- * @apiBody {Number} [caryolphyllene] Percentage by weight
- * @apiBody {Number} [cohumulone] Percentage by weight
- * @apiBody {Number} [myrcene] Percentage by weight
  * @apiUse successResponse
  */
 
@@ -194,33 +171,19 @@ const updateMashValidation = [
     .isLength({ min: 1, max: 100 })
     .customSanitizer(validate.xssSanitize),
   customMashNameValidator,
-  validate.body("alpha").optional().custom(isPercentage),
-  validate.body("beta").optional().custom(isPercentage),
-  validate
-    .body("form")
-    .optional()
-    .custom(isValidMashForm),
+  validate.body("createdBy").optional().isString().custom(isExistingUid),
+  validate.body("grainTemp").optional().custom(numberValidator()),
+  validate.body("tunTemp").optional().custom(numberValidator()),
+  validate.body("spargeTemp").optional().custom(isPositiveNumber),
+  validate.body("ph").optional().custom(isPositiveNumber),
+  validate.body("tunWeight").optional().custom(isPositiveNumber),
+  validate.body("tunSpecificHeat").optional().custom(isPositiveNumber),
+  validate.body("equipAdjust").optional().isBoolean({strict: true}),
   validate
     .body("notes")
     .optional()
     .isString()
     .customSanitizer(validate.xssSanitize),
-  validate
-    .body("origin")
-    .optional()
-    .isString()
-    .isLength({ max: 100 })
-    .customSanitizer(validate.xssSanitize),
-  validate
-    .body("supplier")
-    .optional()
-    .isString()
-    .isLength({ max: 100 })
-    .customSanitizer(validate.xssSanitize),
-  validate.body("humulene").optional().custom(isPercentage),
-  validate.body("caryophyllene").optional().custom(isPercentage),
-  validate.body("cohumulone").optional().custom(isPercentage),
-  validate.body("myrcene").optional().custom(isPercentage),
   validate.catchValidationErrors,
 ];
 

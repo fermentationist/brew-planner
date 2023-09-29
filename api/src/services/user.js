@@ -1,4 +1,3 @@
-/*global console*/
 import admin from "firebase-admin";
 import {getAuth} from "firebase-admin/auth";
 import { randomString } from "../utils/helpers.js";

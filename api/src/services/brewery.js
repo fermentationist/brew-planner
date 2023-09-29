@@ -14,11 +14,11 @@ export const getBreweries = async breweryUuid => {
 export const createBrewery = async breweryData => {
   const {breweryUuid} = breweryData;
   const {insertId} = await Models.brewery.insert([breweryData]);
+  localCache.invalidate("brewery");
   if (breweryUuid) { // If user passed a UUID for the new brewery
     return breweryUuid;
   }
   const [newBrewery] = await Models.brewery.select({breweryKey: insertId});
-  localCache.invalidate("brewery");
   return newBrewery.breweryUuid;
 }
 

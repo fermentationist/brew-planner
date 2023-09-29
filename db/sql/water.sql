@@ -44,9 +44,10 @@ CREATE TABLE IF NOT EXISTS water_version (
 
 CREATE TABLE IF NOT EXISTS recipe_water (
   water_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_recipe_water_water_uuid FOREIGN KEY (water_uuid) REFERENCES water(water_uuid),
   version INT NOT NULL,
   recipe_uuid BINARY (16) NOT NULL,
-  CONSTRAINT fk_water_recipe_uuid FOREIGN KEY (recipe_uuid) REFERENCES recipe(recipe_uuid),
+  CONSTRAINT fk_recipe_water_recipe_uuid FOREIGN KEY (recipe_uuid) REFERENCES recipe(recipe_uuid),
   UNIQUE KEY (water_uuid, version, recipe_uuid),
   amount DECIMAL (10, 6) NOT NULL, -- volume in liters
   added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

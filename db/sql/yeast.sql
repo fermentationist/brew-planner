@@ -48,9 +48,10 @@ CREATE TABLE IF NOT EXISTS yeast_version (
 
 CREATE TABLE IF NOT EXISTS recipe_yeast (
   yeast_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_recipe_yeast_yeast_uuid FOREIGN KEY (yeast_uuid) REFERENCES yeast(yeast_uuid),
   version INT NOT NULL,
   recipe_uuid BINARY (16) NOT NULL,
-  CONSTRAINT fk_yeast_recipe_uuid FOREIGN KEY (recipe_uuid) REFERENCES recipe(recipe_uuid),
+  CONSTRAINT fk_recipe_yeast_recipe_uuid FOREIGN KEY (recipe_uuid) REFERENCES recipe(recipe_uuid),
   UNIQUE KEY (yeast_uuid, version, recipe_uuid),
   form ENUM ("Liquid", "Dry", "Slant", "Culture") NOT NULL,
   volume DECIMAL (10, 4), -- volume in liters,

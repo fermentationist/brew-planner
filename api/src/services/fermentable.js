@@ -20,6 +20,7 @@ export const createFermentable = async (breweryUuid, fermentableData) => {
     ...fermentableData,
   };
   const { insertId } = await Models.fermentable.insert([fermentableRow], false);
+  localCache.invalidate("fermentable");
   if (fermentableUuid) {
     // if user passed a UUID for the new fermentable
     return fermentableUuid;
@@ -27,7 +28,6 @@ export const createFermentable = async (breweryUuid, fermentableData) => {
   const [newFermentable] = await Models.fermentable.select({
     fermentableKey: insertId,
   });
-  localCache.invalidate("fermentable");
   return newFermentable.fermentableUuid;
 };
 

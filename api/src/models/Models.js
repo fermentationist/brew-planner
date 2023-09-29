@@ -1,4 +1,5 @@
 import Model from "./Model.js";
+import { toSnakeCase } from "../utils/helpers.js";
 
 const Models = {};
 
@@ -11,11 +12,12 @@ const modelNames = [
   "water",
   "yeast",
   "misc",
-  "mash"
+  "mash",
+  "mashStep",
 ];
 
 for (const modelName of modelNames) {
-  Models[modelName] = new Model(modelName);
+  Models[modelName] = new Model(toSnakeCase(modelName));
   await Models[modelName].init();
 }
 

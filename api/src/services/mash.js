@@ -12,6 +12,7 @@ export const createMash = async (breweryUuid, mashData) => {
     ...mashData,
   };
   const { insertId } = await Models.mash.insert([mashRow], false);
+  localCache.invalidate("mash");
   if (mashUuid) {
     // if user passed a UUID for the new mash
     return mashUuid;
@@ -19,11 +20,11 @@ export const createMash = async (breweryUuid, mashData) => {
   const [newMash] = await Models.mash.select({
     mashKey: insertId,
   });
-  localCache.invalidate("mash");
   return newMash.mashUuid;
 };
 
 export const updateMash = async (breweryUuid, mashUuid, updateData) => {
+  console.log("updateData", updateData);
   const result = await Models.mash.update(updateData, {
     breweryUuid,
     mashUuid,

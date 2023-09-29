@@ -5,17 +5,16 @@ import TestAPI from "../../test/TestAPI.js";
 import {
   expectError,
   runDataValidationTests,
-  getEntityFactory,
   deleteEntityFactory,
   createEntityFactory,
-  assertEqualIfCondition,
+  createTestToVerifyPersistedData,
+  createInsertionTest,
 } from "../../test/testHelpers.js";
 import {
   randomInt,
   randomFloat,
   randomString,
   getRandomArrayMembers,
-  toSnakeCase,
   objectKeysToSnakeCase,
 } from "../utils/helpers.js";
 import * as userService from "../services/user.js";
@@ -31,39 +30,9 @@ const deleteBrewery = deleteEntityFactory("brewery");
 const createHop = createEntityFactory("hop");
 const deleteHop = deleteEntityFactory("hop");
 
-const getExistingHops = getEntityFactory("hop");
+const verifyHopsData = createTestToVerifyPersistedData("hop");
 
-const verifyHopsData = async (hopsData) => {
-  const existingHops = await getExistingHops();
-  const existingHopUuids = existingHops.map(
-    (hop) => hop.hop_uuid
-  );
-  for (const hop of hopsData) {
-    assertEqualIfCondition(
-      hop.hopUuid,
-      existingHopUuids.includes(hop.hopUuid),
-      true
-    );
-    const [dbData] = existingHops.filter(
-      (existingHop) =>
-        existingHop.hop_uuid === hop.hopUuid
-    );
-    for (const attr in hop) {
-      let dbValue = dbData[toSnakeCase(attr)];
-      dbValue = dbValue instanceof Date ? dbValue.getTime() : dbValue;
-      assert.strictEqual(hop[attr], dbValue);
-    }
-  }
-};
-
-const confirmHopInsertion = async (hopUuid, hopData) => {
-  const [dbData] = await getExistingHops(hopUuid);
-  for (const attr in hopData) {
-    let dbValue = dbData[toSnakeCase(attr)];
-    dbValue = dbValue instanceof Date ? dbValue.getTime() : dbValue;
-    assert.strictEqual(hopData[attr], dbValue);
-  }
-};
+const confirmHopInsertion = createInsertionTest("hop");
 
 const getHopTestData = async () => {
   const users = await userService.getAllUsers();

@@ -1,5 +1,3 @@
-/* global setTimeout */
-//test helpers
 
 export const randomInt = (min, max, exclude = []) => {
   let output = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -19,6 +17,8 @@ export const randomFloat = (min, max, decimalPlaces, exclude = []) => {
   }
   return output;
 };
+
+export const randomBool = () => Math.random() >= 0.5;
 
 export const getRandomArrayMembers = (array, num) => {
   const arrayCopy = [...array];

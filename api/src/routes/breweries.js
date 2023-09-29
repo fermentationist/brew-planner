@@ -46,12 +46,18 @@ import {
   updateMisc,
   deleteMisc,
 } from "../controllers/miscs.js";
-// import {
-//   createMash,
-//   getMashes,
-//   updateMash,
-//   deleteMash,
-// } from "../controllers/mashes.js";
+import {
+  createMash,
+  getMashes,
+  updateMash,
+  deleteMash,
+} from "../controllers/mashes.js";
+import {
+  createMashStep,
+  getMashSteps,
+  updateMashStep,
+  deleteMashStep,
+} from "../controllers/mashSteps.js";
 
 const router = Router();
 
@@ -93,9 +99,14 @@ router.post("/:breweryUuid/miscs", createMisc);
 router.patch("/:breweryUuid/miscs/:miscUuid", updateMisc);
 router.delete("/:breweryUuid/miscs/:miscUuid", deleteMisc);
 
-// router.get("/:breweryUuid/mashes", getMashes);
-// router.post("/:breweryUuid/mashes", createMash);
-// router.patch("/:breweryUuid/mashes/:mashUuid", updateMash);
-// router.delete("/:breweryUuid/mashes/:mashUuid", deleteMash);
+router.get("/:breweryUuid/mashes", getMashes);
+router.post("/:breweryUuid/mashes", createMash);
+router.patch("/:breweryUuid/mashes/:mashUuid", updateMash);
+router.delete("/:breweryUuid/mashes/:mashUuid", deleteMash);
+
+router.get("/:breweryUuid/mashes/:mashUuid/mash_steps", getMashSteps);
+router.post("/:breweryUuid/mashes/:mashUuid/mash_steps", createMashStep);
+router.patch("/:breweryUuid/mashes/:mashUuid/mash_steps/:mashStepUuid", updateMashStep);
+router.delete("/:breweryUuid/mashes/:mashUuid/mash_steps/:mashStepUuid", deleteMashStep);
 
 export default router;

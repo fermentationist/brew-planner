@@ -1,4 +1,3 @@
-/* global process */
 import "dotenv/config";
 
 const DEFAULT_CACHE_EXPIRATION_TIME =
@@ -106,16 +105,14 @@ export default class LocalCache {
       const filterForConditions = !!Object.keys(requiredConditionsObject)
         .length;
       const conditionFilter = (row) => {
-        if (filterForConditions) {
-          for (const attr in requiredConditionsObject) {
-            const value = requiredConditionsObject[attr];
-            if (Array.isArray(value)) {
-              if (!value.includes(row[attr])) {
-                return false;
-              }
-            } else if (row[attr] !== value) {
+        for (const attr in requiredConditionsObject) {
+          const value = requiredConditionsObject[attr];
+          if (Array.isArray(value)) {
+            if (!value.includes(row[attr])) {
               return false;
             }
+          } else if (row[attr] !== value) {
+            return false;
           }
         }
         return true;

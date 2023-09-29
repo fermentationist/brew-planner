@@ -14,6 +14,7 @@ export const createHop = async (breweryUuid, hopData) => {
     ...hopData,
   };
   const { insertId } = await Models.hop.insert([hopRow], false);
+  localCache.invalidate("hop");
   if (hopUuid) {
     // if user passed a UUID for the new hop
     return hopUuid;
@@ -21,7 +22,6 @@ export const createHop = async (breweryUuid, hopData) => {
   const [newHop] = await Models.hop.select({
     hopKey: insertId,
   });
-  localCache.invalidate("hop");
   return newHop.hopUuid;
 };
 

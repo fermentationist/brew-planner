@@ -5,17 +5,17 @@ import TestAPI from "../../test/TestAPI.js";
 import {
   expectError,
   runDataValidationTests,
-  getEntityFactory,
   deleteEntityFactory,
   createEntityFactory,
-  assertEqualIfCondition,
+  createTestToVerifyPersistedData,
+  createInsertionTest,
 } from "../../test/testHelpers.js";
 import {
   randomInt,
   randomFloat,
+  randomBool,
   randomString,
   getRandomArrayMembers,
-  toSnakeCase,
   objectKeysToSnakeCase,
 } from "../utils/helpers.js";
 import * as userService from "../services/user.js";
@@ -30,39 +30,9 @@ const deleteBrewery = deleteEntityFactory("brewery");
 const createMash = createEntityFactory("mash");
 const deleteMash = deleteEntityFactory("mash");
 
-const getExistingMashes = getEntityFactory("mash");
+const verifyMashesData = createTestToVerifyPersistedData("mash");
 
-const verifyMashesData = async (mashesData) => {
-  const existingMashes = await getExistingMashes();
-  const existingMashUuids = existingMashes.map(
-    (mash) => mash.mash_uuid
-  );
-  for (const mash of mashesData) {
-    assertEqualIfCondition(
-      mash.mashUuid,
-      existingMashUuids.includes(mash.mashUuid),
-      true
-    );
-    const [dbData] = existingMashes.filter(
-      (existingMash) =>
-        existingMash.mash_uuid === mash.mashUuid
-    );
-    for (const attr in mash) {
-      let dbValue = dbData[toSnakeCase(attr)];
-      dbValue = dbValue instanceof Date ? dbValue.getTime() : dbValue;
-      assert.strictEqual(mash[attr], dbValue);
-    }
-  }
-};
-
-const confirmMashInsertion = async (mashUuid, mashData) => {
-  const [dbData] = await getExistingMashes(mashUuid);
-  for (const attr in mashData) {
-    let dbValue = dbData[toSnakeCase(attr)];
-    dbValue = dbValue instanceof Date ? dbValue.getTime() : dbValue;
-    assert.strictEqual(mashData[attr], dbValue);
-  }
-};
+const confirmMashInsertion = createInsertionTest("mash");
 
 const getMashTestData = async () => {
   const users = await userService.getAllUsers();
@@ -70,16 +40,14 @@ const getMashTestData = async () => {
   return {
     name: `Test mash ${randomString(6)}`,
     createdBy: randomUser.uid,
-    alpha: randomFloat(1, 20),
-    beta: randomFloat(0, 20),
-    form: getRandomArrayMembers(HOP_FORMS, 1)[0],
+    grainTemp: randomFloat(10, 30),
+    tunTemp: randomFloat(10, 30),
+    spargeTemp: randomFloat(60, 90),
+    ph: randomFloat(5, 7),
+    tunWeight: randomFloat(10, 100),
+    tunSpecificHeat: randomFloat(0.1, 0.5),
+    equipAdjust: randomBool(),
     notes: randomString(256),
-    origin: `Test origin ${randomString(4)}`,
-    supplier: `Test supplier ${randomString(4)}`,
-    humulene: randomFloat(0, 100),
-    caryophyllene: randomFloat(0, 100),
-    cohumulone: randomFloat(0, 100),
-    myrcene: randomFloat(0, 100)
   };
 };
 
@@ -196,17 +164,15 @@ export default describe("mash routes", function () {
     const testData = await getMashTestData();
     const invalidTestData = {
       name: [void 0, "", randomString(101), randomMashNames[0]],
-      createdBy: [void 0, randomString(36), randomInt(999999)],
-      alpha: [void 0, `${randomFloat(1, 20)}`, randomString(6), -1 * randomFloat(1, 20)],
-      beta: [`${randomFloat(1, 20)}`, randomString(6), -1 * randomFloat(1, 20)],
-      form: [randomString(8), randomFloat(0, 100)],
+      createdBy: [void 0, randomString(36), randomInt(0, 999999)],
+      grainTemp: [`${randomFloat(10, 30)}`, randomString(6)],
+      tunTemp: [`${randomFloat(10, 30)}`, randomString(6)],
+      spargeTemp: [`${randomFloat(60, 90)}`, randomString(6), -1 * randomFloat(60, 90)],
+      ph: [`${randomFloat(5, 7)}`, randomString(6), -1 * randomFloat(5, 7)],
+      tunWeight: [`${randomFloat(10, 100)}`, randomString(6), -1 * randomFloat(10, 100)],
+      tunSpecificHeat: [`${randomFloat(0.1, 0.5)}`, randomString(6), -1 * randomFloat(0.1, 0.5)],
+      equipAdjust: [randomString(6), randomInt(2, 10), "false"],
       notes: [randomFloat(0, 1000)],
-      origin: [randomInt(5, 10), randomString(101)],
-      supplier: [randomInt(5, 10), randomString(101)],
-      humulene: [`${randomFloat(0, 100)}`, -1 * randomFloat(0, 100), randomFloat(100.01, 1000)],
-      caryophyllene: [`${randomFloat(0, 100)}`, -1 * randomFloat(0, 100), randomFloat(100.01, 1000)],
-      cohumulone: [`${randomFloat(0, 100)}`, -1 * randomFloat(0, 100), randomFloat(100.01, 1000)],
-      myrcene: [`${randomFloat(0, 100)}`, -1 * randomFloat(0, 100), randomFloat(100.01, 1000)]
     }
     await runDataValidationTests(invalidTestData, testData, api, {
       url: `/breweries/${breweryUuid}/mashes`,
@@ -232,17 +198,16 @@ export default describe("mash routes", function () {
     const mashUuid = mashesToDelete[mashesToDelete.length - 1];
     const testData = await getMashTestData();
     const invalidTestData = {
-      name: [randomString(101), randomMashNames[0]],
-      alpha: [`${randomFloat(1, 20)}`, randomString(6), -1 * randomFloat(1, 20)],
-      beta: [`${randomFloat(1, 20)}`, randomString(6), -1 * randomFloat(1, 20)],
-      form: [randomString(8), randomFloat(0, 100)],
+      name: ["", randomString(101), randomMashNames[0]],
+      createdBy: [randomString(36), randomInt(0, 999999)],
+      grainTemp: [`${randomFloat(10, 30)}`, randomString(6)],
+      tunTemp: [`${randomFloat(10, 30)}`, randomString(6)],
+      spargeTemp: [`${randomFloat(60, 90)}`, randomString(6), -1 * randomFloat(60, 90)],
+      ph: [`${randomFloat(5, 7)}`, randomString(6), -1 * randomFloat(5, 7)],
+      tunWeight: [`${randomFloat(10, 100)}`, randomString(6), -1 * randomFloat(10, 100)],
+      tunSpecificHeat: [`${randomFloat(0.1, 0.5)}`, randomString(6), -1 * randomFloat(0.1, 0.5)],
+      equipAdjust: [randomString(6), randomInt(2, 10), "false"],
       notes: [randomFloat(0, 1000)],
-      origin: [randomInt(5, 10), randomString(101)],
-      supplier: [randomInt(5, 10), randomString(101)],
-      humulene: [`${randomFloat(0, 100)}`, -1 * randomFloat(0, 100), randomFloat(100.01, 1000)],
-      caryophyllene: [`${randomFloat(0, 100)}`, -1 * randomFloat(0, 100), randomFloat(100.01, 1000)],
-      cohumulone: [`${randomFloat(0, 100)}`, -1 * randomFloat(0, 100), randomFloat(100.01, 1000)],
-      myrcene: [`${randomFloat(0, 100)}`, -1 * randomFloat(0, 100), randomFloat(100.01, 1000)]
     }
     await runDataValidationTests(invalidTestData, testData, api, {
       url: `/breweries/${breweryUuid}/mashes/${mashUuid}`,

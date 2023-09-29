@@ -7,8 +7,7 @@ CREATE TABLE IF NOT EXISTS brewery (
   city VARCHAR (100),
   state_or_province VARCHAR(50),
   postal_code VARCHAR (20),
-  country VARCHAR (100),
-  is_private BOOLEAN DEFAULT 1
+  country VARCHAR (100)
 );
 
 DROP TRIGGER IF EXISTS before_insert_on_brewery;

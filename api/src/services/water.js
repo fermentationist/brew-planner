@@ -12,6 +12,7 @@ export const createWater = async (breweryUuid, waterData) => {
     ...waterData,
   };
   const { insertId } = await Models.water.insert([waterRow], false);
+  localCache.invalidate("water");
   if (waterUuid) {
     // if user passed a UUID for the new water
     return waterUuid;
@@ -19,7 +20,6 @@ export const createWater = async (breweryUuid, waterData) => {
   const [newWater] = await Models.water.select({
     waterKey: insertId,
   });
-  localCache.invalidate("water");
   return newWater.waterUuid;
 };
 
