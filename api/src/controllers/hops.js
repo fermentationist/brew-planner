@@ -1,4 +1,3 @@
-import { isExistingUid } from "./users.js";
 import * as hopService from "../services/hop.js";
 import * as validate from "../middleware/input-validation.js";
 import { isExistingBreweryUuid } from "./breweries.js";
@@ -83,7 +82,6 @@ export const getHops = [
  * @apiParam {String} breweryUuid The brewery's unique identifier
  * @apiBody {String} name A name for the hop
  * @apiBody {String} [hopUuid] A unique identifier for the hop (a v1 UUID)
- * @apiBody {String} createdBy The uid of the user who created the hop
  * @apiBody {Number} alpha Percentage Alpha Acids by weight (a whole-number percentage)
  * @apiBody {Number} [beta] Percentage Beta Acids by weight
  * @apiBody {String} [form] One of "Pellet", "Plug", or "Leaf"
@@ -108,7 +106,6 @@ const createHopValidation = [
     .customSanitizer(validate.xssSanitize),
   customHopNameValidator,
   validate.body("hopUuid").optional(opt).isUUID(1),
-  validate.body("createdBy").exists(opt).isString().custom(isExistingUid),
   validate.body("alpha").exists().custom(isPercentage),
   validate.body("beta").optional().custom(isPercentage),
   validate
@@ -143,7 +140,10 @@ const createHopController = async (req, res, next) => {
   try {
     const hopUuid = await hopService.createHop(
       req.params.breweryUuid,
-      validate.cleanRequestBody(req, { removeUndefined: true })
+      {
+        ...validate.cleanRequestBody(req, { removeUndefined: true }),
+        createdBy: res.locals.user.uid,
+      }
     );
     return res.locals.sendResponse(res, { uuid: hopUuid });
   } catch (error) {

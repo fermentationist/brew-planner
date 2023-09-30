@@ -1,3 +1,4 @@
+// TODO: namespace units by entity (e.g. mash, water, etc.)
 const unitDefaults: {[field: string]: {
   type?: string;
   default: string;
@@ -100,6 +101,21 @@ const unitDefaults: {[field: string]: {
   magnesium: {
     default: "ppm",
     canonical: "ppm"
+  },
+  grainTemp: {
+    type: "temperature",
+    default: "F",
+    canonical: "C"
+  },
+  tunTemp: {
+    type: "temperature",
+    default: "F",
+    canonical: "C"
+  },
+  spargeTemp: {
+    type: "temperature",
+    default: "F",
+    canonical: "C"
   },
 }
 

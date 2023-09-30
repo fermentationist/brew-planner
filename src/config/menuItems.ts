@@ -33,6 +33,10 @@ const menuItems: IMenuItem[] = [
         link: "/ingredients/hops"
       },
       {
+        title: "Mash Profiles",
+        link: "/ingredients/mash_profiles"
+      },
+      {
         title: "Yeasts",
         link: "/ingredients/yeasts"
       },

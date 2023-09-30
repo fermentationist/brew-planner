@@ -1,6 +1,7 @@
 import entityPageFactory from "../../componentFactories/entityPageFactory";
 import { MashData } from "../../types";
-import {percentage, percentageMessage, required, requiredMessage} from "../../utils/validationHelpers";
+import { columnOptions } from "../../components/DataTable";
+import {required, requiredMessage} from "../../utils/validationHelpers";
 
 /*
   mashUuid: string;
@@ -28,7 +29,8 @@ export const mashInputs = [
   {
     name: "grainTemp",
     label: "Grain temp",
-    type: "fakeNumber",
+    type: "numberWithUnits",
+    preferredUnitKeyField: "mashUuid",
     validation: {min: 0},
     errorMessages: {min: "Please enter a positive number"},
     width: "250px",
@@ -36,7 +38,8 @@ export const mashInputs = [
   {
     name: "tunTemp",
     label: "Tun temp",
-    type: "fakeNumber",
+    type: "numberWithUnits",
+    preferredUnitKeyField: "mashUuid",
     validation: {min: 0},
     errorMessages: {min: "Please enter a positive number"},
     width: "250px",
@@ -44,7 +47,8 @@ export const mashInputs = [
   {
     name: "spargeTemp",
     label: "Sparge temp",
-    type: "fakeNumber",
+    type: "numberWithUnits",
+    preferredUnitKeyField: "mashUuid",
     validation: {min: 0},
     errorMessages: {min: "Please enter a positive number"},
     width: "250px",
@@ -60,7 +64,8 @@ export const mashInputs = [
   {
     name: "tunWeight",
     label: "Tun weight",
-    type: "fakeNumber",
+    type: "numberWithUnits",
+    preferredUnitKeyField: "mashUuid",
     validation: {min: 0},
     errorMessages: {min: "Please enter a positive number"},
     width: "250px",
@@ -68,7 +73,8 @@ export const mashInputs = [
   {
     name: "tunSpecificHeat",
     label: "Tun specific heat",
-    type: "fakeNumber",
+    type: "numberWithUnits",
+    preferredUnitKeyField: "mashUuid",
     validation: {min: 0},
     errorMessages: {min: "Please enter a positive number"},
     width: "250px",
@@ -77,17 +83,19 @@ export const mashInputs = [
     name: "equipAdjust",
     label: "Equipment adjustment",
     type: "switch",
-    defaultChecked: true,
+    defaultChecked: false,
+    tableOptions: columnOptions.booleanOptions,
     width: "250px",
   },
   {
     name: "notes",
     label: "Notes",
     type: "textarea",
+    tableOptions: columnOptions.createEllipsisOptions(10),
     width: "250px",
   },
 ];
 
-const Mashes = entityPageFactory<MashData>("mash", mashInputs);
+const Mashes = entityPageFactory<MashData>({entityName: "mash", pluralEntityName: "mashes", inputList: mashInputs});
 
 export default Mashes;

@@ -7,6 +7,7 @@ import { ComponentType } from "react";
 const withBreweryRequired = (Component: ComponentType) => {
   return (props: any) => {
     const { auth } = useAuth();
+    console.log("auth", auth);
     if (!auth.loaded) {
       return (
         <Page>

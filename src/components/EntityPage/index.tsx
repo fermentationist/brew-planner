@@ -21,7 +21,7 @@ function EntityPage<EntityType>({
   inputList = [],
   title,
   baseURL,
-  pluralEntityName
+  pluralEntityName,
 }: {
   startLoading: () => void;
   doneLoading: () => void;

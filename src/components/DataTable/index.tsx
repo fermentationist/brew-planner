@@ -1,4 +1,9 @@
-import MUIDataTable, { MUIDataTableOptions, MUIDataTableColumn, MUIDataTableColumnOptions, MUIDataTableMeta } from "mui-datatables";
+import MUIDataTable, {
+  MUIDataTableOptions,
+  MUIDataTableColumn,
+  MUIDataTableColumnOptions,
+  MUIDataTableMeta,
+} from "mui-datatables";
 import { styled as muiStyled } from "@mui/material/styles";
 import IconButton from "@mui/material/IconButton";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -41,7 +46,7 @@ interface DataTableProps {
 }
 
 const StyledMUIDataTable = muiStyled(MUIDataTable)<DataTableProps>`
-  width: ${props => props.width || "calc(100vw - 1.5%)"};
+  width: ${(props) => props.width || "calc(100vw - 1.5%)"};
   @media screen and (max-width: 600px) {
     width: calc(100vw - 2em);
   }
@@ -54,7 +59,7 @@ const DataTable = ({
   options,
   width,
   refresh,
-  className
+  className,
 }: {
   data: { [key: string]: any }[];
   columns: any[];
@@ -71,7 +76,7 @@ const DataTable = ({
     enableNestedDataAccess: ".",
     selectableRows: "none",
     rowsPerPageOptions: [10, 25, 50, 100],
-    print: false
+    print: false,
   };
 
   return (
@@ -93,7 +98,7 @@ const DataTable = ({
           options
             ? {
                 ...tableOptions,
-                ...options
+                ...options,
               }
             : tableOptions
         }
@@ -106,23 +111,20 @@ export default memo(DataTable, (prevProps, nextProps) => {
   return deepEquals(prevProps, nextProps);
 });
 
-
-
-
 export type DataTableColumn = MUIDataTableColumn;
 export type DataTableColumnOptions = MUIDataTableColumnOptions;
 export type DataTableMeta = MUIDataTableMeta;
 // getColumnIndex:
 // rowData is returned by mui-datatables as an array of column values, without any keys. This function takes in the column name and returns the index of that column for use with rowData array
 export const getColumnIndex = (columnName: string) => {
-  const columnNames = cols.map(column => column.name);
+  const columnNames = cols.map((column) => column.name);
   return columnNames.indexOf(columnName);
 };
 
 // getRowData:
 // rowData is returned by mui-datatables as an array of column values, without any keys. This function transforms the rowData array into an object that uses the column names as keys.
 export const getRowData = (dataArray: any[]) => {
-  const columnNames = cols.map(column => column.name);
+  const columnNames = cols.map((column) => column.name);
   const rowData = columnNames.reduce((map, name, index) => {
     if (name) {
       map[name] = dataArray[index];
@@ -144,7 +146,7 @@ export const expandObject = (obj: { [key: string]: any }) => {
       } else if (obj[newKey] && typeof obj[newKey] === "object") {
         obj[newKey] = {
           ...obj[newKey],
-          ...newValue
+          ...newValue,
         };
       }
     } else {
@@ -161,13 +163,13 @@ const expandField = (key: string, value: any): any[] => {
   }
   if (remainder.length === 1) {
     const newValue = {
-      [remainder[0]]: value
+      [remainder[0]]: value,
     };
     return [newKey, newValue];
   }
   const [newKey2, newValue2] = expandField(remainder.join("."), value);
   const newValue = {
-    [newKey2]: newValue2
+    [newKey2]: newValue2,
   };
   return [newKey, newValue];
 };
@@ -181,11 +183,9 @@ export const columnOptions = ((): Record<string, any> => {
         return null;
       }
       const newDate = new Date(value);
-      return (
-        <DatePopper date={newDate} />
-      );
-    }
-  } ;
+      return <DatePopper date={newDate} />;
+    },
+  };
   const booleanOptions = {
     ...options,
     customBodyRender: (value: boolean) => {
@@ -198,14 +198,31 @@ export const columnOptions = ((): Record<string, any> => {
           <FalseIcon />
         </Tooltip>
       );
-    }
+    },
+  };
+  const createEllipsisOptions = (maxLength: number) => {
+    return {
+      ...options,
+      customBodyRender: (value: string) => {
+        const valueWithEllipsis =
+          value.length > maxLength ? `${value.slice(0, 20)}...` : value;
+        return (
+          <Tooltip title={value}>
+            <span>{valueWithEllipsis}</span>
+          </Tooltip>
+        );
+      },
+    };
   };
   const moneyOptions = {
     ...options,
     customBodyRender: (value: number | string) => {
-      const currencyFormatter = new Intl.NumberFormat("en-US", {style: "currency", currency: "USD"})
+      const currencyFormatter = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      });
       return currencyFormatter.format(Number(value));
-    }
+    },
   };
   const actionOptions = {
     empty: true,
@@ -213,7 +230,7 @@ export const columnOptions = ((): Record<string, any> => {
     searchable: false,
     sort: false,
     download: false,
-    viewColumns: false
+    viewColumns: false,
   };
 
   const rowDataOptions = {
@@ -223,21 +240,22 @@ export const columnOptions = ((): Record<string, any> => {
     sort: false,
   };
 
-  const createRenderEditButtonOptions = (tooltipText: string, callback: (rowData: any) => void) => {
+  const createRenderEditButtonOptions = (
+    tooltipText: string,
+    callback: (rowData: any) => void
+  ) => {
     return {
       customBodyRender: (value: any, meta: MUIDataTableMeta) => {
         return (
           <Tooltip title={tooltipText}>
-            <IconButton
-              onClick={callback.bind(null, getRowData(meta.rowData))}
-            >
+            <IconButton onClick={callback.bind(null, getRowData(meta.rowData))}>
               <EditIcon />
             </IconButton>
           </Tooltip>
         );
       },
       ...actionOptions,
-    }
+    };
   };
 
   return {
@@ -247,6 +265,7 @@ export const columnOptions = ((): Record<string, any> => {
     moneyOptions,
     actionOptions,
     rowDataOptions,
-    createRenderEditButtonOptions
+    createEllipsisOptions,
+    createRenderEditButtonOptions,
   };
 })();

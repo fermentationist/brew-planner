@@ -1,6 +1,6 @@
 import db from "../src/services/db/index.js";
 import {convertObjectUUIDsToBuffers, convertUuidToBuffer} from "../src/models/Model.js";
-import {toCamelCase, toSnakeCase} from "../src/utils/helpers.js";
+import {toCamelCase, toSnakeCase, objectKeysToSnakeCase} from "../src/utils/helpers.js";
 import assert from "assert";
 
 export const expectError = function (p, errorName, testDescription) {
@@ -35,7 +35,8 @@ export const expectInvalidInput = (promise, message) =>
   expectError(promise, "invalid_input", message);
 
 export const createEntityFactory = entityType => async params => {
-  const paramsWithBinaryUuids = convertObjectUUIDsToBuffers(params);
+  const snakeCaseParams = objectKeysToSnakeCase(params);
+  const paramsWithBinaryUuids = convertObjectUUIDsToBuffers(snakeCaseParams);
   const cols = Object.keys(paramsWithBinaryUuids);
   const colString = cols.join(", ");
   const valString = Array(cols.length).fill("?").join(", ");

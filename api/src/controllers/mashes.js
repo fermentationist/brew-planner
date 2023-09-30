@@ -1,4 +1,3 @@
-import { isExistingUid } from "./users.js";
 import * as mashService from "../services/mash.js";
 import * as validate from "../middleware/input-validation.js";
 import { isExistingBreweryUuid } from "./breweries.js";
@@ -79,7 +78,6 @@ export const getMashes = [
  * @apiParam {String} breweryUuid The brewery's unique identifier
  * @apiBody {String} name A name for the mash
  * @apiBody {String} [mashUuid] A unique identifier for the mash (a v1 UUID)
- * @apiBody {String} createdBy The uid of the user who created the mash
  * @apiBody {Number} [grainTemp] The temperature of the grain (ºC)
  * @apiBody {Number} [tunTemp] The temperature of the mash tun (ºC)
  * @apiBody {Number} [spargeTemp] The temperature of the sparge water (ºC)
@@ -102,7 +100,6 @@ const createMashValidation = [
     .customSanitizer(validate.xssSanitize),
   customMashNameValidator,
   validate.body("mashUuid").optional(opt).isUUID(1),
-  validate.body("createdBy").exists(opt).isString().custom(isExistingUid),
   validate.body("grainTemp").optional().custom(numberValidator()),
   validate.body("tunTemp").optional().custom(numberValidator()),
   validate.body("spargeTemp").optional().custom(isPositiveNumber),
@@ -122,7 +119,10 @@ const createMashController = async (req, res, next) => {
   try {
     const mashUuid = await mashService.createMash(
       req.params.breweryUuid,
-      validate.cleanRequestBody(req, { removeUndefined: true })
+      {
+        ...validate.cleanRequestBody(req, { removeUndefined: true }),
+        createdBy: res.locals.user.uid,
+      }
     );
     return res.locals.sendResponse(res, { uuid: mashUuid });
   } catch (error) {
@@ -146,7 +146,6 @@ export const createMash = [
  * @apiParam {String} breweryUuid The brewery's unique identifier
  * @apiParam {String} mashUuid The unique identifier for the mash
  * @apiBody {String} [name] A name for the mash
- * @apiBody {String} [createdBy] The uid of the user who created the mash
  * @apiBody {Number} [grainTemp] The temperature of the grain (ºC)
  * @apiBody {Number} [tunTemp] The temperature of the mash tun (ºC)
  * @apiBody {Number} [spargeTemp] The temperature of the sparge water (ºC)
@@ -171,7 +170,6 @@ const updateMashValidation = [
     .isLength({ min: 1, max: 100 })
     .customSanitizer(validate.xssSanitize),
   customMashNameValidator,
-  validate.body("createdBy").optional().isString().custom(isExistingUid),
   validate.body("grainTemp").optional().custom(numberValidator()),
   validate.body("tunTemp").optional().custom(numberValidator()),
   validate.body("spargeTemp").optional().custom(isPositiveNumber),

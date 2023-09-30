@@ -1,4 +1,4 @@
-/* global describe, before, it, after, process, setTimeout */
+/* global describe, before, it, after */
 import db from "../index.js";
 import assert from "assert";
 import {randomInt, randomString} from "../../../utils/helpers.js";

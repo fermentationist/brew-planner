@@ -19,6 +19,7 @@ import {
   WaterData,
   YeastData,
   MiscData,
+  MashData,
 } from "../../types";
 import useDeeperMemo from "../../hooks/useDeeperMemo";
 
@@ -152,6 +153,22 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
       ),
       enable: useCallback(toggleQueryFn("hops", true), []),
       disable: useCallback(toggleQueryFn("hops", false), []),
+    },
+
+    mashes: {
+      ...useQuery<MashData, ErrorData>(
+        ["mashes", currentBrewery, auth?.accessToken],
+        apiRequest({
+          baseURL: breweryPath,
+          url: "mashes",
+        }) as QueryFunction<MashData, QueryKey>,
+        {
+          staleTime: 60 * 1000 * 10,
+          enabled: Boolean(enabledQueries.mashes),
+        }
+      ),
+      enable: useCallback(toggleQueryFn("mashes", true), []),
+      disable: useCallback(toggleQueryFn("mashes", false), []),
     },
 
     waters: {
