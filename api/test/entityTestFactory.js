@@ -24,7 +24,6 @@ const entityTestFactory = (entityName, pluralEntityName, validPostDataThunk, inv
   const createBrewery = createEntityFactory("brewery");
   const deleteBrewery = deleteEntityFactory("brewery");
 
-  const createEntity = createEntityFactory(entityName);
   const deleteEntity = deleteEntityFactory(entityName);
 
   const verifyEntitiesData = createTestToVerifyPersistedData(entityName);
