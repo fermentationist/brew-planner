@@ -1,4 +1,3 @@
-import { isExistingUid } from "./users.js";
 import * as yeastService from "../services/yeast.js";
 import * as validate from "../middleware/input-validation.js";
 import { isExistingBreweryUuid } from "./breweries.js";
@@ -8,7 +7,6 @@ import { rejectOnFalse, numberValidator } from "../utils/helpers.js";
 //validation helpers
 
 const opt = { checkFalsy: true };
-const numOpt = { no_symbols: true };
 
 const yeastUuidChecker = (input) =>
   yeastService.isExistingYeastAttribute(input, "yeastUuid");
@@ -88,7 +86,6 @@ export const getYeasts = [getYeastsValidation, getYeastsController];
  * @apiParam {String} breweryUuid The brewery's unique identifier
  * @apiBody {String} name A name for the yeast
  * @apiBody {String} [yeastUuid] A unique identifier for the yeast (a v1 UUID)
- * @apiBody {String} createdBy The uid of the user who created the yeast
  * @apiBody {String} type One of: "Ale", "Lager", "Wheat", "Wine", "Champagne" or "Kveik"
  * @apiBody {String} [laboratory] The name of the laboratory (brand) that produced the yeast
  * @apiBody {String} [productId] The manufacturer's product id, i.e. WLP001
@@ -114,7 +111,6 @@ const createYeastValidation = [
     .isLength({ min: 1, max: 100 })
     .customSanitizer(validate.xssSanitize),
   customYeastNameValidator,
-  validate.body("createdBy").exists(opt).isString().custom(isExistingUid),
   validate.body("type").exists(opt).custom(isValidYeastType),
   validate
     .body("laboratory")
@@ -154,7 +150,10 @@ const createYeastController = async (req, res, next) => {
   try {
     const yeastUuid = await yeastService.createYeast(
       req.params.breweryUuid,
-      validate.cleanRequestBody(req, { removeUndefined: true })
+      {
+        ...validate.cleanRequestBody(req, { removeUndefined: true }),
+        createdBy: res.locals.user.uid,
+      }
     );
     return res.locals.sendResponse(res, { uuid: yeastUuid });
   } catch (error) {

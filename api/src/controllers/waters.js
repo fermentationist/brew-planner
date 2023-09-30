@@ -1,4 +1,3 @@
-import { isExistingUid } from "./users.js";
 import * as waterService from "../services/water.js";
 import * as validate from "../middleware/input-validation.js";
 import { isExistingBreweryUuid } from "./breweries.js";
@@ -8,7 +7,6 @@ import { rejectOnFalse, numberValidator } from "../utils/helpers.js";
 //validation helpers
 
 const opt = { checkFalsy: true };
-const numOpt = { no_symbols: true };
 
 const waterUuidChecker = (input) =>
   waterService.isExistingWaterAttribute(input, "waterUuid");
@@ -78,7 +76,6 @@ export const getWaters = [
  * @apiParam {String} breweryUuid The brewery's unique identifier
  * @apiBody {String} name A name for the water
  * @apiBody {String} [waterUuid] A unique identifier for the water (a v1 UUID)
- * @apiBody {String} createdBy The uid of the user who created the water
  * @apiBody {Number} [calcium] Parts per million (ppm)
  * @apiBody {Number} [bicarbonate] Parts per million (ppm)
  * @apiBody {Number} [sulfate] Parts per million (ppm)
@@ -101,7 +98,6 @@ const createWaterValidation = [
     .customSanitizer(validate.xssSanitize),
   customWaterNameValidator,
   validate.body("waterUuid").optional(opt).isUUID(1),
-  validate.body("createdBy").exists(opt).isString().custom(isExistingUid),
   validate.body("calcium").optional().custom(numberValidator({min: 0})),
   validate.body("bicarbonate").optional().custom(numberValidator({min: 0})),
   validate.body("sulfate").optional().custom(numberValidator({min: 0})),
@@ -121,7 +117,10 @@ const createWaterController = async (req, res, next) => {
   try {
     const waterUuid = await waterService.createWater(
       req.params.breweryUuid,
-      validate.cleanRequestBody(req, { removeUndefined: true })
+      {
+        ...validate.cleanRequestBody(req, { removeUndefined: true }),
+        createdBy: res.locals.user.uid
+      }
     );
     return res.locals.sendResponse(res, { uuid: waterUuid });
   } catch (error) {
