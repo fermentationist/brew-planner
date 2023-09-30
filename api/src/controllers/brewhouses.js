@@ -1,4 +1,4 @@
-import * as brewhouseService from "../services/brewhouse.js";
+import brewhouseService from "../services/brewhouse.js";
 import { isExistingBreweryUuid } from "./breweries.js";
 import * as validate from "../middleware/input-validation.js";
 import { rejectOnFalse, numberValidator } from "../utils/helpers.js";

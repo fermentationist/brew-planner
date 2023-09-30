@@ -1,4 +1,4 @@
-import * as fermentableService from "../services/fermentable.js";
+import fermentableService from "../services/fermentable.js";
 import * as validate from "../middleware/input-validation.js";
 import { isExistingBreweryUuid } from "./breweries.js";
 import { inputError } from "../server/errors.js";

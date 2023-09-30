@@ -1,13 +1,13 @@
 import { randomString, randomFloat, getRandomArrayMembers, randomInt } from "../utils/helpers.js";
 import entityTestFactory from "../../test/entityTestFactory.js";
-import { HOP_FORMS } from "../services/hop.js";
+import hopService from "../services/hop.js";
 
 const validPostDataThunk = async () => {
   return {
     name: `Test hop ${randomString(6)}`,
     alpha: randomFloat(1, 20),
     beta: randomFloat(0, 20),
-    form: getRandomArrayMembers(HOP_FORMS, 1)[0],
+    form: getRandomArrayMembers(hopService.HOP_FORMS, 1)[0],
     notes: randomString(256),
     origin: `Test origin ${randomString(4)}`,
     supplier: `Test supplier ${randomString(4)}`,

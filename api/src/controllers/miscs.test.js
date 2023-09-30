@@ -1,11 +1,11 @@
 import { randomString, randomFloat, getRandomArrayMembers } from "../utils/helpers.js";
 import entityTestFactory from "../../test/entityTestFactory.js";
-import {MISC_TYPES} from "../services/misc.js";
+import miscService from "../services/misc.js";
 
 const validPostDataThunk = async () => {
   return {
     name: `Test misc ${randomString(6)}`,
-    type: getRandomArrayMembers(MISC_TYPES, 1)[0],
+    type: getRandomArrayMembers(miscService.MISC_TYPES, 1)[0],
     useFor: randomString(24),
     notes: randomString(256)
   };

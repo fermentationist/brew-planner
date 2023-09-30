@@ -1,4 +1,4 @@
-import * as mashService from "../services/mash.js";
+import mashService from "../services/mash.js";
 import * as validate from "../middleware/input-validation.js";
 import { isExistingBreweryUuid } from "./breweries.js";
 import { inputError } from "../server/errors.js";

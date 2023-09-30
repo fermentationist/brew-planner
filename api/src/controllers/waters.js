@@ -1,4 +1,4 @@
-import * as waterService from "../services/water.js";
+import waterService from "../services/water.js";
 import * as validate from "../middleware/input-validation.js";
 import { isExistingBreweryUuid } from "./breweries.js";
 import { inputError } from "../server/errors.js";

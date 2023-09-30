@@ -1,11 +1,11 @@
 import { randomString, randomFloat, getRandomArrayMembers, randomInt } from "../utils/helpers.js";
 import entityTestFactory from "../../test/entityTestFactory.js";
-import {FERMENTABLE_TYPES} from "../services/fermentable.js";
+import fermentableService from "../services/fermentable.js";
 
 const validPostDataThunk = async () => {
   return {
     name: `Test fermentable ${randomString(6)}`,
-    type: getRandomArrayMembers(FERMENTABLE_TYPES, 1)[0],
+    type: getRandomArrayMembers(fermentableService.FERMENTABLE_TYPES, 1)[0],
     yield: randomFloat(0, 100),
     color: randomFloat(0, 500),
     origin: `Test origin ${randomString(4)}`,

@@ -1,4 +1,4 @@
-import * as miscService from "../services/misc.js";
+import miscService from "../services/misc.js";
 import * as validate from "../middleware/input-validation.js";
 import { isExistingBreweryUuid } from "./breweries.js";
 import { inputError } from "../server/errors.js";
