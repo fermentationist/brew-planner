@@ -67,7 +67,7 @@ app.use((req, res, next) => {
 
 app.use("/api", router);
 
-app.get("/*", (req, res, next) => {// catch-all route, serve SPA
+app.get("/*", (req, res) => {// catch-all route, serve SPA
   const clientPath = PROD_MODE ? "../../../build/client/index.html" : "../../../index.html";
   const newPath = path.join(dirName, clientPath);
   res.setHeader("Content-Type", "text/html");

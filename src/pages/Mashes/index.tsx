@@ -7,7 +7,7 @@ import {required, requiredMessage} from "../../utils/validationHelpers";
   mashUuid: string;
   name: string;
   createdBy: string;
-  grainTemp: number;
+  grainTemp?: number;
   tunTemp?: number;
   spargeTemp?: number;
   ph?: number;

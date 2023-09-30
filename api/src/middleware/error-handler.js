@@ -1,8 +1,7 @@
 /* 
-global process, console
 eslint no-unused-vars: off
 */
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res) => {
   res.error = err;
   if (!err.isCustomError) {
     //error was not caught or was not declared in custom error class

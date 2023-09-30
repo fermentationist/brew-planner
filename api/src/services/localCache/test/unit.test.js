@@ -1,4 +1,4 @@
-/* global describe, before, it, after, setTimeout */
+/* global describe, before, it */
 import assert from "assert";
 import { randomString } from "../../../utils/helpers.js";
 import LocalCache from "../lib/localCache.js";

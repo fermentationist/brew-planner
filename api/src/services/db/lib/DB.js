@@ -1,4 +1,3 @@
-/* global console, setTimeout */
 import mysql from "mysql2";
 import { OperationalError, ProgramError } from "../../../server/errors.js";
 import proxyMysqlDeadlockRetries from "node-mysql-deadlock-retries";
@@ -106,7 +105,7 @@ class DB {
         connection.query(
           deleteSqlString,
           deleteObj.values,
-          function (error, results, fields) {
+          function (error) {
             if (error) {
               return connection.rollback(function () {
                 connection.release();

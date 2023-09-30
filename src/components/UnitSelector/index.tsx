@@ -23,7 +23,6 @@ const UnitSelector = ({
   const [unitParts, setUnitParts] = useState(initialParts);
   const [operators, setOperators] = useState(intialOperators);
   const [dropdownState, setDropdownState] = useState([]);
-  console.log("selections in UnitSElector", selections);
   useEffect(() => {
     const [parts, ops] = parseUnit(defaultUnit);
     setDropdownState(parts);

@@ -28,7 +28,6 @@ const CustomSwitch = forwardRef(
     forwardedRef: Ref<any>
   ) => {
     const [checked, setChecked] = useState(!!defaultChecked);
-    
     const toggleSwitch = () => {
       setChecked(!checked);
       if (callback) {

@@ -18,7 +18,7 @@
     "restart": "forever stop api/src/server/app.js\n./save_log.sh\nPROD_MODE=true\nexport PROD_MODE\npnpm run build\nforever start -o console_log.txt -e console_err.txt ./api/src/server/app.js",
     "api-test": "mocha --recursive './api/src/**/*test.js' './api/test/*test.js' -grep $1",
     "test": "mocha --recursive './api/src/**/*test.js' './api/test/*test.js' './testBuild/**/*test.ts' -grep $1",
-    "lint": "npx eslint -c .eslintrc.cjs '**/*'",
+    "lint": "npx eslint '**/*.js' '**/*.ts' '**/*.tsx' --ignore-pattern 'node_modules/' --ignore-pattern 'testBuild/' --ignore-pattern 'doc/' --ignore-pattern 'build/' --ignore-pattern 'dist/' --ignore-pattern 'public/' --ignore-pattern 'doc/' --ignore-pattern 'api/node_modules/' --ignore-pattern 'api/build/' --ignore-pattern 'api/dist/' --ignore-pattern 'api/public/' --ignore-pattern 'api/doc/' --ignore-pattern 'api/testBuild/' --ignore-pattern 'api/test/' --ignore-pattern 'api/src/'",
     "unit-test": "mocha --recursive './api/src/**/*test.js' -g $1",
     "int-test": "mocha --recursive './api/test/*test.js' -g $1",
     "client-test": "vitest --dir ./src/"

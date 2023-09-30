@@ -25,6 +25,10 @@ const EntityModal = ({
   const formInputs: FormInputOptions[] = inputList.map((input) => {
     const inputCopy = { ...input } as FormInputOptions;
     inputCopy.defaultValue = data?.[input.name] ?? inputCopy.defaultValue;
+    if (Object.hasOwnProperty.call(inputCopy, "defaultChecked")) {
+      inputCopy.defaultChecked =
+        data?.[input.name] ?? inputCopy.defaultChecked;
+    }
     if (inputCopy.preferredUnitKeyField) {
       inputCopy.preferredUnitKey =
         data?.[inputCopy.preferredUnitKeyField] || "temp";

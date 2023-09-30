@@ -36,7 +36,7 @@ const initialState: AlertState = {
 
 export const AlertStateContext = createContext({
   alertState: initialState,
-  setAlertState: (newState: any) => {
+  setAlertState: (_newState: any) => {
     console.error("call to setAlertState failed.");
   },
   callAlert: (args: CallAlertArgs) => {
@@ -101,7 +101,7 @@ const AlertStateProvider = function ({children}:{children: ChildProps}) {
   };
 
   const callAlertProm = (args: CallAlertArgs) => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const passedArgs = typeof args === "string" ? { message: args } : args;
       const alertArgs = {
         ...passedArgs,

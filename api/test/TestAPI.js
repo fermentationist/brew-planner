@@ -1,9 +1,10 @@
-/* eslint no-unused-vars: "off" */
+
 // API Test Class
 
 import axios from "axios";
 import { config } from "dotenv";
 import assert from "assert";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import app from "../src/server/app.js"; // importing to start server
 import { createUser, deleteUser, getIDToken, updateUser } from "./firebase.js";
 import { randomString } from "../src/utils/helpers.js";

@@ -4,7 +4,6 @@ import React, {
   useRef,
   createElement,
   ChangeEvent,
-  KeyboardEvent,
   ComponentPropsWithoutRef,
   memo,
   Ref,
@@ -174,6 +173,7 @@ const Form = function (props: FormProps) {
 
       case "switch":
         componentProps = {
+          ...componentProps,
           name: input.name,
           label: input.label,
           defaultChecked: input.defaultChecked ?? input.defaultValue,

@@ -1,4 +1,4 @@
-import { MouseEventHandler, ReactNode, useState, useEffect, memo } from "react";
+import { MouseEventHandler, ReactNode, useState, memo } from "react";
 import Divider from "@mui/material/Divider";
 import List from "@mui/material/List";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -30,7 +30,10 @@ const SettingsMenu = ({ closeDrawer }: { closeDrawer: () => void }) => {
   const [brewerySelectorIsLoading, setBrewerySelectorIsLoading] = useState(false);
   const { auth, logout, changeBrewery } = useAuth();
   const [globalState, dispatch] = useGlobalState();
-  const { resetAPI, refetch: refreshBreweries } = useAPI("breweries");
+  const { 
+    resetAPI, 
+    // refetch: refreshBreweries 
+  } = useAPI("breweries");
 
   const navigate = useNavigate();
 

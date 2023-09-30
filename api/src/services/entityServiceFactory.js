@@ -1,6 +1,7 @@
 import Models from "../models/Models.js";
 import localCache from "./localCache/index.js";
 
+// entityServiceFactory is a factory function that returns a service for interacting with a particular entity.
 export default function entityServiceFactory (entityName, pluralEntityName, additionalExports) {
   const capitalize = (str) => str[0].toUpperCase() + str.slice(1);
   const capitalizedEntityName = capitalize(entityName);
