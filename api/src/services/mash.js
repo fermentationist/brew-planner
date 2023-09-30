@@ -24,7 +24,6 @@ export const createMash = async (breweryUuid, mashData) => {
 };
 
 export const updateMash = async (breweryUuid, mashUuid, updateData) => {
-  console.log("updateData", updateData);
   const result = await Models.mash.update(updateData, {
     breweryUuid,
     mashUuid,
