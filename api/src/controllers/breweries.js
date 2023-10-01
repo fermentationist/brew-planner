@@ -10,6 +10,27 @@ export const breweryUuidChecker = async input => {
 export const isExistingBreweryUuid = rejectOnFalse(breweryUuidChecker);
 const opt = { checkFalsy: true };
 
+// getBreweryUuids
+/**
+ * @api {get} /breweries/uuids Get breweries
+ * @apiName GetBreweries
+ * @apiGroup Breweries
+ * @apiUse authHeader
+ * @apiDescription Get all breweries the user is authorized for
+ * @apiUse successResponse
+ * @apiSuccess {String[]} uuids An array of all valid brewery uuids
+ */
+
+export const getBreweryUuids = async (req, res, next) => {
+  try {
+    const allBreweries = await breweryService.getBreweries();
+    const uuids = allBreweries.map(brewery => brewery.breweryUuid);
+    return res.locals.sendResponse(res, { uuids });
+  } catch (error) {
+    return next(res.locals.opError("getBreweyUuids request failed", error));
+  }
+};
+
 // getBreweries
 /**
  * @api {get} /breweries Get breweries

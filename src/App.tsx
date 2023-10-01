@@ -13,7 +13,6 @@ const queryClient = new QueryClient(queryClientConfig);
 
 const App = () => {
   const [globalState] = useGlobalState();
-  console.log(globalState)
   return (
     <div className="App" style={{position: "absolute"}}>
       <ThemeProvider theme={globalState?.theme === "dark" ? darkTheme : lightTheme}>

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import testController from "../controllers/testController.js";
-import { getBreweries } from "../controllers/breweries.js";
+import { getBreweries, getBreweryUuids } from "../controllers/breweries.js";
 import {
   protectBreweryRoutes,
 } from "../middleware/auth.js";
@@ -62,6 +62,7 @@ const router = Router();
 
 // breweries routes
 router.get("/", getBreweries);
+router.get("/uuids", getBreweryUuids);
 router.use("/:breweryUuid/", protectBreweryRoutes);
 router.get("/:breweryUuid/test", testController);
 router.get("/:breweryUuid/users", getBreweryUsers);

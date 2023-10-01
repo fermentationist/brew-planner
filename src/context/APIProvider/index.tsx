@@ -43,6 +43,7 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
   type UsersData = { data: UserData[]; status: string };
   type ErrorData = { error: APIError; status: string };
   type BreweriesData = { data: BreweryData[]; status: string };
+  type BreweryUuidsData = { data: string[]; status: string };
   type BrewhousesData = { data: BrewhouseData[]; status: string };
 
   const toggleQueryFn = useCallback(

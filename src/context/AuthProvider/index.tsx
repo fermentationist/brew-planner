@@ -12,6 +12,8 @@ import storage from "../../utils/storage";
 import useDeeperMemo from "../../hooks/useDeeperMemo";
 import useTriggeredEffect from "../../hooks/useTriggeredEffect";
 import { stringifyObjectWithFunctions } from "../../utils/helpers";
+import useEffectOnce from "../../hooks/useEffectOnce";
+import APIRequest from "../../utils/APIRequest";
 const { setStorage, getStorage } = storage("brewPlanner");
 
 // Initialize Firebase
@@ -45,6 +47,8 @@ const AuthProvider = ({ children }: { children: ChildProps }) => {
   } as AuthObject;
   const initialState = getStorage("authState") || { loaded: false };
   const [authState, setAuthState] = useState(initialState as AuthObject);
+  const [validBreweryUuids, setValidBreweryUuids] = useState([] as string[]);
+
   const deepMemoize = useDeeperMemo();
 
   const setAuth = useCallback(
@@ -54,11 +58,22 @@ const AuthProvider = ({ children }: { children: ChildProps }) => {
     [setAuthState]
   );
 
-  useTriggeredEffect(() => {
-    // when authState is updated, save it to localStorage
-    console.log("saving authState to localStorage:", authState);
-    setStorage("authState", authState);
-  }, [stringifyObjectWithFunctions(authState)]); 
+  // useEffect to get brewery uuids, which are used to filter out defunct breweries from brewery uuids in user's Firebase claims
+  useEffect(() => {
+    // cannot use useAPI hook because this component is used outside of APIProvider
+    const breweryUuidsRequest = new APIRequest({
+      url: "/breweries/uuids",
+      method: "GET",
+    });
+
+    breweryUuidsRequest.request().then((response: any) => {
+      setValidBreweryUuids(response.data?.uuids);
+    });
+    // cleanup
+    return () => {
+      breweryUuidsRequest.abort();
+    }
+  }, []);
 
   const resetAuth = useCallback(() => {
     console.log("resetting auth");
@@ -66,16 +81,16 @@ const AuthProvider = ({ children }: { children: ChildProps }) => {
     setStorage("authState", NULL_AUTH_STATE);
   }, [setAuth]);
 
+  const filterOutDefunctBreweryUuids = (breweryUuids: any[]) => {
+    console.log("passed breweryUuids:", breweryUuids);
+    console.log("validBreweryUuids:", validBreweryUuids);
+    const filteredBreweries = breweryUuids.filter((uuid) => {
+      return validBreweryUuids.includes(uuid);
+    });
+    return filteredBreweries;
+  }
+
   useEffect(() => {
-    // const tokenExpired =
-    //   // tokenRefresh ||
-    //   (authState.tokenExpiration && Date.now() >= authState.tokenExpiration)
-    //     ? true
-    //     : false;
-    // if (tokenExpired) {
-    //   // logout();
-    //   firebaseAuth.updateCurrentUser(authState.firebaseUser);
-    // }
     // was previously using firebaseAuth.onAuthStateChanged
     console.log("useEffect adding onIdTokenChanged listener...");
     const removeListener = firebaseAuth.onIdTokenChanged((authUser: any) => {
@@ -86,25 +101,27 @@ const AuthProvider = ({ children }: { children: ChildProps }) => {
         authUser
           .getIdTokenResult()
           .then((result: any) => {
-            setAuth((prevState) => { 
-              console.log("result.claims.breweries:", result.claims.breweries);
-              return {
-                ...prevState,
-                firebaseUser: authUser,
-                user: {
-                  uid: authUser.uid,
-                  email: authUser.email,
-                  displayName: authUser.displayName,
-                  role: result.claims.role,
-                  breweries: result.claims.breweries || [],
-                },
-                accessToken: authUser.accessToken,
-                currentBrewery:
-                  prevState.currentBrewery || result.claims.breweries[0],
-                tokenExpiration: new Date(result.expirationTime).getTime(),
-                loaded: true,
-              };
-            });
+            const userBreweries = filterOutDefunctBreweryUuids(result.claims.breweries);
+            const newCurrentBrewery = authState.currentBrewery && userBreweries.includes(authState.currentBrewery) ? authState.currentBrewery : userBreweries[0]; 
+            console.log("userBreweries:", userBreweries);
+            console.log("newCurrentBrewery:", newCurrentBrewery);
+            const newAuthState = {
+              ...authState,
+              firebaseUser: authUser,
+              user: {
+                uid: authUser.uid,
+                email: authUser.email,
+                displayName: authUser.displayName,
+                role: result.claims.role,
+                breweries: userBreweries,
+              },
+              accessToken: authUser.accessToken,
+              currentBrewery: newCurrentBrewery,
+              tokenExpiration: new Date(result.expirationTime).getTime(),
+              loaded: true,
+            };
+            setAuth(newAuthState);
+            setStorage("authState", newAuthState);
           });
       }
     });
@@ -113,7 +130,7 @@ const AuthProvider = ({ children }: { children: ChildProps }) => {
       console.log("removing auth state listener");
       removeListener();
     };
-  }, [resetAuth, setAuth]);
+  }, [resetAuth, setAuth, authState.currentBrewery, validBreweryUuids]);
 
   const login = useCallback(async (email: string, password: string) => {
     console.log("login called.");

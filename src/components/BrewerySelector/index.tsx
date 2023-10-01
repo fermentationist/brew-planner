@@ -33,7 +33,7 @@ const BrewerySelector = ({
     data,
     enable: enableBreweriesQuery,
   } = useAPI("breweries");
-  const { alertError } = useAlert();
+  const { alertError, callAlert } = useAlert();
 
   useEffect(() => {
     if (isLoading && !data) {
@@ -52,6 +52,9 @@ const BrewerySelector = ({
         const [currentBrewery] = allowedBreweries.filter(
           (brewery: BreweryData) => brewery.breweryUuid === auth?.currentBrewery
         );
+        if (auth?.currentBrewery && !currentBrewery) {
+          callAlert("You are not authorized to access the current brewery. Please select a new one.");
+        }
         setSelectedBrewery(currentBrewery?.name);
         setConfirmedBrewery(currentBrewery?.name);
       }

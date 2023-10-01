@@ -17,7 +17,7 @@ export interface CustomDialogProps {
 }
 
 const StyledContent = muiStyled(DialogContent)`
-  padding-top: 1em;
+  padding-top: 1em !important;
   margin-top: 1em;
 `;
 
