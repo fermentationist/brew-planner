@@ -1,7 +1,6 @@
-/* 
-eslint no-unused-vars: off
-*/
-const errorHandler = (err, req, res) => {
+// errorHandler MUST have 4 parameters to be recognized as an error handler
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const errorHandler = (err, req, res, next) => {
   res.error = err;
   if (!err.isCustomError) {
     //error was not caught or was not declared in custom error class

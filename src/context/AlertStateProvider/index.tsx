@@ -36,7 +36,8 @@ const initialState: AlertState = {
 
 export const AlertStateContext = createContext({
   alertState: initialState,
-  setAlertState: (_newState: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  setAlertState: (_newState: AlertState) => {
     console.error("call to setAlertState failed.");
   },
   callAlert: (args: CallAlertArgs) => {
@@ -136,7 +137,7 @@ const AlertStateProvider = function ({children}:{children: ChildProps}) {
       });
     });
   };
-  const memoizedSetAlertState = useCallback(setAlertState, []);
+  const memoizedSetAlertState = useCallback(setAlertState, [setAlertState]);
   const memoizedCallAlert = useCallback(callAlert, []);
   const memoizedCallAlertProm = useCallback(callAlertProm, []);
   const memoizedResetAlertState = useCallback(resetAlertState, []);

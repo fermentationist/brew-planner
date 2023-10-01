@@ -52,7 +52,7 @@ const CustomAutocomplete = forwardRef(
         setValue("");
         callback(void 0);
       }
-    }, [options, optionKey, restricted]);
+    }, [options, optionKey, restricted, value, callback]);
 
     const onInput: ReactEventHandler<HTMLInputElement> = event => {
       const target = event.target as HTMLInputElement;

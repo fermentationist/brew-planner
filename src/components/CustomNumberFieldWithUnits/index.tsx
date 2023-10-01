@@ -40,8 +40,8 @@ const CustomNumberFieldWithUnits = forwardRef(
       return initialDefaultValue && (props.maxDecPlaces ?? null)
         ? Number(Number(initialDefaultValue).toFixed(props.maxDecPlaces))
         : initialDefaultValue;
-    }, []);
-    const memoizedInitialDefaultUnit = useMemo(() => initialDefaultUnit, []);
+    }, [initialDefaultValue, props.maxDecPlaces]);
+    const memoizedInitialDefaultUnit = useMemo(() => initialDefaultUnit, [initialDefaultUnit]);
 
     const [controlledValue, setControlledValue] = useState<number | string>(
       memoizedInitialDefaultValue
@@ -51,7 +51,7 @@ const CustomNumberFieldWithUnits = forwardRef(
       () => {
         return getAltUnitSelections(memoizedInitialDefaultUnit, props.unitsToExclude)
       },
-      []
+      [memoizedInitialDefaultUnit, props.unitsToExclude, getAltUnitSelections]
     );
 
     const label = `${

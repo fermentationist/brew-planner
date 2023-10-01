@@ -53,7 +53,7 @@ const FormModal = ({
   return (
     <StyledDialog
       showDialog={showModal}
-      closeDialog={useCallback(closeModal, [])}
+      closeDialog={useCallback(closeModal, [closeModal])}
       title={
         (mode ? mode[0].toUpperCase() + mode.slice(1) : "") +
         (title ? " " + title : "")

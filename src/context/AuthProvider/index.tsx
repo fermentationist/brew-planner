@@ -10,6 +10,7 @@ import { AuthObject, ChildProps } from "../../types";
 import firebaseConfig from "../../config/firebaseConfig";
 import storage from "../../utils/storage";
 import useDeeperMemo from "../../hooks/useDeeperMemo";
+import useTriggeredEffect from "../../hooks/useTriggeredEffect";
 import { stringifyObjectWithFunctions } from "../../utils/helpers";
 const { setStorage, getStorage } = storage("brewPlanner");
 
@@ -34,35 +35,35 @@ export const AuthContext = createContext<IAuthContext>({
 });
 
 const AuthProvider = ({ children }: { children: ChildProps }) => {
+  const NULL_AUTH_STATE = {
+    loaded: true,
+    firebaseUser: null,
+    user: null,
+    accessToken: null,
+    currentBrewery: null,
+    tokenExpiration: null,
+  } as AuthObject;
   const initialState = getStorage("authState") || { loaded: false };
   const [authState, setAuthState] = useState(initialState as AuthObject);
-  // const [tokenRefresh, setTokenRefresh] = useState(false);
   const deepMemoize = useDeeperMemo();
 
   const setAuth = useCallback(
     (newState: AuthObject | ((prevState: any) => any)) => {
       setAuthState(newState);
     },
-    []
+    [setAuthState]
   );
 
-  useEffect(() => {
+  useTriggeredEffect(() => {
     // when authState is updated, save it to localStorage
     console.log("saving authState to localStorage:", authState);
     setStorage("authState", authState);
-  }, [stringifyObjectWithFunctions(authState)]); // stringifying dependency (authState) so that useEffect will only be called when it actually changes
+  }, [stringifyObjectWithFunctions(authState)]); 
 
   const resetAuth = useCallback(() => {
     console.log("resetting auth");
-    // setTokenRefresh(true);
-    setAuth({
-      firebaseUser: null,
-      user: null,
-      accessToken: null,
-      currentBrewery: null,
-      loaded: true,
-      tokenExpiration: null,
-    });
+    setAuth(NULL_AUTH_STATE);
+    setStorage("authState", NULL_AUTH_STATE);
   }, [setAuth]);
 
   useEffect(() => {
@@ -124,13 +125,13 @@ const AuthProvider = ({ children }: { children: ChildProps }) => {
       console.log(`Error logging in user ${email}`);
       console.error(err);
     });
-    setAuthState((prevState) => {
-      return {
-        ...prevState,
-        loaded: false,
-        accessToken: credentials?.user?.accessToken || null,
-      };
-    });
+    const newAuthState = {
+      ...authState,
+      loaded: true,
+      accessToken: credentials?.user?.accessToken || null,
+    }
+    setAuthState(newAuthState);
+    setStorage("authState", newAuthState);
     return credentials?.user?.accessToken || false;
   }, []);
 
