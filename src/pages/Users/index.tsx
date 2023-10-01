@@ -62,7 +62,7 @@ const Users = function ({
         doneLoading();
       }
     }
-  }, [usersQuery?.isLoading, usersQuery?.data, usersQuery?.error, doneLoading, alertError, breweriesQuery?.isLoading, breweriesQuery?.data]);
+  }, [usersQuery, doneLoading, alertError, breweriesQuery]);
 
   const editUser = (rowData: UserData) => {
     setUserData(rowData);

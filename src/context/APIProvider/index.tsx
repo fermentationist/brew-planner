@@ -88,8 +88,8 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
           enabled: Boolean(enabledQueries.users),
         }
       ),
-      enable: useCallback(toggleQueryFn("users", true), []),
-      disable: useCallback(toggleQueryFn("users", false), []),
+      enable: toggleQueryFn("users", true),
+      disable: toggleQueryFn("users", false),
     },
 
     breweries: {
@@ -103,8 +103,8 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
           enabled: Boolean(enabledQueries.breweries),
         }
       ),
-      enable: useCallback(toggleQueryFn("breweries", true), []),
-      disable: useCallback(toggleQueryFn("breweries", false), []),
+      enable: toggleQueryFn("breweries", true),
+      disable: toggleQueryFn("breweries", false),
     },
 
     brewhouses: {
@@ -119,8 +119,8 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
           enabled: Boolean(enabledQueries.brewhouses),
         }
       ),
-      enable: useCallback(toggleQueryFn("brewhouses", true), []),
-      disable: useCallback(toggleQueryFn("brewhouses", false), []),
+      enable: toggleQueryFn("brewhouses", true),
+      disable: toggleQueryFn("brewhouses", false),
     },
 
     fermentables: {
@@ -135,8 +135,8 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
           enabled: Boolean(enabledQueries.fermentables),
         }
       ),
-      enable: useCallback(toggleQueryFn("fermentables", true), []),
-      disable: useCallback(toggleQueryFn("fermentables", false), []),
+      enable: toggleQueryFn("fermentables", true),
+      disable: toggleQueryFn("fermentables", false),
     },
 
     hops: {
@@ -151,8 +151,8 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
           enabled: Boolean(enabledQueries.hops),
         }
       ),
-      enable: useCallback(toggleQueryFn("hops", true), []),
-      disable: useCallback(toggleQueryFn("hops", false), []),
+      enable: toggleQueryFn("hops", true),
+      disable: toggleQueryFn("hops", false),
     },
 
     mashes: {
@@ -167,8 +167,8 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
           enabled: Boolean(enabledQueries.mashes),
         }
       ),
-      enable: useCallback(toggleQueryFn("mashes", true), []),
-      disable: useCallback(toggleQueryFn("mashes", false), []),
+      enable: toggleQueryFn("mashes", true),
+      disable: toggleQueryFn("mashes", false),
     },
 
     waters: {
@@ -183,8 +183,8 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
           enabled: Boolean(enabledQueries.waters),
         }
       ),
-      enable: useCallback(toggleQueryFn("waters", true), []),
-      disable: useCallback(toggleQueryFn("waters", false), []),
+      enable: toggleQueryFn("waters", true),
+      disable: toggleQueryFn("waters", false),
     },
 
     yeasts: {
@@ -199,8 +199,8 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
           enabled: Boolean(enabledQueries.yeasts),
         }
       ),
-      enable: useCallback(toggleQueryFn("yeasts", true), []),
-      disable: useCallback(toggleQueryFn("yeasts", false), []),
+      enable: toggleQueryFn("yeasts", true),
+      disable: toggleQueryFn("yeasts", false),
     },
 
     miscs: {
@@ -215,8 +215,8 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
           enabled: Boolean(enabledQueries.miscs),
         }
       ),
-      enable: useCallback(toggleQueryFn("miscs", true), []),
-      disable: useCallback(toggleQueryFn("miscs", false), []),
+      enable: toggleQueryFn("miscs", true),
+      disable: toggleQueryFn("miscs", false),
     },
   };
 
@@ -226,18 +226,18 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
     // remove data for all active queries, without removing them from the cache or triggering a refetch
     await queryClient.setQueriesData({ type: "active" }, (): any => null);
     console.log("API cache reset");
-  }, []);
+  }, [queryClient]);
 
   const invalidateAll = useCallback(async () => {
     await queryClient.cancelQueries();
     console.log("invalidating all cached API queries");
     return queryClient.invalidateQueries({ refetchType: "none" });
-  }, []);
+  }, [queryClient]);
 
   const refetchAll = useCallback(async () => {
     console.log("refetching all API queries");
     return queryClient.refetchQueries();
-  }, []);
+  }, [queryClient]);
 
   const disableAll = useCallback(() => {
     setEnabledQueries({});

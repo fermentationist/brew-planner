@@ -1,11 +1,7 @@
 import MuiCard from "@mui/material/Card";
 import MuiButton from "@mui/material/Button";
-import Grid from "@mui/material/Grid";
-import TextField from "../../../components/CustomTextField";
-import FormError from "../../../components/FormError";
 import styled from "styled-components";
 import { styled as muiStyled } from "@mui/material/styles";
-import { useForm } from "react-hook-form";
 import { FormEvent, useState } from "react";
 import ReactHookForm from "../../../components/ReactHookForm";
 
@@ -32,11 +28,6 @@ const Container = styled.div`
 
 const LoginForm = (props: LoginFormProps): JSX.Element => {
   const [resetState, setResetState] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors: formErrors },
-  } = useForm();
   const togglePasswordReset = () => {
     setResetState(!resetState);
   };

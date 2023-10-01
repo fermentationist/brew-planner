@@ -52,7 +52,6 @@ const BrewerySelector = ({
         const [currentBrewery] = allowedBreweries.filter(
           (brewery: BreweryData) => brewery.breweryUuid === auth?.currentBrewery
         );
-        console.log("currentBrewery?.name:", currentBrewery?.name);
         setSelectedBrewery(currentBrewery?.name);
         setConfirmedBrewery(currentBrewery?.name);
       }
@@ -60,7 +59,7 @@ const BrewerySelector = ({
         alertError(error);
       }
     }
-  }, [isLoading, data, error, alertError]);
+  }, [isLoading, data, error, alertError, auth, enableBreweriesQuery]);
 
   const autocompleteCallback = (breweryName: string) => {
     setSelectedBrewery(breweryName);
