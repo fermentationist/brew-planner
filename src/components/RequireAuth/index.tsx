@@ -10,9 +10,9 @@ export interface RequireAuthProps {
 
 
 const RequireAuth = function ({ allowedRoles }: RequireAuthProps) {
-  const {auth} = useAuth();
+  const {auth: [authState]} = useAuth();
   const location = useLocation();
-  if (!auth.loaded) {
+  if (!authState.loaded) {
   return (
       <Page>
         <StyledSpinner />
@@ -20,11 +20,11 @@ const RequireAuth = function ({ allowedRoles }: RequireAuthProps) {
     );
   }
   
-  const role = auth?.user?.role;
+  const role = authState?.user?.role;
   if (allowedRoles?.includes(role)) {
     // user is logged in and role matches - allow access to children
     return <Outlet />; 
-  } else if (auth?.user) {
+  } else if (authState?.user) {
     // user is logged in but lacks required role
     return <Navigate to="/unauthorized" state={{ from: location }} replace />; 
   }

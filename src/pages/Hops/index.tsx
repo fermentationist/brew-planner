@@ -1,6 +1,7 @@
 import entityPageFactory from "../../componentFactories/entityPageFactory";
 import { HopData } from "../../types";
 import {percentage, percentageMessage, required, requiredMessage} from "../../utils/validationHelpers";
+import { columnOptions } from "../../components/DataTable";
 
 export const hopInputs = [
   {
@@ -37,15 +38,6 @@ export const hopInputs = [
     selectOptions: ["Pellet", "Plug", "Leaf"],
     selectRestricted: true,
     width: "250px",
-  },
-  {
-    name: "notes",
-    label: "Notes",
-    type: "textarea",
-    width: "250px",
-    tableOptions: {
-      display: false,
-    },
   },
   {
     name: "origin",
@@ -107,6 +99,16 @@ export const hopInputs = [
     errorMessages: percentageMessage,
     tableOptions: {
       display: false,
+    },
+  },
+  {
+    name: "notes",
+    label: "Notes",
+    type: "textarea",
+    width: "250px",
+    tableOptions: {
+      display: false,
+      ...columnOptions.createEllipsisOptions(10)
     },
   },
 ];

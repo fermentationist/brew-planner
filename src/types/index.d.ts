@@ -217,3 +217,8 @@ export interface MashData {
   tunSpecificHeat?: number;
   equipAdjust?: boolean;// If TRUE, mash infusion and decoction calculations should take into account the temperature effects of the equipment (tun specific heat and tun weight).
 }
+
+export interface ReducerAction {
+  type: string;
+  payload: any;
+}

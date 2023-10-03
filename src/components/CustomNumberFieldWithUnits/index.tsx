@@ -1,9 +1,9 @@
-import { memo, useState, forwardRef, Ref } from "react";
+import { memo, useState, forwardRef, Ref, ChangeEvent, Dispatch } from "react";
 import UnitSelector from "../UnitSelector";
 import PseudoNumberField, {
   PseudoNumberFieldProps,
 } from "../PseudoNumberField";
-import { ChangeEvent, useRef, useMemo } from "react";
+import { FocusEvent, useRef, useMemo } from "react";
 import useConvertUnits from "../../hooks/useConvertUnits";
 import styled from "styled-components";
 
@@ -20,7 +20,8 @@ const Container = styled.div`
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  align-items: flex-end;
+  /* align-items: flex-end; */
+  place-content: baseline;
   margin: 0;
 `;
 
@@ -41,8 +42,8 @@ const CustomNumberFieldWithUnits = forwardRef(
         ? Number(Number(initialDefaultValue).toFixed(props.maxDecPlaces))
         : initialDefaultValue;
     }, [initialDefaultValue, props.maxDecPlaces]);
+    
     const memoizedInitialDefaultUnit = useMemo(() => initialDefaultUnit, [initialDefaultUnit]);
-
     const [controlledValue, setControlledValue] = useState<number | string>(
       memoizedInitialDefaultValue
     );
@@ -77,6 +78,7 @@ const CustomNumberFieldWithUnits = forwardRef(
     };
 
     const callSetPreferredUnit = (unit: string) => {
+      console.log("callSetPreferredUnit");
       // create a function to convert the previous unit to canonical
       const prevUnitToCanonical = createConvertFunction(
         "canonical",
@@ -98,6 +100,7 @@ const CustomNumberFieldWithUnits = forwardRef(
           canonicalValue,
           props.preferredUnitKey
         );
+        console.log("convertedValue", convertedValue);
         // apply rounding if necessary
         const newConvertedValue =
           convertedValue && (props.maxDecPlaces ?? null)
@@ -152,6 +155,13 @@ interface InternalComponentProps extends CustomNumberFieldWithUnitsProps {
 
 const InternalComponent = forwardRef(
   (props: InternalComponentProps, forwardedRef: Ref<any>) => {
+    // forceCollapseUnitsValue - this awkwardly named value is used to force the UnitSelector to re-render when the input is focused. It will either have a null value or else a randomly generated number. This is used instead of a boolean because we can change from one truthy value to a different truthy value, to force a re-render.
+    const [forceCollapseUnitsValue, setForceCollapseUnitsValue] : [(null | number), Dispatch<(null | number)>]= useState(null);
+    const onFocus = (event: FocusEvent<HTMLInputElement>) => {
+      console.log("onFocus")
+      setForceCollapseUnitsValue(Math.random());
+      props.onFocus && props.onFocus(event);
+    }
     return (
       <Container>
         <PseudoNumberField
@@ -161,6 +171,7 @@ const InternalComponent = forwardRef(
           width={props.width}
           defaultValue={props.defaultValue}
           onChange={props.onChange}
+          onFocus={onFocus}
           onBlur={props.onBlur}
           id={`number-field-with-units-${props.name}`}
           disabled={props.disabled}
@@ -185,6 +196,8 @@ const InternalComponent = forwardRef(
               ? `${props.className} ${props.className}-unit-selector`
               : ""
           }
+          forceCollapseUnitsValue={forceCollapseUnitsValue}
+          // callback={}
         />
       </Container>
     );

@@ -39,7 +39,7 @@ function EntityPage<EntityType>({
   const [modalData, setModalData] = useState(null);
   const [refreshNumber, setRefreshNumber] = useState(0);
   const { callAlert, alertError, alertErrorProm, resetAlertState } = useAlert();
-  const { auth } = useAuth();
+  const { auth: [authState] } = useAuth();
   const { confirmDelete, confirm } = useConfirm();
   const {
     isLoading,
@@ -138,7 +138,7 @@ function EntityPage<EntityType>({
     const editMode = mode === "edit";
     const reqBody = editMode
       ? formData
-      : { ...formData, createdBy: auth?.user?.uid };
+      : { ...formData, createdBy: authState?.user?.uid };
     const url = editMode
       ? `/${pluralEntityName || entityName + "s"}/` + modalData[`${entityName}Uuid`]
       : `/${pluralEntityName || entityName + "s"}`;

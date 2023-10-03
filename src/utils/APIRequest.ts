@@ -101,7 +101,6 @@ export default class APIRequest {
         return response;
       })
       .catch((error) => {
-        console.error("ERROR in APIRequest:", error);
         if (this.config?.signal?.aborted) {
           // ignore "CanceledError"
           console.log("pending request aborted by client:", requestConfig);

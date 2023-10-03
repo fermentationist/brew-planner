@@ -1,6 +1,7 @@
 import entityPageFactory from "../../componentFactories/entityPageFactory";
 import { FermentableData } from "../../types";
 import {percentage, percentageMessage, required, requiredMessage} from "../../utils/validationHelpers";
+import { columnOptions } from "../../components/DataTable";
 
 export const fermentableInputs = [
   {
@@ -120,7 +121,8 @@ export const fermentableInputs = [
     selectRestricted: true,
     width: "250px",
     tableOptions: {
-      display: false
+      display: false,
+      ...columnOptions.booleanOptions
     }
   },
   {

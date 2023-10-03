@@ -36,7 +36,7 @@ const EntityModal = ({
     delete inputCopy.tableOptions;
     return inputCopy;
   });
-
+  
   const refreshOnClose = () => {
     refresh && refresh();
     closeModal();

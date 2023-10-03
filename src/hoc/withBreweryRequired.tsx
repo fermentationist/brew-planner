@@ -6,15 +6,15 @@ import { ComponentType } from "react";
 
 const withBreweryRequired = (Component: ComponentType) => {
   return (props: any) => {
-    const { auth } = useAuth();
-    if (!auth.loaded) {
+    const { auth: [authState] } = useAuth();
+    if (!authState.loaded) {
       return (
         <Page>
           <StyledSpinner />
         </Page>
       );
     }
-    if (!auth.currentBrewery) {
+    if (!authState.currentBrewery) {
       return (
         <ErrorPage errorTitle="No brewery selected" errorMessage="Please select a brewery from the settings menu to view this page" />
       );

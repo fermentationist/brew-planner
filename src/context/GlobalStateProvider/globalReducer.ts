@@ -1,9 +1,4 @@
-// import { ReducerAction } from "react";
-
-export interface ReducerAction {
-  type: string;
-  payload: any;
-}
+import type { ReducerAction } from "../../types/index.d.ts";
 
 const globalReducer = (state: any, action: ReducerAction) => {
   switch (action.type) {
@@ -77,11 +72,9 @@ const globalReducer = (state: any, action: ReducerAction) => {
           }
         };
         console.log("RENAME_TEMP_PREFERRED_UNITS called");
-        console.log("action.payload:", action.payload);
         if (action.payload) {
           newState.preferredUnits[action.payload] = state.preferredUnits?.temp;
         }
-        console.log("newState.preferredUnits.temp:", newState.preferredUnits.temp);
         newState.preferredUnits.temp && delete newState.preferredUnits.temp;
         return newState;
       }

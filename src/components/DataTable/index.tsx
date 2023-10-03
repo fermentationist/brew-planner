@@ -204,6 +204,9 @@ export const columnOptions = ((): Record<string, any> => {
     return {
       ...options,
       customBodyRender: (value: string) => {
+        if (!value) {
+          return null;
+        }
         const valueWithEllipsis =
           value.length > maxLength ? `${value.slice(0, 20)}...` : value;
         return (

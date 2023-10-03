@@ -35,7 +35,7 @@ const Menu = ({menuItems, nested}: MenuProps) => {
   const [collapsedState, setCollapsedState] = useState<CollapsedState>(
     menuState?.collapsedState
   );
-  const { auth } = useAuth();
+  const { auth: [authState] } = useAuth();
   const toggleExpandCollapse = (title: string) => {
     const titleState = (collapsedState && collapsedState[title]) || false;
     const newCollapsedState = {
@@ -57,7 +57,7 @@ const Menu = ({menuItems, nested}: MenuProps) => {
   const  displayMenuItem = (menuItem: any): boolean => {
     if (typeof menuItem.link == "string") {
       const allowedRoles = getAllowedRoles(menuItem.link, routes) || [];
-      if (!allowedRoles.includes(auth?.user?.role)) {
+      if (!allowedRoles.includes(authState?.user?.role)) {
         // do not display menuItem if user is not authorized
         return false;
       }

@@ -1,6 +1,7 @@
 import entityPageFactory from "../../componentFactories/entityPageFactory";
 import { YeastData } from "../../types";
 import {required, requiredMessage, percentage, percentageMessage, maxLengthErrorMessageFactory} from "../../utils/validationHelpers";
+import { columnOptions } from "../../components/DataTable";
 
 export const yeastInputs = [
   {
@@ -84,6 +85,7 @@ export const yeastInputs = [
     width: "250px",
     tableOptions: {
       display: false,
+      ...columnOptions.createEllipsisOptions(10)
     },
   },
   {
@@ -106,6 +108,7 @@ export const yeastInputs = [
     tableOptions: {
       display: false,
     },
+    integerOnly: true,
   },
   
 ];

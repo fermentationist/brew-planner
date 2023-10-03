@@ -1,6 +1,7 @@
-import { useEffect, useState, memo } from "react";
+import { useEffect, useState, memo, useCallback } from "react";
 import MenuItem from "@mui/material/MenuItem";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
+import styled from "styled-components";
 
 export interface UnitSelectorProps {
   selections: Record<string, string[]>;
@@ -9,7 +10,20 @@ export interface UnitSelectorProps {
   setPreferredUnit: (unit: string) => void;
   parseUnit: (unit: string) => string[][];
   className?: string;
+  forceCollapseUnitsValue?: number | null;
 }
+
+const CHANGE_UNIT_MESSAGE = "Change units...";
+
+const StyledSpan = styled.span`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  .unit-selector-operator {
+    margin: 0 0.5em;
+  }
+`;
 
 const UnitSelector = ({
   selections,
@@ -17,43 +31,87 @@ const UnitSelector = ({
   callback,
   setPreferredUnit,
   parseUnit,
-  className
+  className,
+  forceCollapseUnitsValue,
 }: UnitSelectorProps) => {
   const [initialParts, intialOperators] = parseUnit(defaultUnit);
   const [unitParts, setUnitParts] = useState(initialParts);
   const [operators, setOperators] = useState(intialOperators);
   const [dropdownState, setDropdownState] = useState([]);
+  const [showExpandedSelector, setShowExpandedSelector] = useState(false);
+
   useEffect(() => {
     const [parts, ops] = parseUnit(defaultUnit);
     setDropdownState(parts);
-    setOperators([...ops, ""]);
+    setOperators(ops);
     setUnitParts(parts);
   }, [defaultUnit, parseUnit]);
 
-  const onUnitChange = (unitPartIndex: number, event: SelectChangeEvent) => {
+  const getCombinedUnit = (): string => {
+    return getCombinedUnitFromNewDropdownState(dropdownState);
+  };
+
+  const getCombinedUnitFromNewDropdownState = useCallback((newDropdownState: string[]): string => 
+    {
+      const operatorsCopy = [...operators];
+      const combined = newDropdownState.reduce((accum, unitPart, index) => {
+        if (index < operatorsCopy.length) {
+          return accum + unitPart + operatorsCopy[index];
+        }
+        return accum + unitPart;
+      }, "");
+      return combined;
+    }, [operators]);
+
+  // if forceCollapseUnitsValue is true, then the unit selector will be collapsed to a single select and a re-render will be forced
+  useEffect(() => {
+    if (forceCollapseUnitsValue) {
+      setShowExpandedSelector(false);
+      const compoundUnit = getCombinedUnitFromNewDropdownState(dropdownState);
+      setPreferredUnit(compoundUnit);
+      callback && callback(compoundUnit);
+    }
+  }, [forceCollapseUnitsValue, dropdownState, setPreferredUnit, callback, getCombinedUnitFromNewDropdownState]);
+
+  
+  const onExpandedUnitChange = (
+    unitPartIndex: number,
+    event: SelectChangeEvent
+  ) => {
     const newUnit = event.target.value;
     const newDropdownState = [...dropdownState];
     newDropdownState[unitPartIndex] = newUnit;
-    const newCompoundUnit = newDropdownState.reduce(
-      (newUnit, unitPart, index) => {
-        return newUnit + unitPart + operators[index];
-      },
-      ""
-    );
+    const newCompoundUnit = getCombinedUnitFromNewDropdownState(newDropdownState);
     setPreferredUnit(newCompoundUnit);
     setDropdownState(newDropdownState);
     callback && callback(newCompoundUnit);
   };
+
+  
+
+
+  const onCombinedUnitChange = (event: SelectChangeEvent) => {
+    const selection = event.target.value;
+    if (selection === CHANGE_UNIT_MESSAGE) {
+      setShowExpandedSelector(true);
+    }
+  };
+
   return (
     <>
-      {dropdownState.length
-        ? unitParts.map((part: string, partIndex) => {
+      {dropdownState.length ? (
+        showExpandedSelector || dropdownState.length === 1 ? (
+          unitParts.map((part: string, partIndex) => {
             return (
-              <span key={partIndex}>
+              <StyledSpan key={partIndex}>
                 <Select
                   value={dropdownState[partIndex]}
-                  onChange={onUnitChange.bind(null, partIndex)}
-                  className={className}
+                  onChange={onExpandedUnitChange.bind(null, partIndex)}
+                  className={
+                    className
+                      ? `${className} expanded-unit-selector`
+                      : "expanded-unit-selector"
+                  }
                 >
                   {selections[part]?.map((selection, index) => {
                     return (
@@ -63,13 +121,33 @@ const UnitSelector = ({
                     );
                   })}
                 </Select>
-                {operators[partIndex]}
-              </span>
+                {operators.length && partIndex < operators.length ? (
+                  <span className="unit-selector-operator">
+                    {operators[partIndex]}
+                  </span>
+                ) : null}
+              </StyledSpan>
             );
           })
-        : null}
+        ) : (
+          <StyledSpan>
+            <Select
+              value={getCombinedUnit()}
+              onChange={onCombinedUnitChange}
+              className={className}
+            >
+              <MenuItem value={getCombinedUnit()}>{getCombinedUnit()}</MenuItem>
+              <MenuItem value={CHANGE_UNIT_MESSAGE}>
+                {CHANGE_UNIT_MESSAGE}
+              </MenuItem>
+            </Select>
+          </StyledSpan>
+        )
+      ) : null}
     </>
   );
 };
 
-export default memo(UnitSelector, () => true);
+export default memo(UnitSelector, (prevProps, nextProps) => {
+    return prevProps.forceCollapseUnitsValue === nextProps.forceCollapseUnitsValue;
+});

@@ -17,11 +17,11 @@ const StyledAutocomplete = muiStyled(CustomAutocomplete)`
 const BrewerySelector = ({
   onSubmit,
   loading,
-  auth,
+  authState,
 }: {
   onSubmit: (breweryName: string) => void;
   loading?: boolean;
-  auth: AuthObject;
+  authState: AuthObject;
 }) => {
   const [breweriesData, setBreweriesData] = useState([]);
   const [selectedBrewery, setSelectedBrewery] = useState(null);
@@ -44,15 +44,15 @@ const BrewerySelector = ({
         const allBreweries = data.data?.breweries;
         const allowedBreweries = allBreweries.filter((brewery: BreweryData) => {
           return (
-            auth?.user?.role === "admin" ||
-            auth?.user?.breweries.includes(brewery.breweryUuid)
+            authState?.user?.role === "admin" ||
+            authState?.user?.breweries.includes(brewery.breweryUuid)
           );
         });
         setBreweriesData(allowedBreweries);
         const [currentBrewery] = allowedBreweries.filter(
-          (brewery: BreweryData) => brewery.breweryUuid === auth?.currentBrewery
+          (brewery: BreweryData) => brewery.breweryUuid === authState?.currentBrewery
         );
-        if (auth?.currentBrewery && !currentBrewery) {
+        if (authState?.currentBrewery && !currentBrewery) {
           callAlert("You are not authorized to access the current brewery. Please select a new one.");
         }
         setSelectedBrewery(currentBrewery?.name);
@@ -62,7 +62,7 @@ const BrewerySelector = ({
         alertError(error);
       }
     }
-  }, [isLoading, data, error, alertError, auth, enableBreweriesQuery]);
+  }, [isLoading, data, error, alertError, authState, enableBreweriesQuery]);
 
   const autocompleteCallback = (breweryName: string) => {
     setSelectedBrewery(breweryName);

@@ -26,13 +26,12 @@ interface SettingsMenuItem {
 }
 
 const SettingsMenu = ({ closeDrawer }: { closeDrawer: () => void }) => {
-  console.log("SettingsMenu loaded")
   const [brewerySelectorIsLoading, setBrewerySelectorIsLoading] = useState(false);
-  const { auth, logout, changeBrewery } = useAuth();
-  const [globalState, dispatch] = useGlobalState();
+  const { auth: [authState, authDispatch], logout } = useAuth();
+  const [globalState, globalStateDispatch] = useGlobalState();
   const { 
     resetAPI, 
-    // refetch: refreshBreweries 
+    refetch: refreshBreweries 
   } = useAPI("breweries");
 
   const navigate = useNavigate();
@@ -46,32 +45,21 @@ const SettingsMenu = ({ closeDrawer }: { closeDrawer: () => void }) => {
   };
 
   const toggleDarkMode = () => {
-    dispatch({
+    globalStateDispatch({
       type: "TOGGLE_THEME"
-    })
-    // setGlobalState(prevState => {
-    //   return {
-    //     ...prevState,
-    //     theme: globalState.theme === "dark" ? "light" : "dark"
-    //   }
-    // });
+    });
   };
 
   const toggleSafeMode = () => {
-    dispatch({type: "TOGGLE_SAFE_MODE"});
-    // setGlobalState(prevState => {
-    //   return {
-    //     ...prevState,
-    //     safeMode: !globalState.safeMode
-    //   }
-    // });
+    globalStateDispatch({type: "TOGGLE_SAFE_MODE"});
   };
 
   const callChangeBrewery = async (breweryUuid: string) => {
     setBrewerySelectorIsLoading(true);
-    changeBrewery(breweryUuid);
+    console.log("changing brewery to", breweryUuid);
+    authDispatch({type: "SET_CURRENT_BREWERY", payload: breweryUuid});
     setBrewerySelectorIsLoading(false);
-    // refreshBreweries();
+    refreshBreweries();
     closeDrawer();
   };
 
@@ -89,10 +77,10 @@ const SettingsMenu = ({ closeDrawer }: { closeDrawer: () => void }) => {
       divider: true
     },
     {
-      title: auth?.user
-        ? `Log out ${auth.user.displayName || auth.user.email}`
+      title: authState?.user
+        ? `Log out ${authState.user.displayName || authState.user.email}`
         : "Log in",
-      link: auth?.user ? callLogout : "/login"
+      link: authState?.user ? callLogout : "/login"
     },
     {
       divider: true
@@ -115,13 +103,13 @@ const SettingsMenu = ({ closeDrawer }: { closeDrawer: () => void }) => {
     }
   ];
 
-  if (auth?.user) {
+  if (authState?.user) {
     const brewerySelection = {
       child: (
         <BrewerySelector
           onSubmit={callChangeBrewery}
           loading={brewerySelectorIsLoading}
-          auth={auth}
+          authState={authState}
         />
       )
     };

@@ -7,6 +7,7 @@ export type PseudoNumberFieldProps = Omit<
 > & { 
   defaultValue?: number | string;
   allowNegative?: boolean;
+  integerOnly?: boolean;
 };
 
 const PseudoNumberField = forwardRef(
@@ -29,10 +30,12 @@ const PseudoNumberField = forwardRef(
       "7",
       "8",
       "9",
-      "."
     ];
     if (props.allowNegative) {
       allowedKeys.push("-");
+    }
+    if (!props.integerOnly) {
+      allowedKeys.push(".");
     }
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLInputElement;

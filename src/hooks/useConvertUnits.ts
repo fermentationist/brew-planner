@@ -120,6 +120,7 @@ const useConvertUnits = () => {
     [parseUnit, getPreferredOrDefaultUnit]
   );
 
+  //eslint-disable-next-line react-hooks/exhaustive-deps
   const convertToPreferredUnit = useCallback(
     createConvertFunction("preferred"),
     [createConvertFunction]
