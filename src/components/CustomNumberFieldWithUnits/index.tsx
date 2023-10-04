@@ -100,7 +100,6 @@ const CustomNumberFieldWithUnits = forwardRef(
           canonicalValue,
           props.preferredUnitKey
         );
-        console.log("convertedValue", convertedValue);
         // apply rounding if necessary
         const newConvertedValue =
           convertedValue && (props.maxDecPlaces ?? null)
@@ -156,9 +155,13 @@ interface InternalComponentProps extends CustomNumberFieldWithUnitsProps {
 const InternalComponent = forwardRef(
   (props: InternalComponentProps, forwardedRef: Ref<any>) => {
     // forceCollapseUnitsValue - this awkwardly named value is used to force the UnitSelector to re-render when the input is focused. It will either have a null value or else a randomly generated number. This is used instead of a boolean because we can change from one truthy value to a different truthy value, to force a re-render.
-    const forceCollapseUnitsValue = useRef<number | null>(null);
+    const forceCollapseUnitsRef = useRef<number | null>(null);
+    const [forceCollapseUnitsValue, setForceCollapseUnitsValue] = useState<number | null>(forceCollapseUnitsRef.current);
     const onFocus = (event: FocusEvent<HTMLInputElement>) => {
-      forceCollapseUnitsValue.current = (Math.random());
+      console.log("onFocus");
+      const rnd = Math.random();
+      forceCollapseUnitsRef.current = (rnd);
+      setForceCollapseUnitsValue(rnd);
       props.onFocus && props.onFocus(event);
     }
     return (
@@ -195,7 +198,7 @@ const InternalComponent = forwardRef(
               ? `${props.className} ${props.className}-unit-selector`
               : ""
           }
-          forceCollapseUnitsValue={forceCollapseUnitsValue.current}
+          forceCollapseUnitsValue={forceCollapseUnitsValue}
         />
       </Container>
     );

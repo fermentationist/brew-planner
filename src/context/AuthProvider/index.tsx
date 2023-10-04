@@ -149,8 +149,6 @@ const AuthProvider = ({ children }: { children: ChildProps }) => {
     dispatch({ type: "OVERWRITE_AUTH_STATE", payload: newAuthState });
     setStorage("authState", newAuthState);
     return credentials?.user?.accessToken || false;
-  // including dependency authState causes infinite loop
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const logout = useCallback(async () => {

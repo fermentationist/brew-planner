@@ -65,7 +65,6 @@ export default class APIRequest {
   ): Promise<ResponseType | Error> {
     const globalState = getStorage("globalState");
     const authState = getStorage("authState");
-
     // accessToken check
     if (!authState?.accessToken) {
       console.log("authState from localStorage:", authState);

@@ -71,7 +71,6 @@ const globalReducer = (state: any, action: ReducerAction) => {
             ...(state.preferredUnits || {}),
           }
         };
-        console.log("RENAME_TEMP_PREFERRED_UNITS called");
         if (action.payload) {
           newState.preferredUnits[action.payload] = state.preferredUnits?.temp;
         }

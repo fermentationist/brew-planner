@@ -68,11 +68,8 @@ const UnitSelector = ({
     if (forceCollapseUnitsValue) {
       console.log("forceCollapseUnitsValue", forceCollapseUnitsValue);
       setShowExpandedSelector(false);
-      const compoundUnit = getCombinedUnitFromNewDropdownState(dropdownState);
-      setPreferredUnit(compoundUnit);
-      callback && callback(compoundUnit);
     }
-  }, [forceCollapseUnitsValue, dropdownState, setPreferredUnit, callback, getCombinedUnitFromNewDropdownState]);
+  }, [forceCollapseUnitsValue, setShowExpandedSelector]);
 
   
   const onExpandedUnitChange = (
