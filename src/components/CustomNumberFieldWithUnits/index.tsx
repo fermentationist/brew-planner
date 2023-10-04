@@ -1,4 +1,4 @@
-import { memo, useState, forwardRef, Ref, ChangeEvent, Dispatch } from "react";
+import { memo, useState, forwardRef, Ref, ChangeEvent } from "react";
 import UnitSelector from "../UnitSelector";
 import PseudoNumberField, {
   PseudoNumberFieldProps,
@@ -156,10 +156,9 @@ interface InternalComponentProps extends CustomNumberFieldWithUnitsProps {
 const InternalComponent = forwardRef(
   (props: InternalComponentProps, forwardedRef: Ref<any>) => {
     // forceCollapseUnitsValue - this awkwardly named value is used to force the UnitSelector to re-render when the input is focused. It will either have a null value or else a randomly generated number. This is used instead of a boolean because we can change from one truthy value to a different truthy value, to force a re-render.
-    const [forceCollapseUnitsValue, setForceCollapseUnitsValue] : [(null | number), Dispatch<(null | number)>]= useState(null);
+    const forceCollapseUnitsValue = useRef<number | null>(null);
     const onFocus = (event: FocusEvent<HTMLInputElement>) => {
-      console.log("onFocus")
-      setForceCollapseUnitsValue(Math.random());
+      forceCollapseUnitsValue.current = (Math.random());
       props.onFocus && props.onFocus(event);
     }
     return (
@@ -196,8 +195,7 @@ const InternalComponent = forwardRef(
               ? `${props.className} ${props.className}-unit-selector`
               : ""
           }
-          forceCollapseUnitsValue={forceCollapseUnitsValue}
-          // callback={}
+          forceCollapseUnitsValue={forceCollapseUnitsValue.current}
         />
       </Container>
     );
