@@ -12,7 +12,7 @@ const Home = ({
   useEffect(() => {
     // startLoading();
     setTimeout(() => {
-      doneLoading();
+      // doneLoading();
     }, 1000);
   }, [startLoading, doneLoading]);
   console.log("rendering Home...");

@@ -38,7 +38,7 @@ function withLoadingSpinner<P>(
     return (
       <>
         {!loaded ? (
-          <Page>
+          <Page containerMargin="0">
             <LoadingSpinner />
           </Page>
         ) : null}

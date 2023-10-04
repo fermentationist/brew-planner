@@ -11,11 +11,11 @@ const Background = styled.div`
   position: relative;
 `;
 
-const PageContainer = styled.div`
+const PageContainer = styled.div<{margin?: string}>`
   position: absolute;
   width: 100vw;
   height: calc(100vh - ${props => props.theme?.componentStyles?.Header?.desktop?.height});
-  margin: 1em;
+  margin: ${props => props.margin || "1em"};
   @media screen and (max-width: 600px) {
     height: calc(100vh - ${props => props.theme?.componentStyles?.Header?.mobile?.height});
   }
@@ -27,11 +27,11 @@ const StyledPaper = muiStyled(Paper)`
   height: 100%;
 `;
 
-const Page = ({children}: {children?: ChildProps}) => {
+const Page = ({children, containerMargin}: {children?: ChildProps; containerMargin?: string}) => {
   return (
     <Background>
       <StyledPaper>
-        <PageContainer className="page-container">
+        <PageContainer className="page-container" margin={containerMargin}>
           {children}
         </PageContainer>
       </StyledPaper>
