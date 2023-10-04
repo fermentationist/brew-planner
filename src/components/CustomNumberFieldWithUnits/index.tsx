@@ -78,7 +78,6 @@ const CustomNumberFieldWithUnits = forwardRef(
     };
 
     const callSetPreferredUnit = (unit: string) => {
-      console.log("callSetPreferredUnit");
       // create a function to convert the previous unit to canonical
       const prevUnitToCanonical = createConvertFunction(
         "canonical",

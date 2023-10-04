@@ -79,7 +79,6 @@ const Container = styled.div`
 `;
 
 const Form = function (props: FormProps) {
-  console.log("props in Form:", props)
   const getDefaultValues = (
     inputs: FormInputOptions[],
     excludeControlled = false

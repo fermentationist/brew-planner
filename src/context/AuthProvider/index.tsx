@@ -129,7 +129,7 @@ const AuthProvider = ({ children }: { children: ChildProps }) => {
     };
   // adding authState.currentBrewery to dependency array causes infinite loop
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resetAuth, dispatch, authState.currentBrewery, validBreweryUuids]);
+  }, [resetAuth, dispatch, authState.currentBrewery, validBreweryUuids, authState.accessToken]);
 
   const login = useCallback(async (email: string, password: string) => {
     console.log("login called.");
@@ -149,7 +149,7 @@ const AuthProvider = ({ children }: { children: ChildProps }) => {
     dispatch({ type: "OVERWRITE_AUTH_STATE", payload: newAuthState });
     setStorage("authState", newAuthState);
     return credentials?.user?.accessToken || false;
-  }, []);
+  }, [authState, dispatch]);
 
   const logout = useCallback(async () => {
     console.log("logging out user...");

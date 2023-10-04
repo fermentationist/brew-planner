@@ -45,6 +45,7 @@ const SettingsMenu = ({ closeDrawer }: { closeDrawer: () => void }) => {
   };
 
   const toggleDarkMode = () => {
+    console.log("toggling theme")
     globalStateDispatch({
       type: "TOGGLE_THEME"
     });
