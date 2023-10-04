@@ -21,6 +21,7 @@ export const mashInputs = [
   {
     name: "name",
     label: "Name",
+    modalStep: 0,
     type: "text",
     validation: required,
     errorMessages: requiredMessage,
@@ -29,6 +30,7 @@ export const mashInputs = [
   {
     name: "grainTemp",
     label: "Grain temp",
+    modalStep: 0,
     type: "numberWithUnits",
     convertOnUnitChange: true,
     preferredUnitKeyField: "mashUuid",
@@ -39,6 +41,7 @@ export const mashInputs = [
   {
     name: "tunTemp",
     label: "Tun temp",
+    modalStep: 0,
     type: "numberWithUnits",
     convertOnUnitChange: true,
     preferredUnitKeyField: "mashUuid",
@@ -49,6 +52,7 @@ export const mashInputs = [
   {
     name: "spargeTemp",
     label: "Sparge temp",
+    modalStep: 0,
     type: "numberWithUnits",
     convertOnUnitChange: true,
     preferredUnitKeyField: "mashUuid",
@@ -59,6 +63,7 @@ export const mashInputs = [
   {
     name: "ph",
     label: "ph",
+    modalStep: 0,
     type: "fakeNumber",
     validation: {min: 0},
     errorMessages: {min: "Please enter a positive number"},
@@ -67,6 +72,7 @@ export const mashInputs = [
   {
     name: "tunWeight",
     label: "Tun weight",
+    modalStep: 1,
     type: "numberWithUnits",
     convertOnUnitChange: true,
     preferredUnitKeyField: "mashUuid",
@@ -77,6 +83,7 @@ export const mashInputs = [
   {
     name: "tunSpecificHeat",
     label: "Tun specific heat",
+    modalStep: 1,
     type: "numberWithUnits",
     convertOnUnitChange: true,
     preferredUnitKeyField: "mashUuid",
@@ -87,6 +94,7 @@ export const mashInputs = [
   {
     name: "equipAdjust",
     label: "Equipment adjustment",
+    modalStep: 1,
     type: "switch",
     defaultChecked: false,
     tableOptions: columnOptions.booleanOptions,
@@ -95,12 +103,13 @@ export const mashInputs = [
   {
     name: "notes",
     label: "Notes",
+    modalStep: 1,
     type: "textarea",
     tableOptions: columnOptions.createEllipsisOptions(10),
     width: "250px",
   },
 ];
 
-const Mashes = entityPageFactory<MashData>({entityName: "mash", pluralEntityName: "mashes", inputList: mashInputs});
+const Mashes = entityPageFactory<MashData>({entityName: "mash", pluralEntityName: "mashes", inputList: mashInputs, numModalSteps: 2});
 
 export default Mashes;

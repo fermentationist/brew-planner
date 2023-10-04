@@ -8,11 +8,12 @@ export interface EntityPageFactoryOptions {
   pluralEntityName?: string;
   title?: string;
   baseURL?: string;
+  numModalSteps?: number;
 }
 
 // a factory to automate the creation of pages for entities like breweries or ingredients
 function entityPageFactory<EntityType>(arg1: string | EntityPageFactoryOptions, arg2?: FormInputOptions[]) { // accepts either an entityName and an inputList as arguments, or else an options object
-  let entityName, inputList, pluralEntityName, title, baseURL;
+  let entityName, inputList, pluralEntityName, title, baseURL, numModalSteps;
   if (typeof arg1 === "string") {
     ([entityName, inputList] = [arg1, arg2]);
   } else {
@@ -22,6 +23,7 @@ function entityPageFactory<EntityType>(arg1: string | EntityPageFactoryOptions, 
       pluralEntityName,
       title,
       baseURL,
+      numModalSteps
     } = arg1);
   }
   return EntityPage.bind(null, {
@@ -30,6 +32,7 @@ function entityPageFactory<EntityType>(arg1: string | EntityPageFactoryOptions, 
     pluralEntityName,
     title,
     baseURL,
+    numModalSteps
   }) as ComponentType<EntityType>;
 }
 

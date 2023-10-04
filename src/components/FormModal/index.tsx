@@ -3,10 +3,15 @@ import CustomDialog from "../CustomDialog";
 import ReactHookForm, {
   FormInputOptions as InputOptions,
 } from "../ReactHookForm";
-import MuiButton from "@mui/lab/LoadingButton";
+import MuiLoadingButton from "@mui/lab/LoadingButton";
+import MuiButton from "@mui/material/Button";
 import { styled as muiStyled } from "@mui/material/styles";
 
 export type FormInputOptions = InputOptions;
+
+const LoadingButton = muiStyled(MuiLoadingButton)`
+  margin: 1em;
+`;
 
 const Button = muiStyled(MuiButton)`
   margin: 1em;
@@ -24,6 +29,7 @@ const FormModal = ({
   formId,
   title,
   onSubmit,
+  numSteps = 1,
 }: {
   mode?: "create" | "edit";
   showModal: boolean;
@@ -32,14 +38,42 @@ const FormModal = ({
   formId: string;
   title?: string;
   onSubmit: (formData: any) => any;
+  numSteps?: number;
 }) => {
   const [buttonLoadingState, setButtonLoadingState] = useState(false);
+  const [modalStep, setModalStep] = useState(0);
+  const [formOutput, setFormOutput] = useState({});
+  console.log("numSteps: ", numSteps);
+  const divideIntoPages = useCallback((inputsToDivide: FormInputOptions[]) => {
+    const pages = inputsToDivide.reduce((output, input) => {
+      const inputStep = input.modalStep ?? 0;
+      console.log("inputStep: ", inputStep);
+      if (!output[inputStep]) {
+        output[inputStep] = [input];
+      } else {
+        output[inputStep].push(input);
+      }
+      return output;
+    }, {} as Record<string, any[]>);
+    const pageArray = [];
+    for (let i = 0; i < numSteps; i++) {
+      console.log("i: ", i);
+      console.log("pages[i]: ", pages[i] ?? "")
+      pageArray.push(pages[i] ?? []);
+    }
+    return pageArray;
+  }, [numSteps]);
+  
+  const [inputPages] = useState(divideIntoPages(inputs));
 
+  console.log("inputPages: ", inputPages);
   const onSubmitWrapper = (onSubmitFn: (val: any) => any) => {
     return (formData: any) => {
       setButtonLoadingState(true);
       try {
-        return onSubmitFn(formData);
+        const output = { ...formOutput, ...formData };
+        setFormOutput(output);
+        return onSubmitFn(output);
       } catch (error) {
         console.error(error);
       } finally {
@@ -48,6 +82,11 @@ const FormModal = ({
         }, 250);
       }
     };
+  };
+
+  const onNext = (formData: any) => {
+    setFormOutput({ ...formOutput, ...formData });
+    setModalStep(modalStep + 1);
   };
 
   return (
@@ -59,19 +98,54 @@ const FormModal = ({
         (title ? " " + title : "")
       }
     >
-      <ReactHookForm
-        onSubmit={onSubmitWrapper(onSubmit)}
-        formId={formId}
-        inputs={inputs}
-      />
-      <Button
-        type="submit"
-        form={formId}
-        variant="contained"
-        loading={buttonLoadingState}
-      >
-        Save
-      </Button>
+      {
+        inputPages.length ? (
+          <>
+            <ReactHookForm
+              onSubmit={modalStep === numSteps - 1 ? onSubmitWrapper(onSubmit) : onNext}
+              formId={formId}
+              inputs={inputPages[modalStep]}
+            />
+            {
+              modalStep === numSteps - 1 ? (
+                <LoadingButton
+                  type="submit"
+                  form={formId}
+                  variant="contained"
+                  loading={buttonLoadingState}
+                >
+                  Save
+                </LoadingButton>
+              ) : null
+            }
+            {
+              modalStep > 0 ?
+              (
+                <Button
+                  form={formId}
+                  variant="contained"
+                  onClick={() => setModalStep(modalStep - 1)}
+                >
+                  Back
+                </Button>
+              ) : null
+            }
+            {
+              modalStep < numSteps - 1 ?
+              (
+                <Button
+                  type="submit"
+                  form={formId}
+                  variant="contained"
+                >
+                  Next
+                </Button>
+              ) : null
+            }
+            
+          </>
+        ) : null
+      }
       <Button onClick={closeModal}>Cancel</Button>
     </StyledDialog>
   );

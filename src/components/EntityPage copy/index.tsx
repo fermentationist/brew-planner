@@ -22,7 +22,6 @@ function EntityPage<EntityType>({
   title,
   baseURL,
   pluralEntityName,
-  numModalSteps = 1,
 }: {
   startLoading: () => void;
   doneLoading: () => void;
@@ -31,7 +30,6 @@ function EntityPage<EntityType>({
   title?: string;
   baseURL?: string;
   pluralEntityName?: string;
-  numModalSteps?: number;
 }) {
   const [tableData, setTableData] = useState([]);
   const [showEntityModal, setShowEntityModal] = useState(false);
@@ -242,7 +240,6 @@ function EntityPage<EntityType>({
             (title || entityName).slice(1)
           }
           refresh={refresh}
-          numSteps={numModalSteps}
         />
       ) : null}
     </Page>

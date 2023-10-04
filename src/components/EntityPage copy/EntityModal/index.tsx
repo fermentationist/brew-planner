@@ -10,7 +10,6 @@ const EntityModal = ({
   title,
   formId,
   refresh,
-  numSteps = 1,
 }: {
   showModal: boolean;
   closeModal: () => void;
@@ -21,7 +20,6 @@ const EntityModal = ({
   title: string;
   formId?: string;
   refresh?: () => void;
-  numSteps?: number;
 }) => {
   // add defaultValues from existing data (present if in "edit" mode)
   const formInputs: FormInputOptions[] = inputList.map((input) => {
@@ -53,7 +51,6 @@ const EntityModal = ({
       formId={formId ?? `${mode}-${title}-form`}
       onSubmit={onSubmit}
       inputs={formInputs}
-      numSteps={numSteps}
     />
   );
 };
