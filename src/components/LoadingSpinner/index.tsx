@@ -45,7 +45,7 @@ const SpinningBorder = styled.div`
 const LoadingSpinner = (props: any) => {
   return (
     <Container className={props.className ? props.className : ""}>
-      <Video src={video} autoPlay loop />
+      <Video src={video} autoPlay loop playsInline />
       <SpinningBorder role="status"></SpinningBorder>
     </Container>
   );
