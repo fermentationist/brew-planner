@@ -25,7 +25,7 @@ const Users = function ({
   const [showUserModal, setShowUserModal] = useState(false);
   const [mode, setMode] = useState("create" as "create" | "edit");
   const [userData, setUserData] = useState(null);
-  const { auth, sendPasswordResetEmail } = useAuth();
+  const { auth: [authState], sendPasswordResetEmail } = useAuth();
   const { callAlert, alertError, alertErrorProm, resetAlertState } = useAlert();
   const { confirmDelete, confirm } = useConfirm();
   const {
@@ -90,11 +90,11 @@ const Users = function ({
 
   const deleteSingleUser = async (uid: string) => {
     const deleteUser = new APIRequest({
-      baseURL: auth?.user?.role === "admin" ? ADMIN_PATH : breweryPath,
+      baseURL: authState?.user?.role === "admin" ? ADMIN_PATH : breweryPath,
       url: `/users/${uid}`,
       method: "delete",
     });
-    if (uid === auth?.user?.uid) {
+    if (uid === authState?.user?.uid) {
       callAlert({
         message: "You may not delete your own user!",
         title: "Error",
@@ -102,7 +102,7 @@ const Users = function ({
       return;
     }
     return deleteUser
-      .request()
+      .dispatch()
       .catch(async (error: APIError) => await alertErrorProm(error));
   };
 
@@ -117,7 +117,7 @@ const Users = function ({
     if (!confirmResult) {
       return;
     }
-    if (uidsToDelete.includes(auth?.user?.uid)) {
+    if (uidsToDelete.includes(authState?.user?.uid)) {
       callAlert({
         message: "You may not delete your own user!",
         title: "Error",
@@ -194,12 +194,12 @@ const Users = function ({
           };
     console.log("ADMIN_PATH:", ADMIN_PATH);
     const apiReq = new APIRequest({
-      baseURL: auth?.user?.role === "admin" ? ADMIN_PATH : breweryPath,
+      baseURL: authState?.user?.role === "admin" ? ADMIN_PATH : breweryPath,
       url: mode === "create" ? "/users" : "/users/" + userData?.uid,
       method: mode === "create" ? "post" : "patch",
       data: reqBody,
     });
-    const response = await apiReq.request().catch(async (error: APIError) => {
+    const response = await apiReq.dispatch().catch(async (error: APIError) => {
       await alertErrorProm(error);
     });
     return response?.data;
@@ -280,7 +280,7 @@ const Users = function ({
 
   // only admin users should be shown the edit button
   const columns =
-    auth?.user?.role === "admin"
+    authState?.user?.role === "admin"
       ? [...sharedColumns, editColumn]
       : sharedColumns;
 
@@ -307,7 +307,7 @@ const Users = function ({
           showModal={showUserModal}
           closeModal={() => setShowUserModal(false)}
           data={userData}
-          isAdmin={auth?.user?.role === "admin"}
+          isAdmin={authState?.user?.role === "admin"}
           onSubmit={onUserModalFormSubmit}
         />
       ) : null}

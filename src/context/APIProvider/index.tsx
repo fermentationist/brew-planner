@@ -71,7 +71,7 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
         url,
         method: "get",
         signal,
-      }).request();
+      }).dispatch();
     };
 
   const apiRequests: Record<string, ReactQueryResult> = {

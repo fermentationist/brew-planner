@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import ip from "ip";
 import cors from "cors";
+import compression from "compression";
 import { parse } from "qs";
 import { fileURLToPath } from "url";
 import path, { dirname } from "path";
@@ -38,12 +39,13 @@ app.options("*", cors(corsOptions), (req, res) => {
 app.use(cors(corsOptions));
 
 //set limit to the query param array
-app.set("query parser", str => {
+app.set("query parser", (str) => {
   return parse(str, { arrayLimit: 50 });
 });
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(compression());
 
 if (PROD_MODE) {
   // serve static assets from build/client
@@ -59,16 +61,22 @@ app.use((req, res, next) => {
   res.locals.opError = opError;
   res.locals.inputError = inputError;
   res.set("Content-Type", "application/json");
-  res.header("Access-Control-Allow-Origin", "*"); 
-  res.header("Access-Control-Allow-Credentials", false)
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Firebase-Token");
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Credentials", false);
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Firebase-Token"
+  );
   next();
 });
 
 app.use("/api", router);
 
-app.get("/*", (req, res) => {// catch-all route, serve SPA
-  const clientPath = PROD_MODE ? "../../../build/client/index.html" : "../../../index.html";
+app.get("/*", (req, res) => {
+  // catch-all route, serve SPA
+  const clientPath = PROD_MODE
+    ? "../../../build/client/index.html"
+    : "../../../index.html";
   const newPath = path.join(dirName, clientPath);
   res.setHeader("Content-Type", "text/html");
   res.sendFile(newPath);

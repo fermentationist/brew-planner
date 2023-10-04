@@ -9,6 +9,11 @@ const { getStorage } = storage("brewPlanner");
 export const API_URL = import.meta.env.VITE_API_URL;
 export const ADMIN_PATH = `${API_URL}/admin`;
 
+export const DEFAULT_HEADERS = {
+  "Content-Type": "application/json",
+  "Accpet-Encoding": "gzip, deflate, br",
+};
+
 export default class APIRequest {
   config: Record<string, any>;
   abortController: AbortController;
@@ -23,6 +28,7 @@ export default class APIRequest {
     this.abortController = new AbortController();
     this.config.signal = this.abortController.signal;
     this.config.baseURL = config.baseURL || API_URL;
+    this.config.headers = config.headers || DEFAULT_HEADERS;
     this.config.timeout = config.timeout ?? 20000;
     this.axiosInstance = axios.create();
     this.retries = config.retries ?? 3;
@@ -34,7 +40,7 @@ export default class APIRequest {
         config.errorResponseInterceptor || this.defaultErrorResponseInterceptor.bind(this)
       );
     
-    this.request = this.request.bind(this);
+    this.dispatch = this.dispatch.bind(this);
     this.retry = this.retry.bind(this);
     this.abort = this.abort.bind(this);
   }
@@ -60,7 +66,7 @@ export default class APIRequest {
     return Promise.reject(error);
   }
 
-  async request<ResponseType>(
+  async dispatch<ResponseType>(
     additionalConfig = {}
   ): Promise<ResponseType | Error> {
     const globalState = getStorage("globalState");
@@ -147,7 +153,7 @@ export default class APIRequest {
       console.log(`retrying request in ${this.retryDelay} milliseconds`);
       this.retries--;
       await sleep(this.retryDelay);
-      return this.request();
+      return this.dispatch();
     }
   }
 

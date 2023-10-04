@@ -52,7 +52,7 @@ const AuthProvider = ({ children }: { children: ChildProps }) => {
       method: "GET",
     });
 
-    breweryUuidsRequest.request().then((response: any) => {
+    breweryUuidsRequest.dispatch().then((response: any) => {
       setValidBreweryUuids(response?.data?.uuids ?? []);
     }).catch((err: any) => {
       console.error(err);

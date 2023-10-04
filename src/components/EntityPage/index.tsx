@@ -148,7 +148,7 @@ function EntityPage<EntityType>({
       method: editMode ? "patch" : "post",
       data: reqBody,
     });
-    const response = await apiReq.request().catch(async (error: APIError) => {
+    const response = await apiReq.dispatch().catch(async (error: APIError) => {
       await alertErrorProm(error);
     });
     renameTempPreferredUnits(response?.data?.uuid);
@@ -168,7 +168,7 @@ function EntityPage<EntityType>({
       url: `/${pluralEntityName || entityName + "s"}/${entityUuid}`,
       method: "delete",
     });
-    return deleteEntityRequest.request().catch(async (error: APIError) => {
+    return deleteEntityRequest.dispatch().catch(async (error: APIError) => {
       await alertErrorProm(error);
     });
   };
