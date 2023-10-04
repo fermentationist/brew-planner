@@ -1,18 +1,11 @@
 import React from "react";
 import styled from "styled-components";
-// import logo from "../../airlock_square.gif";
 import video from "../../airlock_square_180.mp4";
+import poster from "../../airlock_square_180_still.png";
 
 const Container = styled.div`
   position: relative;
 `;
-
-// const Image = styled.img`
-//   position: absolute;
-//   width: 100px;
-//   z-index: 10;
-//   border-radius: 50%;
-// `;
 
 const Video = styled.video`
   position: absolute;
@@ -45,7 +38,15 @@ const SpinningBorder = styled.div`
 const LoadingSpinner = (props: any) => {
   return (
     <Container className={props.className ? props.className : ""}>
-      <Video src={video} autoPlay loop playsInline />
+      <Video 
+        src={video}
+        autoPlay
+        loop
+        playsInline
+        poster={poster}
+        width="100px"
+        height="100px"
+      />
       <SpinningBorder role="status"></SpinningBorder>
     </Container>
   );
