@@ -1,5 +1,6 @@
 import { isExistingUid } from "./users.js";
 import * as mashStepService from "../services/mashStep.js";
+import mashService from "../services/mash.js";
 import * as validate from "../middleware/input-validation.js";
 import { isExistingBreweryUuid } from "./breweries.js";
 import { inputError } from "../server/errors.js";
@@ -13,7 +14,7 @@ const mashStepTypeChecker = (input) => mashStepService.MASH_STEP_TYPES.includes(
 const isValidMashStepType = rejectOnFalse(mashStepTypeChecker);
 
 const mashUuidChecker = (input) =>
-  mashStepService.isExistingMashStepAttribute(input, "mashUuid"); 
+  mashService.isExistingMashAttribute(input, "mashUuid"); 
 const isExistingMashUuid = rejectOnFalse(mashUuidChecker);
 
 const mashStepUuidChecker = (input) =>
@@ -90,7 +91,6 @@ export const getMashSteps = [
  * @apiParam {String} mashUuid The unique identifier for the mash
  * @apiBody {String} name A name for the mashStep
  * @apiBody {String} [mashStepUuid] The unique identifier for the mashStep
- * @apiBody {String} createdBy The uid of the user who created the mashStep
  * @apiBody {String} type One of "Infusion", "Temperature" or "Decoction"
  * @apiBody {String} [infuseAmount] The amount of water to infuse (L)
  * @apiBody {Number} stepTemp The temperature of the mash step (ºC)
@@ -112,13 +112,12 @@ const createMashStepValidation = [
     .customSanitizer(validate.xssSanitize),
   customMashStepNameValidator,
   validate.body("mashStepUuid").optional(opt).isUUID(1),
-  validate.body("createdBy").exists(opt).isString().custom(isExistingUid),
   validate.body("type").exists(opt).custom(isValidMashStepType),
   validate.body("infuseAmount").optional().custom(isPositiveNumber),
   validate.body("stepTemp").exists(opt).custom(numberValidator()),
   validate.body("stepTime").exists(opt).isInt({ min: 0 }),
-  validate.body("rampTime").optional().isInt({ min: 0 }),
-  validate.body("endTemp").optional().custom(isPositiveNumber),
+  validate.body("rampTime").optional(opt).isInt({ min: 0 }),
+  validate.body("endTemp").optional(opt).custom(isPositiveNumber),
   validate.catchValidationErrors,
 ];
 
@@ -127,7 +126,10 @@ const createMashStepController = async (req, res, next) => {
     const mashStepUuid = await mashStepService.createMashStep(
       req.params.breweryUuid,
       req.params.mashUuid,
-      validate.cleanRequestBody(req, { removeUndefined: true })
+      {
+        ...validate.cleanRequestBody(req, { removeUndefined: true }),
+        createdBy: res.locals.user.uid,
+      }
     );
     return res.locals.sendResponse(res, { uuid: mashStepUuid });
   } catch (error) {
@@ -177,13 +179,13 @@ const updateMashStepValidation = [
     .customSanitizer(validate.xssSanitize),
   customMashStepNameValidator,
   validate.body("mashStepUuid").optional(opt).isUUID(1),
-  validate.body("createdBy").optional().isString().custom(isExistingUid),
-  validate.body("type").optional().custom(isValidMashStepType),
-  validate.body("infuseAmount").optional().custom(isPositiveNumber),
-  validate.body("stepTemp").optional().custom(numberValidator()),
-  validate.body("stepTime").optional().isInt({ min: 0 }),
-  validate.body("rampTime").optional().isInt({ min: 0 }),
-  validate.body("endTemp").optional().custom(isPositiveNumber),
+  validate.body("createdBy").optional(opt).isString().custom(isExistingUid),
+  validate.body("type").optional(opt).custom(isValidMashStepType),
+  validate.body("infuseAmount").optional(opt).custom(isPositiveNumber),
+  validate.body("stepTemp").optional(opt).custom(numberValidator()),
+  validate.body("stepTime").optional(opt).isInt({ min: 0 }),
+  validate.body("rampTime").optional(opt).isInt({ min: 0 }),
+  validate.body("endTemp").optional(opt).custom(isPositiveNumber),
   validate.catchValidationErrors,
 ];
 

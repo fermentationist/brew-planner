@@ -79,6 +79,8 @@ const AuthProvider = ({ children }: { children: ChildProps }) => {
   }, [dispatch]);
 
   const filterOutDefunctBreweryUuids = (breweryUuids: any[]) => {
+    console.log("validBreweryUuids:", validBreweryUuids);
+    console.log("user breweryUuids:", breweryUuids);
     const filteredBreweries = breweryUuids.filter((uuid) => {
       return validBreweryUuids.includes(uuid);
     });
@@ -97,11 +99,14 @@ const AuthProvider = ({ children }: { children: ChildProps }) => {
           const userBreweries = filterOutDefunctBreweryUuids(
             result.claims.breweries
           );
-          const newCurrentBrewery =
+          let newCurrentBrewery =
             (authState.currentBrewery &&
             userBreweries.includes(authState.currentBrewery))
               ? authState.currentBrewery
               : userBreweries[0];
+          if (result.claims.role === "admin") {
+            newCurrentBrewery = newCurrentBrewery ?? validBreweryUuids[0];
+          }
           const newAuthState = {
             ...authState,
             firebaseUser: authUser,
@@ -117,6 +122,7 @@ const AuthProvider = ({ children }: { children: ChildProps }) => {
             tokenExpiration: new Date(result.expirationTime).getTime(),
             loaded: true,
           };
+          console.log("newCurrentBrewery:", newAuthState.currentBrewery);
           dispatch({ type: "OVERWRITE_AUTH_STATE", payload: newAuthState });
           setStorage("authState", newAuthState);
         });

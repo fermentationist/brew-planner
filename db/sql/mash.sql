@@ -62,7 +62,8 @@ CREATE TABLE IF NOT EXISTS mash_step (
   step_temp DECIMAL(5, 2) NOT NULL, -- target temperature for the step in degrees Celcius
   step_time INT NOT NULL, -- time in minutes to maintain the temperature
   ramp_time INT, -- time in minutes to achieve the target temperature
-  end_temp DECIMAL(5, 2) -- the temperature you can expect the mash to fall to after a long mash step, in degrees Celsius.
+  end_temp DECIMAL(5, 2), -- the temperature you can expect the mash to fall to after a long mash step, in degrees Celsius.
+  step_order INT NOT NULL DEFAULT 1 -- the order in which the steps are performed
 );
 
 ALTER TABLE mash_step ADD INDEX (mash_step_uuid);
@@ -82,7 +83,8 @@ CREATE TABLE IF NOT EXISTS mash_step_version (
   step_temp DECIMAL(5, 2) NOT NULL, -- target temperature for the step in degrees Celcius
   step_time INT NOT NULL, -- time in minutes to maintain the temperature
   ramp_time INT, -- time in minutes to achieve the target temperature
-  end_temp DECIMAL(5, 2) -- the temperature you can expect the mash to fall to after a long mash step, in degrees Celsius.
+  end_temp DECIMAL(5, 2), -- the temperature you can expect the mash to fall to after a long mash step, in degrees Celsius.
+  step_order INT NOT NULL DEFAULT 1 -- the order in which the steps are performed
 );
 
 DROP VIEW IF EXISTS mash_view;
@@ -189,7 +191,8 @@ CREATE TRIGGER before_update_on_mash_step
       step_temp,
       step_time,
       ramp_time,
-      end_temp
+      end_temp,
+      step_order
     )
     VALUES (
       OLD.mash_step_uuid,
@@ -202,7 +205,8 @@ CREATE TRIGGER before_update_on_mash_step
       OLD.step_temp,
       OLD.step_time,
       OLD.ramp_time,
-      OLD.end_temp
+      OLD.end_temp,
+      OLD.step_order
     );
     SET NEW.version = OLD.version + 1;
     INSERT INTO mash_version (

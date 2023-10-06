@@ -157,7 +157,6 @@ const InternalComponent = forwardRef(
     const forceCollapseUnitsRef = useRef<number | null>(null);
     const [forceCollapseUnitsValue, setForceCollapseUnitsValue] = useState<number | null>(forceCollapseUnitsRef.current);
     const onFocus = (event: FocusEvent<HTMLInputElement>) => {
-      console.log("onFocus");
       const rnd = Math.random();
       forceCollapseUnitsRef.current = (rnd);
       setForceCollapseUnitsValue(rnd);

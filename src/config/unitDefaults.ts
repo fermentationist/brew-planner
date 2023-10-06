@@ -117,6 +117,32 @@ const unitDefaults: {[field: string]: {
     default: "F",
     canonical: "C"
   },
+  infuseAmount: {
+    type: "volume",
+    default: "gal",
+    canonical: "l"
+  },
+  stepTemp: {
+    type: "temperature",
+    default: "F",
+    canonical: "C"
+  },
+  stepTime: {
+    type: "time",
+    default: "min",
+    canonical: "min"
+  },
+  rampTime: {
+    type: "time",
+    default: "min",
+    canonical: "min"
+  },
+  endTemp: {
+    type: "temperature",
+    default: "F",
+    canonical: "C"
+  },
+
 }
 
 export default unitDefaults;

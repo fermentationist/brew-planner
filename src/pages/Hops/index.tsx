@@ -11,6 +11,7 @@ export const hopInputs = [
     validation: required,
     errorMessages: requiredMessage,
     width: "250px",
+    modalStep: 0,
   },
   {
     name: "alpha",
@@ -19,6 +20,7 @@ export const hopInputs = [
     validation: { ...required, ...percentage },
     errorMessages: { ...requiredMessage, ...percentageMessage },
     width: "250px",
+    modalStep: 0,
   },
   {
     name: "beta",
@@ -30,6 +32,7 @@ export const hopInputs = [
     tableOptions: {
       display: false,
     },
+    modalStep: 0,
   },
   {
     name: "form",
@@ -38,6 +41,7 @@ export const hopInputs = [
     selectOptions: ["Pellet", "Plug", "Leaf"],
     selectRestricted: true,
     width: "250px",
+    modalStep: 0,
   },
   {
     name: "origin",
@@ -47,6 +51,7 @@ export const hopInputs = [
     tableOptions: {
       display: false,
     },
+    modalStep: 0,
   },
   {
     name: "supplier",
@@ -56,6 +61,7 @@ export const hopInputs = [
     tableOptions: {
       display: false,
     },
+    modalStep: 0,
   },
   {
     name: "humulene",
@@ -67,6 +73,7 @@ export const hopInputs = [
     tableOptions: {
       display: false,
     },
+    modalStep: 1,
   },
   {
     name: "caryophyllene",
@@ -78,6 +85,7 @@ export const hopInputs = [
     tableOptions: {
       display: false,
     },
+    modalStep: 0,
   },
   {
     name: "cohumulone",
@@ -89,6 +97,7 @@ export const hopInputs = [
     tableOptions: {
       display: false,
     },
+    modalStep: 1,
   },
   {
     name: "myrcene",
@@ -100,6 +109,7 @@ export const hopInputs = [
     tableOptions: {
       display: false,
     },
+    modalStep: 1,
   },
   {
     name: "notes",
@@ -110,6 +120,7 @@ export const hopInputs = [
       display: false,
       ...columnOptions.createEllipsisOptions(10)
     },
+    modalStep: 1,
   },
 ];
 

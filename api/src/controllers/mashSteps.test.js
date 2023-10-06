@@ -45,7 +45,6 @@ const getMashStepTestData = async () => {
   const [randomUser] = getRandomArrayMembers(users, 1);
   return {
     name: `Test mashStep ${randomString(6)}`,
-    createdBy: randomUser.uid,
     type: getRandomArrayMembers(MASH_STEP_TYPES, 1)[0],
     infuseAmount: randomFloat(10, 100),
     stepTemp: randomFloat(20, 90),
@@ -205,7 +204,6 @@ export default describe("mash_step routes", function () {
     const testData = await getMashStepTestData();
     const invalidTestData = {
       name: [void 0, "", randomString(101), randomMashStepNames[0]],
-      createdBy: [void 0, randomString(36), randomInt(0, 999999)],
       type: [void 0, "incorrect type", randomString(6)],
       infuseAmount: [
         `${randomFloat(10, 100)}`,
@@ -242,7 +240,6 @@ export default describe("mash_step routes", function () {
     const breweryUuid = breweriesToDelete[breweriesToDelete.length - 1];
     const mashUuid = mashesToDelete[mashesToDelete.length - 1];
     const updateData = await getMashStepTestData();
-    delete updateData.createdBy;
     const mashStepUuid = mashStepsToDelete[mashStepsToDelete.length - 1];
     const response = await makeUpdateMashStepRequest(breweryUuid, mashUuid, mashStepUuid, updateData);
     assert.strictEqual(response.status, "ok");

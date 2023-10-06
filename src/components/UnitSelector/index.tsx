@@ -66,7 +66,6 @@ const UnitSelector = ({
   // if forceCollapseUnitsValue is true, then the unit selector will be collapsed to a single select and a re-render will be forced
   useEffect(() => {
     if (forceCollapseUnitsValue) {
-      console.log("forceCollapseUnitsValue", forceCollapseUnitsValue);
       setShowExpandedSelector(false);
     }
   }, [forceCollapseUnitsValue, setShowExpandedSelector]);

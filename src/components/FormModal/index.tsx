@@ -1,4 +1,4 @@
-import { useState, useCallback, memo } from "react";
+import { useState, useCallback, memo, useEffect } from "react";
 import CustomDialog from "../CustomDialog";
 import ReactHookForm, {
   FormInputOptions as InputOptions,
@@ -29,7 +29,6 @@ const FormModal = ({
   formId,
   title,
   onSubmit,
-  numSteps = 1,
 }: {
   mode?: "create" | "edit";
   showModal: boolean;
@@ -38,16 +37,13 @@ const FormModal = ({
   formId: string;
   title?: string;
   onSubmit: (formData: any) => any;
-  numSteps?: number;
 }) => {
   const [buttonLoadingState, setButtonLoadingState] = useState(false);
   const [modalStep, setModalStep] = useState(0);
   const [formOutput, setFormOutput] = useState({});
-  console.log("numSteps: ", numSteps);
-  const divideIntoPages = useCallback((inputsToDivide: FormInputOptions[]) => {
+  const divideIntoPages = (inputsToDivide: FormInputOptions[]) => {
     const pages = inputsToDivide.reduce((output, input) => {
       const inputStep = input.modalStep ?? 0;
-      console.log("inputStep: ", inputStep);
       if (!output[inputStep]) {
         output[inputStep] = [input];
       } else {
@@ -55,24 +51,27 @@ const FormModal = ({
       }
       return output;
     }, {} as Record<string, any[]>);
-    const pageArray = [];
-    for (let i = 0; i < numSteps; i++) {
-      console.log("i: ", i);
-      console.log("pages[i]: ", pages[i] ?? "")
-      pageArray.push(pages[i] ?? []);
-    }
-    return pageArray;
-  }, [numSteps]);
-  
+    return Object.values(pages);
+  };
+
+  useEffect(() => {
+    console.log("formOutput:", formOutput);
+  }, [formOutput]);
+
   const [inputPages] = useState(divideIntoPages(inputs));
 
-  console.log("inputPages: ", inputPages);
-  const onSubmitWrapper = (onSubmitFn: (val: any) => any) => {
+  const finalSubmitWrapper = (onSubmitFn: (val: any) => any) => {
     return (formData: any) => {
+      console.log("formData in finalSubmit:", formData);
       setButtonLoadingState(true);
       try {
-        const output = { ...formOutput, ...formData };
-        setFormOutput(output);
+        console.log("formOutput:", formOutput);
+        console.log("formData:", formData);
+        const output = { 
+          ...formData,
+          ...formOutput,
+        };
+        console.log("output:", output);
         return onSubmitFn(output);
       } catch (error) {
         console.error(error);
@@ -85,9 +84,53 @@ const FormModal = ({
   };
 
   const onNext = (formData: any) => {
+    console.log("formData in onNext:", formData);
     setFormOutput({ ...formOutput, ...formData });
     setModalStep(modalStep + 1);
   };
+
+  const formSubmitFn =
+    modalStep === inputPages.length - 1 ? finalSubmitWrapper(onSubmit) : onNext;
+
+  const form = inputPages.length ? (
+    <>
+      <ReactHookForm
+        onSubmit={formSubmitFn}
+        formId={`${formId}-${modalStep}`}
+        inputs={inputPages[modalStep]}
+      />
+
+      {modalStep > 0 ? (
+        <>
+          <Button
+            form={`${formId}-${modalStep}`}
+            variant="contained"
+            onClick={() => setModalStep(modalStep - 1)}
+          >
+            Back
+          </Button>
+        </>
+      ) : null}
+      {modalStep < inputPages.length - 1 ? (
+        <Button
+          type="submit"
+          form={`${formId}-${modalStep}`}
+          variant="contained"
+        >
+          Next
+        </Button>
+      ) : (
+        <LoadingButton
+          type="submit"
+          form={`${formId}-${modalStep}`}
+          variant="contained"
+          loading={buttonLoadingState}
+        >
+          Save
+        </LoadingButton>
+      )}
+    </>
+  ) : null;
 
   return (
     <StyledDialog
@@ -101,48 +144,7 @@ const FormModal = ({
       {
         inputPages.length ? (
           <>
-            <ReactHookForm
-              onSubmit={modalStep === numSteps - 1 ? onSubmitWrapper(onSubmit) : onNext}
-              formId={formId}
-              inputs={inputPages[modalStep]}
-            />
-            {
-              modalStep === numSteps - 1 ? (
-                <LoadingButton
-                  type="submit"
-                  form={formId}
-                  variant="contained"
-                  loading={buttonLoadingState}
-                >
-                  Save
-                </LoadingButton>
-              ) : null
-            }
-            {
-              modalStep > 0 ?
-              (
-                <Button
-                  form={formId}
-                  variant="contained"
-                  onClick={() => setModalStep(modalStep - 1)}
-                >
-                  Back
-                </Button>
-              ) : null
-            }
-            {
-              modalStep < numSteps - 1 ?
-              (
-                <Button
-                  type="submit"
-                  form={formId}
-                  variant="contained"
-                >
-                  Next
-                </Button>
-              ) : null
-            }
-            
+            {modalStep % 2 === 0 ? (form): ({...form})}
           </>
         ) : null
       }

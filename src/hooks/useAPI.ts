@@ -33,6 +33,44 @@ const useAPI = (apisToInclude?: string | string[]) => {
     API_URL: api.API_URL,
     APIRequest: api.APIRequest,
   }
+
+  /* expample of output:
+  {
+    status: string,
+    fetchStatus: string,
+    isLoading: boolean,
+    isSuccess: boolean,
+    isError: boolean,
+    data: null | object,
+    dataUpdatedAt: timestamp,
+    error: null | object,
+    errorUpdatedAt: number,
+    failureCount: number,
+    errorUpdateCount: number,
+    isFetched: boolean,
+    isFetchedAfterMount: boolean,
+    isFetching: boolean,
+    isRefetching: boolean,
+    isLoadingError: boolean,
+    isPaused: boolean,
+    isPlaceholderData: boolean,
+    isPreviousData: boolean,
+    isRefetchError: boolean,
+    isStale: boolean,
+    remove: function,
+    resetAPI: function,
+    refetch: function,
+    refetchAll: function,
+    invalidateAll: function,
+    queryClient: null | object,
+    breweryPath: string,
+    currentBrewery: string,
+    ADMIN_PATH:string,
+    API_URL: string,
+    APIRequest: object,
+  }
+  
+  */
   return deepMemoize(output, "useAPI", {keysToExclude: ["queryClient"]});
 }
 

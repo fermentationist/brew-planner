@@ -10,6 +10,9 @@ const EntityModal = ({
   title,
   formId,
   refresh,
+  numSteps = 1,
+  submitEachStep,
+  stepKeys = [],
 }: {
   showModal: boolean;
   closeModal: () => void;
@@ -20,6 +23,9 @@ const EntityModal = ({
   title: string;
   formId?: string;
   refresh?: () => void;
+  numSteps?: number;
+  submitEachStep?: boolean;
+  stepKeys?: string[];
 }) => {
   // add defaultValues from existing data (present if in "edit" mode)
   const formInputs: FormInputOptions[] = inputList.map((input) => {
@@ -35,7 +41,8 @@ const EntityModal = ({
           data?.[inputCopy.preferredUnitKeyField] || "temp";
       }
     } else {
-      inputCopy.preferredUnitKey = "temp"
+      // TODO: find where temp preferredUnitKey is being changed to long-term preferredUnitKey and alter it to account for nested entity creation
+      inputCopy.preferredUnitKey = `temp-${inputCopy.modalStep}`
     }
     delete inputCopy.tableOptions;
     return inputCopy;
@@ -55,6 +62,9 @@ const EntityModal = ({
       formId={formId ?? `${mode}-${title}-form`}
       onSubmit={onSubmit}
       inputs={formInputs}
+      numSteps={numSteps}
+      submitEachStep={submitEachStep}
+      stepKeys={stepKeys}
     />
   );
 };

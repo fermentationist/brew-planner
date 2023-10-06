@@ -12,6 +12,7 @@ import FalseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import Tooltip from "@mui/material/Tooltip";
 import DatePopper from "../DatePopper";
+import TextEllipsis from "../TextEllipsis";
 import { memo } from "react";
 import { deepEquals } from "../../utils/helpers";
 
@@ -207,6 +208,7 @@ export const columnOptions = ((): Record<string, any> => {
         if (!value) {
           return null;
         }
+        return <TextEllipsis value={value} maxLength={maxLength} />;
         const valueWithEllipsis =
           value.length > maxLength ? `${value.slice(0, 20)}...` : value;
         return (
@@ -217,6 +219,7 @@ export const columnOptions = ((): Record<string, any> => {
       },
     };
   };
+
   const moneyOptions = {
     ...options,
     customBodyRender: (value: number | string) => {

@@ -217,7 +217,10 @@ const useConvertUnits = () => {
 
   const generateColumnsFromInputs = useCallback(
     (inputList: FormInputOptions[]) => {
-      return inputList.map((input) => {
+      const filteredInputs = inputList.filter(
+        (input) => !input.excludeFromColumns
+      );
+      return filteredInputs.map((input) => {
         return input.type === "numberWithUnits"
           ? createColumn({
               name: input.name,
