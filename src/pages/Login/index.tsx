@@ -8,7 +8,7 @@ import { FormEvent } from "react";
 import useAPI from "../../hooks/useAPI";
 
 const Login = () => {
-  const { auth, login, sendPasswordResetEmail } = useAuth();
+  const { auth: [authStore], login, sendPasswordResetEmail } = useAuth();
   const { refetchAll } = useAPI();
   const navigate = useNavigate();
   const {callAlert} = useAlert();
@@ -33,7 +33,7 @@ const Login = () => {
     }
     return false;
   };
-  if (auth?.user) {
+  if (authStore?.user) {
     return <Navigate to={from || "/home"} />;
   }
   return (

@@ -1,3 +1,4 @@
+// TODO: namespace units by entity (e.g. mash, water, etc.)
 const unitDefaults: {[field: string]: {
   type?: string;
   default: string;
@@ -87,7 +88,7 @@ const unitDefaults: {[field: string]: {
   },
   sulfate: {
     default: "ppm",
-    canonical: "ppm"
+    canonical: "ppm",
   },
   chloride: {
     default: "ppm",
@@ -101,6 +102,47 @@ const unitDefaults: {[field: string]: {
     default: "ppm",
     canonical: "ppm"
   },
+  grainTemp: {
+    type: "temperature",
+    default: "F",
+    canonical: "C"
+  },
+  tunTemp: {
+    type: "temperature",
+    default: "F",
+    canonical: "C"
+  },
+  spargeTemp: {
+    type: "temperature",
+    default: "F",
+    canonical: "C"
+  },
+  infuseAmount: {
+    type: "volume",
+    default: "gal",
+    canonical: "l"
+  },
+  stepTemp: {
+    type: "temperature",
+    default: "F",
+    canonical: "C"
+  },
+  stepTime: {
+    type: "time",
+    default: "min",
+    canonical: "min"
+  },
+  rampTime: {
+    type: "time",
+    default: "min",
+    canonical: "min"
+  },
+  endTemp: {
+    type: "temperature",
+    default: "F",
+    canonical: "C"
+  },
+
 }
 
 export default unitDefaults;

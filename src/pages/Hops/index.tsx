@@ -1,6 +1,7 @@
 import entityPageFactory from "../../componentFactories/entityPageFactory";
 import { HopData } from "../../types";
 import {percentage, percentageMessage, required, requiredMessage} from "../../utils/validationHelpers";
+import { columnOptions } from "../../components/DataTable";
 
 export const hopInputs = [
   {
@@ -10,25 +11,28 @@ export const hopInputs = [
     validation: required,
     errorMessages: requiredMessage,
     width: "250px",
+    modalStep: 0,
   },
   {
     name: "alpha",
     label: "Alpha acids (%)",
-    type: "number",
+    type: "fakeNumber",
     validation: { ...required, ...percentage },
     errorMessages: { ...requiredMessage, ...percentageMessage },
     width: "250px",
+    modalStep: 0,
   },
   {
     name: "beta",
     label: "Beta acids (%)",
-    type: "number",
+    type: "fakeNumber",
     width: "250px",
     validation: percentage,
     errorMessages: percentageMessage,
     tableOptions: {
       display: false,
     },
+    modalStep: 0,
   },
   {
     name: "form",
@@ -37,15 +41,7 @@ export const hopInputs = [
     selectOptions: ["Pellet", "Plug", "Leaf"],
     selectRestricted: true,
     width: "250px",
-  },
-  {
-    name: "notes",
-    label: "Notes",
-    type: "textarea",
-    width: "250px",
-    tableOptions: {
-      display: false,
-    },
+    modalStep: 0,
   },
   {
     name: "origin",
@@ -55,6 +51,7 @@ export const hopInputs = [
     tableOptions: {
       display: false,
     },
+    modalStep: 0,
   },
   {
     name: "supplier",
@@ -64,50 +61,66 @@ export const hopInputs = [
     tableOptions: {
       display: false,
     },
+    modalStep: 0,
   },
   {
     name: "humulene",
     label: "Humulene (%)",
-    type: "number",
+    type: "fakeNumber",
     width: "250px",
     validation: percentage,
     errorMessages: percentageMessage,
     tableOptions: {
       display: false,
     },
+    modalStep: 1,
   },
   {
     name: "caryophyllene",
     label: "Caryophyllene (%)",
-    type: "number",
+    type: "fakeNumber",
     width: "250px",
     validation: percentage,
     errorMessages: percentageMessage,
     tableOptions: {
       display: false,
     },
+    modalStep: 1,
   },
   {
     name: "cohumulone",
     label: "Cohumulone (%)",
-    type: "number",
+    type: "fakeNumber",
     width: "250px",
     validation: percentage,
     errorMessages: percentageMessage,
     tableOptions: {
       display: false,
     },
+    modalStep: 1,
   },
   {
     name: "myrcene",
     label: "Myrcene (%)",
-    type: "number",
+    type: "fakeNumber",
     width: "250px",
     validation: percentage,
     errorMessages: percentageMessage,
     tableOptions: {
       display: false,
     },
+    modalStep: 1,
+  },
+  {
+    name: "notes",
+    label: "Notes",
+    type: "textarea",
+    width: "250px",
+    tableOptions: {
+      display: false,
+      ...columnOptions.createEllipsisOptions(10)
+    },
+    modalStep: 1,
   },
 ];
 

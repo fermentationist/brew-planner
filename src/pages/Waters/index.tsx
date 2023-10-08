@@ -20,6 +20,7 @@ export const waterInputs = [
     convertOnUnitChange: true,
     preferredUnitKeyField: "waterUuid",
     width: "250px",
+    unitsToExclude: ["ppt", "ppq"]
   },
   {
     name: "bicarbonate",
@@ -30,6 +31,7 @@ export const waterInputs = [
     convertOnUnitChange: true,
     preferredUnitKeyField: "waterUuid",
     width: "250px",
+    unitsToExclude: ["ppt", "ppq"]
   },
   {
     name: "sulfate",
@@ -40,6 +42,7 @@ export const waterInputs = [
     convertOnUnitChange: true,
     preferredUnitKeyField: "waterUuid",
     width: "250px",
+    unitsToExclude: ["ppt", "ppq"],
   },
   {
     name: "chloride",
@@ -50,6 +53,7 @@ export const waterInputs = [
     convertOnUnitChange: true,
     preferredUnitKeyField: "waterUuid",
     width: "250px",
+    unitsToExclude: ["ppt", "ppq"]
   },
   {
     name: "sodium",
@@ -60,6 +64,7 @@ export const waterInputs = [
     convertOnUnitChange: true,
     preferredUnitKeyField: "waterUuid",
     width: "250px",
+    unitsToExclude: ["ppt", "ppq"]
   },
   {
     name: "magnesium",
@@ -70,6 +75,7 @@ export const waterInputs = [
     convertOnUnitChange: true,
     preferredUnitKeyField: "waterUuid",
     width: "250px",
+    unitsToExclude: ["ppt", "ppq"]
   },
   {
     name: "ph",

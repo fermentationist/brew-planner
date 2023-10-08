@@ -1,29 +1,33 @@
-import * as brewhouseService from "../services/brewhouse.js";
+import brewhouseService from "../services/brewhouse.js";
 import { isExistingBreweryUuid } from "./breweries.js";
 import * as validate from "../middleware/input-validation.js";
-import { isExistingUid } from "./users.js";
 import { rejectOnFalse, numberValidator } from "../utils/helpers.js";
 import { inputError } from "../server/errors.js";
 
 //validation helpers
 
 const opt = { checkFalsy: true };
-const numOpt = { no_symbols: true };
 
 const brewhouseUuidChecker = (input) => brewhouseService.isExistingBrewhouseAttribute(input, "brewhouseUuid");
 
 const isExistingBrewhouseUuid = rejectOnFalse(brewhouseUuidChecker);
 
 const customBrewhouseNameValidator = async (req, res, next) => {
-  // ensures that brewhouse name is unique (for the current brewery)
-  const breweryUuid = req.params.breweryUuid;
-  const {name} = req.body;
-  const nameAlreadyExists = await brewhouseService.isExistingBrewhouseAttribute(name, "name", {breweryUuid});
-  if (nameAlreadyExists) {
-    return next(inputError([{msg: "Invalid input", location: "body", param: "name"}]));
+  // ensures that Fermentable name is unique (for the current brewery)
+  const {breweryUuid, brewhouseUuid} = req.params;
+  const { name } = req.body;
+  const nameAlreadyExists =
+    await brewhouseService.isExistingBrewhouseAttribute(name, "name", {
+      breweryUuid,
+    });
+  const nameBelongsToCurrentBrewhouse = brewhouseUuid && await brewhouseService.isExistingBrewhouseAttribute(name, "name", {brewhouseUuid});
+  if (nameAlreadyExists && !nameBelongsToCurrentBrewhouse) {
+    return next(
+      inputError([{ msg: "Invalid input", location: "body", param: "name" }])
+    );
   }
   return next();
-}
+};
 
 // getBrewhouses
 /**
@@ -66,7 +70,6 @@ export const getBrewhouses = [getBrewhousesValidation, getBrewhousesFunction];
  * @apiParam {String} breweryUuid The brewery's unique identifier
  * @apiBody {String} name A unique name for the brewhouse
  * @apiBody {String} [brewhouseUuid] A unique identifier for the brewhouse (a v1 UUID)
- * @apiBody {String} createdBy The uid of the user who created the brewhouse
  * @apiBody {Number} batchSize The target volume, in liters
  * @apiBody {Number} tunVolume Volume in liters
  * @apiBody {Number} tunWeight Weight in kilograms
@@ -95,7 +98,6 @@ const createBrewhouseValidation = [
   customBrewhouseNameValidator,
   validate.param("breweryUuid").exists(opt).custom(isExistingBreweryUuid),
   validate.body("brewhouseUuid").optional(opt).isUUID(1),
-  validate.body("createdBy").exists(opt).isString().custom(isExistingUid),
   validate.body("batchSize").exists().custom(numberValidator({min: 0})),
   validate.body("tunVolume").exists().custom(numberValidator({min: 0})),
   validate.body("tunWeight").exists().custom(numberValidator({min: 0})),
@@ -117,9 +119,12 @@ const createBrewhouseFunction = async (req, res, next) => {
   try {
     const brewhouseUuid = await brewhouseService.createBrewhouse(
       req.params.breweryUuid,
-      validate.cleanRequestBody(req, { removeUndefined: true })
+      {
+        ...validate.cleanRequestBody(req, { removeUndefined: true }),
+        createdBy: res.locals.user.uid,
+      }
     );
-    return res.locals.sendResponse(res, { brewhouseUuid });
+    return res.locals.sendResponse(res, { uuid: brewhouseUuid });
   } catch (error) {
     console.log(error);
     return next(res.locals.opError("Brewhouse creation failed", error));

@@ -1,5 +1,4 @@
 import entityPageFactory from "../../componentFactories/entityPageFactory";
-import { BreweryData } from "../../types";
 import { ADMIN_PATH } from "../../utils/APIRequest";
 import { required, requiredMessage, maxLengthErrorMessageFactory } from "../../utils/validationHelpers";
 
@@ -62,6 +61,6 @@ export const breweryInputs = [
   }
 ];
 
-const Breweries = entityPageFactory<BreweryData>({entityName: "brewery", inputList: breweryInputs, baseURL: ADMIN_PATH, pluralEntityName: "breweries"});
+const Breweries = entityPageFactory({entityName: "brewery", inputList: breweryInputs, baseURL: ADMIN_PATH, pluralEntityName: "breweries"});
 
 export default Breweries;

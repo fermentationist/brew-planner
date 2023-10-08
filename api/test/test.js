@@ -7,11 +7,14 @@ import {
   getEntityFactory,
 } from "./testHelpers.js";
 import { randomString } from "../src/utils/helpers.js";
+import { getAllUsers } from "./firebase.js";
 
 //utility functions
 const createBrewery = createEntityFactory("brewery");
 const deleteBrewery = deleteEntityFactory("brewery");
-const getBrewery = getEntityFactory("brewery");
+const createMash = createEntityFactory("mash");
+const getMash = getEntityFactory("mash");
+const deleteMash = deleteEntityFactory("mash");
 
 export default describe("typecasting", () => {
   let breweriesToDelete = [];
@@ -24,12 +27,15 @@ export default describe("typecasting", () => {
   });
 
   it("TINYINT are typecast as boolean", async () => {
-    const name = "Test Brewery " + randomString(4);
-    const isPrivate = false;
-    const breweryUuid = await createBrewery({ name, is_private: isPrivate });
-    const [brewery] = await getBrewery(breweryUuid);
-    assert.strictEqual(brewery.is_private, false);
+    const breweryName = "Test Brewery " + randomString(4);
+    const mashName = "Test Mash " + randomString(4);
+    const [user] = await getAllUsers();
+    const breweryUuid = await createBrewery({ name: breweryName });
+    const mashUuid = await createMash({ brewery_uuid: breweryUuid, name: mashName, equip_adjust: 1, created_by: user.uid});
+    const [mash] = await getMash(mashUuid);
+    assert.strictEqual(mash.equip_adjust, true);
     breweriesToDelete.push(breweryUuid);
+    await deleteMash(mashUuid);
   });
 
   after(async () => {

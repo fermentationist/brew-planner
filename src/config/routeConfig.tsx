@@ -7,6 +7,7 @@ import YeastsPage from "../pages/Yeasts";
 import MiscsPage from "../pages/Miscs";
 import Users from "../pages/Users";
 import Breweries from "../pages/Breweries";
+import MashesPage from "../pages/Mashes";
 import withBreweryRequired from "../hoc/withBreweryRequired";
 
 const Brewhouses = withBreweryRequired(BrewhousesPage);
@@ -15,6 +16,7 @@ const Hops = withBreweryRequired(HopsPage);
 const Waters = withBreweryRequired(WatersPage);
 const Yeasts = withBreweryRequired(YeastsPage);
 const Miscs = withBreweryRequired(MiscsPage);
+const Mashes = withBreweryRequired(MashesPage);
 
 export interface Routes {
   [route: string]: {
@@ -47,6 +49,10 @@ const routes: Routes = {
   "/ingredients/hops": {
     roles: ["user", "manager", "admin"],
     component: <Hops />
+  },
+  "/ingredients/mash_profiles": {
+      roles: ["user", "manager", "admin"],
+      component: <Mashes />
   },
   "/ingredients/water_profiles": {
     roles: ["user", "manager", "admin"],

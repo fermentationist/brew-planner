@@ -1,6 +1,4 @@
-/* global console */
-import { isExistingUid } from "./users.js";
-import * as miscService from "../services/misc.js";
+import miscService from "../services/misc.js";
 import * as validate from "../middleware/input-validation.js";
 import { isExistingBreweryUuid } from "./breweries.js";
 import { inputError } from "../server/errors.js";
@@ -83,7 +81,6 @@ export const getMiscs = [getMiscsValidation, getMiscsController];
  * @apiParam {String} breweryUuid The brewery's unique identifier
  * @apiBody {String} name A unique name for the misc
  * @apiBody {String} [miscUuid] A unique identifier for the misc (a v1 UUID)
- * @apiBody {String} createdBy The uid of the user who created the misc
  * @apiBody {String} type One of: "Spice", "Fining", "Water Agent", "Herb", "Flavor" or "Other"
  * @apiBody {String} [useFor] Recommened use
  * @apiBody {String} [notes]
@@ -101,7 +98,6 @@ const createMiscValidation = [
     .isLength({ min: 1, max: 100 })
     .customSanitizer(validate.xssSanitize),
   customMiscNameValidator,
-  validate.body("createdBy").exists(opt).isString().custom(isExistingUid),
   validate.body("type").exists(opt).custom(isValidMiscType),
   validate
     .body("useFor")
@@ -120,9 +116,12 @@ const createMiscController = async (req, res, next) => {
   try {
     const miscUuid = await miscService.createMisc(
       req.params.breweryUuid,
-      validate.cleanRequestBody(req, { removeUndefined: true })
+      {
+        ...validate.cleanRequestBody(req, { removeUndefined: true }),
+        createdBy: res.locals.user.uid
+      }
     );
-    return res.locals.sendResponse(res, { miscUuid });
+    return res.locals.sendResponse(res, { uuid: miscUuid });
   } catch (error) {
     console.log(error);
     return next(res.locals.opError("Misc creation failed", error));

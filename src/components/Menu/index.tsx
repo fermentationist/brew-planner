@@ -30,12 +30,12 @@ const DrawerHeader = styled.div`
 `;
 
 const Menu = ({menuItems, nested}: MenuProps) => {
-  const [globalState, setGlobalState] = useGlobalState();
+  const [globalState, dispatch] = useGlobalState();
   const menuState = globalState.menu;
   const [collapsedState, setCollapsedState] = useState<CollapsedState>(
     menuState?.collapsedState
   );
-  const { auth } = useAuth();
+  const { auth: [authState] } = useAuth();
   const toggleExpandCollapse = (title: string) => {
     const titleState = (collapsedState && collapsedState[title]) || false;
     const newCollapsedState = {
@@ -43,28 +43,21 @@ const Menu = ({menuItems, nested}: MenuProps) => {
       [title]: !titleState
     };
     setCollapsedState(newCollapsedState);
-    setGlobalState({
-      ...globalState,
-      menu: {
-        ...globalState.menu,
-        collapsedState: newCollapsedState
-      }
+    dispatch({
+      type: "SET_MENU_COLLAPSED_STATE",
+      payload: newCollapsedState
     });
   };
   const closeDrawer = () => {
-    setGlobalState({
-      ...globalState,
-      menu: {
-        ...globalState.menu,
-        isOpen: false
-      }
+    dispatch({
+      type: "CLOSE_MENU"
     });
   };
 
   const  displayMenuItem = (menuItem: any): boolean => {
     if (typeof menuItem.link == "string") {
       const allowedRoles = getAllowedRoles(menuItem.link, routes) || [];
-      if (!allowedRoles.includes(auth?.user?.role)) {
+      if (!allowedRoles.includes(authState?.user?.role)) {
         // do not display menuItem if user is not authorized
         return false;
       }

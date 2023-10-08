@@ -1,8 +1,8 @@
-/* global process, console */
 import "dotenv/config";
 import express from "express";
 import ip from "ip";
 import cors from "cors";
+import compression from "compression";
 import { parse } from "qs";
 import { fileURLToPath } from "url";
 import path, { dirname } from "path";
@@ -14,8 +14,7 @@ import { opError, inputError } from "./errors.js";
 
 const app = express();
 
-const TEST_MODE = process.env.TEST_MODE === "false" ? false : true;
-const SERVE_MODE = (process.env.PROD_MODE === "true" || process.env.SERVE_MODE === "true") ? true : false;
+const PROD_MODE = process.env.PROD_MODE === "true" ? true : false;
 // const STATIC_FOLDER = SERVE_MODE ? "../client" : "./";
 const PORT = process.env.SERVER_PORT;
 
@@ -40,14 +39,18 @@ app.options("*", cors(corsOptions), (req, res) => {
 app.use(cors(corsOptions));
 
 //set limit to the query param array
-app.set("query parser", str => {
+app.set("query parser", (str) => {
   return parse(str, { arrayLimit: 50 });
 });
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(compression());
 
-if (TEST_MODE) {
+if (PROD_MODE) {
+  // serve static assets from build/client
+  app.use(express.static("build/client"));
+} else {
   //serve documentation
   app.use("/docs", express.static("doc"));
 }
@@ -58,17 +61,24 @@ app.use((req, res, next) => {
   res.locals.opError = opError;
   res.locals.inputError = inputError;
   res.set("Content-Type", "application/json");
-  res.header("Access-Control-Allow-Origin", "*"); 
-  res.header("Access-Control-Allow-Credentials", false)
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Firebase-Token");
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Credentials", false);
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Firebase-Token"
+  );
   next();
 });
 
 app.use("/api", router);
 
-app.get("/*", (req, res, next) => {// catch-all route
-  const clientPath = SERVE_MODE ? "../client/index.html" : "../../../index.html";
+app.get("/*", (req, res) => {
+  // catch-all route, serve SPA
+  const clientPath = PROD_MODE
+    ? "../../../build/client/index.html"
+    : "../../../index.html";
   const newPath = path.join(dirName, clientPath);
+  res.setHeader("Content-Type", "text/html");
   res.sendFile(newPath);
 });
 

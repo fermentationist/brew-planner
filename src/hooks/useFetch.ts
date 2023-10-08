@@ -1,6 +1,7 @@
 import APIRequest from "../utils/APIRequest";
 import {useState, useEffect, useMemo, useCallback} from "react";
 import useAuth from "../hooks/useAuth";
+import { AxiosResponse } from "axios";
 
 const useFetch = (url: string) => {
   const [loading, setLoading] = useState(false);
@@ -8,7 +9,7 @@ const useFetch = (url: string) => {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [refreshValue, setRefreshValue] = useState(0);
-  const { auth } = useAuth();
+  const { auth: [authState] } = useAuth();
 
   useEffect(() => {
     const getData = new APIRequest({
@@ -16,11 +17,11 @@ const useFetch = (url: string) => {
       method: "get"
     });
     console.log("new APIRequest:", getData);
-    if (auth?.accessToken) {
+    if (authState?.accessToken) {
       const fetchData = async () => {
         setLoading(true);
-        const response = await getData
-          .request()
+        const response: any = await getData
+          .dispatch()
           .catch((err: any) => setError(err));
         setResponse(response || null);
         setData(response?.data || null);

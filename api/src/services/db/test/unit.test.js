@@ -1,4 +1,4 @@
-/* global describe, before, it, after, process, setTimeout */
+/* global describe, before, it, after */
 import db from "../index.js";
 import assert from "assert";
 import {randomInt, randomString} from "../../../utils/helpers.js";
@@ -114,7 +114,7 @@ export default describe("database", () => {
         UPDATE ${TEST_TABLE} SET message = ?
         WHERE test_key = ?;
       `;
-      db.query(sqlString, [newMessage, testKey], async (error, results) => {
+      db.query(sqlString, [newMessage, testKey], async (error) => {
         if (error) {
           throw error;
         }
@@ -282,13 +282,13 @@ export default describe("database", () => {
       process.stdout.write = stdoutSpy; // use spy
       const sqlString1 = `SELECT SLEEP(${sleepTime});`;
       const sqlString2 = `SELECT * FROM ${TEST_TABLE};`;
-      db.queryAndLock(sqlString1, [], (error, results) => {
+      db.queryAndLock(sqlString1, [], (error) => {
         // should cause connection to be "paused"
         if (error) {
           throw error;
         }
       });
-      db.query(sqlString2, [], (error, results) => {
+      db.query(sqlString2, [], (error) => {
         // second query will be temporarily blocked by first query, causing "db connection paused" to be logged
         if (error) {
           throw error;

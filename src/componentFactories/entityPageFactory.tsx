@@ -3,10 +3,10 @@ import { FormInputOptions } from "../components/FormModal";
 import { ComponentType } from "react";
 
 export interface EntityPageFactoryOptions {
-  entityName: string;
+  entityName: string | string[];
   inputList: FormInputOptions[];
-  pluralEntityName?: string;
-  title?: string;
+  pluralEntityName?: string | string[];
+  title?: string | string[];
   baseURL?: string;
 }
 

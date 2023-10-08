@@ -1,10 +1,11 @@
+
 const firebaseConfig = {
-  apiKey: "AIzaSyBnsIopHa8DPfHyOwOVuB9tL4uNhjCe-xU",
-  authDomain: "fermentationist-brew-planner.firebaseapp.com",
-  projectId: "fermentationist-brew-planner",
-  storageBucket: "fermentationist-brew-planner.appspot.com",
-  messagingSenderId: "398501432243",
-  appId: "1:398501432243:web:a100413dd760fa5e5419c6"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJET_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.REACT_FIREBASE_APP_ID,
 };
 
 export default firebaseConfig;

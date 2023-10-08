@@ -12,47 +12,58 @@ import withLoadingSpinner from "../../hoc/withLoadingSpinner";
 import useAPI from "../../hooks/useAPI";
 import { APIError, BreweryData, UserData } from "../../types";
 
+const MAX_USER_BREWERIES_TO_DISPLAY_IN_TABLE = 3;
+
 const Users = function ({
   startLoading,
-  doneLoading
+  doneLoading,
 }: {
   startLoading: () => void;
   doneLoading: () => void;
 }) {
-  console.log("\nloading Users\n")
   const [tableData, setTableData] = useState([]);
   const [showUserModal, setShowUserModal] = useState(false);
   const [mode, setMode] = useState("create" as "create" | "edit");
   const [userData, setUserData] = useState(null);
-  const { auth, sendPasswordResetEmail } = useAuth();
+  const { auth: [authState], sendPasswordResetEmail } = useAuth();
   const { callAlert, alertError, alertErrorProm, resetAlertState } = useAlert();
   const { confirmDelete, confirm } = useConfirm();
-  const {users: usersQuery, breweries: breweriesQuery, APIRequest, ADMIN_PATH, breweryPath} = useAPI(["users", "breweries"]);
-  
+  const {
+    users: usersQuery,
+    breweries: breweriesQuery,
+    APIRequest,
+    ADMIN_PATH,
+    breweryPath,
+  } = useAPI(["users", "breweries"]);
+
   useEffect(() => {
     if (usersQuery && breweriesQuery) {
       if (usersQuery.isLoading || breweriesQuery.isLoading) {
-        console.log("enabling users and breweries")
         usersQuery.enable();
         breweriesQuery.enable();
       }
       if (!usersQuery.isLoading && !breweriesQuery.isLoading) {
         if (usersQuery.data) {
           let usersArray = usersQuery.data.data.users;
-          if (breweriesQuery.data){
-            const breweriesMap = breweriesQuery.data.data.breweries.reduce((map: any, brewery: BreweryData) => {
-              if (!Object.hasOwn(map, brewery.breweryUuid)) {
-                map[brewery.breweryUuid] = brewery;
-              }
-              return map;
-            }, {});
+          if (breweriesQuery.data) {
+            const breweriesMap = breweriesQuery.data.data.breweries.reduce(
+              (map: any, brewery: BreweryData) => {
+                if (!Object.hasOwn(map, brewery.breweryUuid)) {
+                  map[brewery.breweryUuid] = brewery;
+                }
+                return map;
+              },
+              {}
+            );
             usersArray = usersArray.map((user: UserData) => {
-              const breweries = user.customClaims?.breweries.map((breweryUuid: string) => {
-                return breweriesMap[breweryUuid];
-              })
+              const breweries = user.customClaims?.breweries.map(
+                (breweryUuid: string) => {
+                  return breweriesMap[breweryUuid];
+                }
+              );
               user.breweries = breweries;
               return user;
-            })
+            });
           }
           setTableData(usersArray);
         }
@@ -63,7 +74,7 @@ const Users = function ({
         doneLoading();
       }
     }
-  }, [usersQuery?.isLoading, usersQuery?.data, usersQuery?.error, doneLoading, alertError, breweriesQuery?.isLoading, breweriesQuery?.data]);
+  }, [usersQuery, doneLoading, alertError, breweriesQuery]);
 
   const editUser = (rowData: UserData) => {
     setUserData(rowData);
@@ -79,18 +90,20 @@ const Users = function ({
 
   const deleteSingleUser = async (uid: string) => {
     const deleteUser = new APIRequest({
-      baseURL: auth?.user?.role === "admin" ? ADMIN_PATH : breweryPath,
+      baseURL: authState?.user?.role === "admin" ? ADMIN_PATH : breweryPath,
       url: `/users/${uid}`,
-      method: "delete"
+      method: "delete",
     });
-    if (uid === auth?.user?.uid) {
+    if (uid === authState?.user?.uid) {
       callAlert({
         message: "You may not delete your own user!",
-        title: "Error"
+        title: "Error",
       });
       return;
     }
-    return deleteUser.request().catch(async (error: APIError) => await alertErrorProm(error));
+    return deleteUser
+      .dispatch()
+      .catch(async (error: APIError) => await alertErrorProm(error));
   };
 
   const deleteRows = async (rowsDeleted: any) => {
@@ -104,16 +117,19 @@ const Users = function ({
     if (!confirmResult) {
       return;
     }
-    if (uidsToDelete.includes(auth?.user?.uid)) {
+    if (uidsToDelete.includes(authState?.user?.uid)) {
       callAlert({
         message: "You may not delete your own user!",
-        title: "Error"
+        title: "Error",
       });
       return;
     }
     if (qty > 4) {
-      const secondConfirm = await confirm("Please be patient, this may take a little while...", x => x);
-      console.log("secondConfirm:", secondConfirm)
+      const secondConfirm = await confirm(
+        "Please be patient, this may take a little while...",
+        (x) => x
+      );
+      console.log("secondConfirm:", secondConfirm);
       if (!secondConfirm) {
         return;
       }
@@ -122,9 +138,12 @@ const Users = function ({
     let count = 1;
     for (const uid of uidsToDelete) {
       console.log("attempting to delete user:", uid);
-      callAlert({message: `Deleting ${count} of ${uidsToDelete.length} users...`, showCloseButton: false});
+      callAlert({
+        message: `Deleting ${count} of ${uidsToDelete.length} users...`,
+        showCloseButton: false,
+      });
       await deleteSingleUser(uid);
-      count ++;
+      count++;
     }
     await resetAlertState();
     usersQuery.refetch();
@@ -151,7 +170,7 @@ const Users = function ({
         callAlert({
           message:
             "No email sent. Alternately, the password may be reset with this link:",
-          child: <a href={resetLink}>click here</a>
+          child: <a href={resetLink}>click here</a>,
         });
       }
     }
@@ -167,47 +186,45 @@ const Users = function ({
             email: formData.email,
             displayName: formData.displayName,
             role: formData.role || "user",
-            password: null
+            password: null,
           }
         : {
             role: formData.role,
-            breweries: formData.breweries
+            breweries: formData.breweries,
           };
-    console.log("ADMIN_PATH:", ADMIN_PATH)
+    console.log("ADMIN_PATH:", ADMIN_PATH);
     const apiReq = new APIRequest({
-      baseURL: auth?.user?.role === "admin" ? ADMIN_PATH : breweryPath,
+      baseURL: authState?.user?.role === "admin" ? ADMIN_PATH : breweryPath,
       url: mode === "create" ? "/users" : "/users/" + userData?.uid,
       method: mode === "create" ? "post" : "patch",
-      data: reqBody
+      data: reqBody,
     });
-    const response = await apiReq
-      .request()
-      .catch(async (error: APIError) => {
-        await alertErrorProm(error);
-      });
+    const response = await apiReq.dispatch().catch(async (error: APIError) => {
+      await alertErrorProm(error);
+    });
     return response?.data;
   };
-  
+
   const sharedColumns = [
     {
       label: "UID",
       name: "uid",
-      options: columnOptions.options
+      options: columnOptions.options,
     },
     {
       label: "Name",
       name: "displayName",
-      options: columnOptions.options
+      options: columnOptions.options,
     },
     {
       label: "Email",
       name: "email",
-      options: columnOptions.options
+      options: columnOptions.options,
     },
     {
       label: "Role",
       name: "customClaims.role",
-      options: columnOptions.options
+      options: columnOptions.options,
     },
     {
       label: "Breweries",
@@ -217,26 +234,53 @@ const Users = function ({
           if (!Array.isArray(breweries)) {
             return null;
           }
-          return breweries.map((brewery, index) => {
+          let breweriesToDisplay = breweries;
+          if (
+            breweriesToDisplay.length > MAX_USER_BREWERIES_TO_DISPLAY_IN_TABLE
+          ) {
+            breweriesToDisplay = breweries.slice(
+              0,
+              MAX_USER_BREWERIES_TO_DISPLAY_IN_TABLE
+            );
+            breweriesToDisplay.push("...");
+          }
+
+          return breweriesToDisplay.map((brewery, index) => {
+            if (brewery === "...") {
+              const breweryNames = breweries
+                .map((brewery) => brewery?.name)
+                .join(", ");
+              return (
+                <Tooltip key={`ellipsis-${index}`} title={breweryNames}>
+                  <p style={{ margin: "0.25em" }}>{brewery}</p>
+                </Tooltip>
+              );
+            }
+            const address = `${brewery?.street ?? ""}${
+              brewery?.unit ? `, \n${brewery.unit}` : ""
+            }${brewery?.city ? `,\n${brewery.city}` : ""}${
+              brewery?.stateOrProvince ? `, \n${brewery.stateOrProvince}` : ""
+            }${brewery?.postalCode ? ` \n${brewery.postalCode}` : ""}`;
             return (
-            <Tooltip key={index} title={JSON.stringify(brewery?.address, null, 2) || ""}>
-              <span>{brewery?.name}</span>
-            </Tooltip>
-          )});
+              <Tooltip key={brewery?.name ?? index} title={address}>
+                <p style={{ margin: "0.25em" }}>{brewery?.name}</p>
+              </Tooltip>
+            );
+          });
         },
-        ...columnOptions.options
-      }
-    }
+        ...columnOptions.options,
+      },
+    },
   ];
 
   const editColumn = {
     name: "",
-    options: columnOptions.createRenderEditButtonOptions("edit user", editUser)
+    options: columnOptions.createRenderEditButtonOptions("edit user", editUser),
   };
 
   // only admin users should be shown the edit button
   const columns =
-    auth?.user?.role === "admin"
+    authState?.user?.role === "admin"
       ? [...sharedColumns, editColumn]
       : sharedColumns;
 
@@ -253,7 +297,7 @@ const Users = function ({
         options={{
           selectableRows: "multiple",
           selectableRowsHeader: true,
-          onRowsDelete: deleteRows
+          onRowsDelete: deleteRows,
         }}
         refresh={usersQuery?.refetch}
       />
@@ -263,7 +307,7 @@ const Users = function ({
           showModal={showUserModal}
           closeModal={() => setShowUserModal(false)}
           data={userData}
-          isAdmin={auth?.user?.role === "admin"}
+          isAdmin={authState?.user?.role === "admin"}
           onSubmit={onUserModalFormSubmit}
         />
       ) : null}

@@ -1,4 +1,4 @@
-import React, { useState, ComponentType, useCallback, Component } from "react";
+import React, { useState, ComponentType, useCallback } from "react";
 import Page from "../components/Page";
 import LoadingSpinner from "../components/styled/StyledSpinner";
 
@@ -13,13 +13,14 @@ function withLoadingSpinner<P>(
   WrappedComponent: ComponentType<ComponentProps<P>>
 ): ComponentType<P> {
   const MIN_DURATION = 750;
+  let timeout: number;
   return (props: any) => {
     const [loaded, setLoaded] = useState(false);
     const [wrapperStyle, setWrapperStyle] = useState<IWrapperStyle>({
       display: "none",
     });
     const doneLoading = () => {
-      const timeout = setTimeout(() => {
+      timeout = setTimeout(() => {
         setLoaded(true);
         setWrapperStyle({
           display: "unset",
@@ -27,6 +28,7 @@ function withLoadingSpinner<P>(
       }, MIN_DURATION);
     };
     const startLoading = () => {
+      clearTimeout(timeout);
       setLoaded(false);
       setWrapperStyle({
         display: "none",
@@ -36,7 +38,7 @@ function withLoadingSpinner<P>(
     return (
       <>
         {!loaded ? (
-          <Page>
+          <Page containerMargin="0">
             <LoadingSpinner />
           </Page>
         ) : null}

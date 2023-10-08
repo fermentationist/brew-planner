@@ -47,9 +47,10 @@ CREATE TABLE IF NOT EXISTS hop_version (
 
 CREATE TABLE IF NOT EXISTS recipe_hop (
   hop_uuid  BINARY (16) NOT NULL,
+  CONSTRAINT fk_recipe_hop_hop_uuid FOREIGN KEY (hop_uuid) REFERENCES hop(hop_uuid),
   version INT NOT NULL,
   recipe_uuid  BINARY (16) NOT NULL,
-  CONSTRAINT fk_hop_recipe_uuid FOREIGN KEY (recipe_uuid) REFERENCES recipe(recipe_uuid),
+  CONSTRAINT fk_recipe_hop_recipe_uuid FOREIGN KEY (recipe_uuid) REFERENCES recipe(recipe_uuid),
   amount DECIMAL (10, 4), -- weight in kilograms
   `use` ENUM ("Mash", "First Wort", "Boil", "Aroma", "Dry Hop") NOT NULL,
   time INT NOT NULL, -- minutes

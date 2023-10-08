@@ -1,4 +1,4 @@
-/* global setTimeout, clearTimeout */
+
 import React, {useState, useEffect, useRef} from "react";
 
 const Timer = props => {

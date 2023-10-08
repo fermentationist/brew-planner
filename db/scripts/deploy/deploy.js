@@ -1,4 +1,4 @@
-/* global process, console */
+// Purpose: script to deploy database
 import dotenv from "dotenv";
 import fs from "fs";
 import { fileURLToPath } from "url";

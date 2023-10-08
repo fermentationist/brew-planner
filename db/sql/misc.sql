@@ -33,9 +33,10 @@ CREATE TABLE IF NOT EXISTS misc_version (
 
 CREATE TABLE IF NOT EXISTS recipe_misc (
   misc_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_recipe_misc_misc_uuid FOREIGN KEY (misc_uuid) REFERENCES misc(misc_uuid),
   version INT NOT NULL,
   recipe_uuid BINARY (16) NOT NULL,
-  CONSTRAINT fk_misc_recipe_uuid FOREIGN KEY (recipe_uuid) REFERENCES recipe(recipe_uuid),
+  CONSTRAINT fk_recipe_misc_recipe_uuid FOREIGN KEY (recipe_uuid) REFERENCES recipe(recipe_uuid),
   `use` ENUM ("Boil", "Mash", "Primary", "Secondary", "Bottling") NOT NULL,
   UNIQUE KEY (misc_uuid, version, recipe_uuid, `use`),
   time INT NOT NULL, -- minutes

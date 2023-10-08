@@ -14,7 +14,7 @@ import useDeeperMemo from "./useDeeperMemo";
 const DEFAULT_MAX_DECIMAL_PLACES = 2;
 
 const useConvertUnits = () => {
-  const [globalState, setGlobalState] = useGlobalState();
+  const [globalState, dispatch] = useGlobalState();
   const deepMemoize = useDeeperMemo();
 
   const parseUnit = useCallback((unit: string) => {
@@ -24,19 +24,26 @@ const useConvertUnits = () => {
   }, []);
 
   const getPreferredOrDefaultUnit = useCallback(
-    (field: string, preferredUnitKey?: string) =>
-      (preferredUnitKey
-        ? globalState?.preferredUnits?.[preferredUnitKey]?.[field]
-        : globalState?.preferredUnits?.[field]) || unitDefaults[field]?.default,
+    (field: string, preferredUnitKey?: string) => {
+      return (
+        (preferredUnitKey
+          ? globalState?.preferredUnits?.[preferredUnitKey]?.[field]
+          : globalState?.preferredUnits?.[field]) ||
+        unitDefaults[field]?.default
+      );
+    },
     [globalState]
   );
 
+  //
   const createConvertFunction = useCallback(
-    (target: "canonical" | "preferred", preferredUnitParam?: string) =>
+    (target: "canonical" | "preferred", // whether to convert to canonical or preferred unit
+     preferredUnitParam?: string, // unit to convert to, if not preferred
+     ) =>
       (
-        field: string,
-        stringOrNumber: string | number,
-        preferredUnitKey?: string
+        field: string, // name of field, used to get preferred unit
+        stringOrNumber: string | number, // value to convert
+        preferredUnitKey?: string // key to get preferred unit from global state
       ) => {
         const value =
           (stringOrNumber ?? "") && (Number(stringOrNumber) as number | string);
@@ -45,8 +52,7 @@ const useConvertUnits = () => {
         const preferredUnit =
           preferredUnitParam ||
           getPreferredOrDefaultUnit(field, preferredUnitKey);
-        if (!field || !(stringOrNumber ?? false)) {
-          // (stringOrNumber ?? false) allows for stringOrNumber to be 0
+        if (!field || !(stringOrNumber === 0 || stringOrNumber)) {
           return {
             value,
             unit: canonicalTarget ? canonicalUnit : preferredUnit,
@@ -114,10 +120,14 @@ const useConvertUnits = () => {
     [parseUnit, getPreferredOrDefaultUnit]
   );
 
-  const convertToPreferredUnit = createConvertFunction("preferred");
+  //eslint-disable-next-line react-hooks/exhaustive-deps
+  const convertToPreferredUnit = useCallback(
+    createConvertFunction("preferred"),
+    [createConvertFunction]
+  );
 
   const getAltUnitSelections = useCallback(
-    (unit: string) => {
+    (unit: string, unitsToExclude: string[] = []) => {
       const [units] = parseUnit(unit);
       const safeUnits = units.map((unitPart) =>
         unitPart.toLowerCase() === "cal" ? "J" : unitPart
@@ -130,7 +140,7 @@ const useConvertUnits = () => {
           if (possibilities.includes("J") || safeUnits[index] === "J") {
             possibilities.push("cal");
           }
-          map[unit] = Array.from(new Set([unit, ...possibilities]));
+          map[unit] = Array.from(new Set([unit, ...possibilities.filter((x: string) => !unitsToExclude.includes(x))]));
           return map;
         },
         {}
@@ -142,53 +152,26 @@ const useConvertUnits = () => {
 
   const setPreferredUnit = useCallback(
     (field: string, unit: string, preferredUnitKey?: string) => {
-      setGlobalState((prevState: any) => {
-        let newState;
-        if (preferredUnitKey) {
-          newState = {
-            ...prevState,
-            preferredUnits: {
-              ...(prevState.preferredUnits || {}),
-              [preferredUnitKey]: {
-                ...(prevState.preferredUnits?.[preferredUnitKey] || {}),
-                [field]: unit,
-              },
-            },
-          };
-        } else {
-          newState = {
-            ...prevState,
-            preferredUnits: {
-              ...(prevState.preferredUnits || {}),
-              [field]: unit,
-            },
-          };
-        }
-        console.log("\n\nnewState:", newState);
-        console.log("\n");
-        return newState;
+      dispatch({
+        type: "SET_PREFERRED_UNIT",
+        payload: {
+          field,
+          unit,
+          preferredUnitKey,
+        },
       });
     },
-    [setGlobalState]
+    [dispatch]
   );
 
   const renameTempPreferredUnits = useCallback(
     (key?: string) => {
-      setGlobalState((prevState: any) => {
-        const newState = {
-          ...prevState,
-          preferredUnits: {
-            ...(prevState.preferredUnits || {}),
-          },
-        };
-        if (key) {
-          newState.preferredUnits[key] = prevState.preferredUnits?.temp;
-        }
-        newState.preferredUnits.temp && delete newState.preferredUnits.temp;
-        return newState;
+      dispatch({
+        type: "RENAME_TEMP_PREFERRED_UNITS",
+        payload: key,
       });
     },
-    [setGlobalState]
+    [dispatch]
   );
 
   const createColumn = useCallback(
@@ -218,10 +201,11 @@ const useConvertUnits = () => {
               value,
               preferredUnitKey
             );
-            const roundedValue = convertedValue
+            const roundedValue = typeof convertedValue === "number"
               ? Number(Number(convertedValue).toFixed(maxDecPlaces))
               : null;
-            return roundedValue && `${roundedValue} (${unit})`;
+            const output = roundedValue !== null ? `${roundedValue} (${unit})` : "";
+            return output;
           },
           ...columnOptions.options,
           ...options,
@@ -233,7 +217,10 @@ const useConvertUnits = () => {
 
   const generateColumnsFromInputs = useCallback(
     (inputList: FormInputOptions[]) => {
-      return inputList.map((input) => {
+      const filteredInputs = inputList.filter(
+        (input) => !input.excludeFromColumns
+      );
+      return filteredInputs.map((input) => {
         return input.type === "numberWithUnits"
           ? createColumn({
               name: input.name,
@@ -252,7 +239,10 @@ const useConvertUnits = () => {
     [createColumn]
   );
 
-  const memoizedPreferredUnits = deepMemoize(globalState?.preferredUnits, "preferredUnits");
+  const memoizedPreferredUnits = deepMemoize(
+    globalState?.preferredUnits,
+    "preferredUnits"
+  );
 
   return {
     parseUnit,

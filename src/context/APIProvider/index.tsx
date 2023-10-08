@@ -19,6 +19,7 @@ import {
   WaterData,
   YeastData,
   MiscData,
+  MashData,
 } from "../../types";
 import useDeeperMemo from "../../hooks/useDeeperMemo";
 
@@ -30,9 +31,9 @@ export type ReactQueryResult = UseQueryResult<any, any> & {
 };
 
 const APIProvider = ({ children }: { children: ChildProps }) => {
-  const { auth } = useAuth();
+  const { auth: [authState] } = useAuth();
   const deepMemoize = useDeeperMemo();
-  const currentBrewery = auth?.currentBrewery;
+  const currentBrewery = authState?.currentBrewery;
   const breweryPath = `${API_URL}/breweries/${currentBrewery}`;
   const [enabledQueries, setEnabledQueries] = useState(
     {} as Record<string, boolean>
@@ -70,16 +71,16 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
         url,
         method: "get",
         signal,
-      }).request();
+      }).dispatch();
     };
 
   const apiRequests: Record<string, ReactQueryResult> = {
     // API Requests
     users: {
       ...useQuery<UsersData, ErrorData>(
-        ["users", auth?.accessToken, auth?.user?.role], // a react-query queryKey is like the dependency array of a useEffect hook, a change in one of the elements will trigger a refetch
+        ["users", authState?.accessToken, authState?.user?.role], // a react-query queryKey is like the dependency array of a useEffect hook, a change in one of the elements will trigger a refetch
         apiRequest({
-          baseURL: auth?.user?.role === "admin" ? ADMIN_PATH : breweryPath,
+          baseURL: authState?.user?.role === "admin" ? ADMIN_PATH : breweryPath,
           url: "/users",
         }) as QueryFunction<UsersData, QueryKey>,
         {
@@ -87,13 +88,13 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
           enabled: Boolean(enabledQueries.users),
         }
       ),
-      enable: useCallback(toggleQueryFn("users", true), []),
-      disable: useCallback(toggleQueryFn("users", false), []),
+      enable: toggleQueryFn("users", true),
+      disable: toggleQueryFn("users", false),
     },
 
     breweries: {
       ...useQuery<BreweriesData, ErrorData>(
-        ["breweries", auth?.accessToken],
+        ["breweries", authState?.accessToken],
         apiRequest({
           url: "/breweries",
         }) as QueryFunction<BreweriesData, QueryKey>,
@@ -102,13 +103,13 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
           enabled: Boolean(enabledQueries.breweries),
         }
       ),
-      enable: useCallback(toggleQueryFn("breweries", true), []),
-      disable: useCallback(toggleQueryFn("breweries", false), []),
+      enable: toggleQueryFn("breweries", true),
+      disable: toggleQueryFn("breweries", false),
     },
 
     brewhouses: {
       ...useQuery<BrewhousesData, ErrorData>(
-        ["brewhouses", currentBrewery, auth?.accessToken],
+        ["brewhouses", currentBrewery, authState?.accessToken],
         apiRequest({
           baseURL: breweryPath,
           url: "/brewhouses",
@@ -118,13 +119,13 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
           enabled: Boolean(enabledQueries.brewhouses),
         }
       ),
-      enable: useCallback(toggleQueryFn("brewhouses", true), []),
-      disable: useCallback(toggleQueryFn("brewhouses", false), []),
+      enable: toggleQueryFn("brewhouses", true),
+      disable: toggleQueryFn("brewhouses", false),
     },
 
     fermentables: {
       ...useQuery<FermentableData, ErrorData>(
-        ["fermentables", currentBrewery, auth?.accessToken],
+        ["fermentables", currentBrewery, authState?.accessToken],
         apiRequest({
           baseURL: breweryPath,
           url: "fermentables",
@@ -134,13 +135,13 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
           enabled: Boolean(enabledQueries.fermentables),
         }
       ),
-      enable: useCallback(toggleQueryFn("fermentables", true), []),
-      disable: useCallback(toggleQueryFn("fermentables", false), []),
+      enable: toggleQueryFn("fermentables", true),
+      disable: toggleQueryFn("fermentables", false),
     },
 
     hops: {
       ...useQuery<HopData, ErrorData>(
-        ["hops", currentBrewery, auth?.accessToken],
+        ["hops", currentBrewery, authState?.accessToken],
         apiRequest({
           baseURL: breweryPath,
           url: "hops",
@@ -150,13 +151,29 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
           enabled: Boolean(enabledQueries.hops),
         }
       ),
-      enable: useCallback(toggleQueryFn("hops", true), []),
-      disable: useCallback(toggleQueryFn("hops", false), []),
+      enable: toggleQueryFn("hops", true),
+      disable: toggleQueryFn("hops", false),
+    },
+
+    mashes: {
+      ...useQuery<MashData, ErrorData>(
+        ["mashes", currentBrewery, authState?.accessToken],
+        apiRequest({
+          baseURL: breweryPath,
+          url: "mashes",
+        }) as QueryFunction<MashData, QueryKey>,
+        {
+          staleTime: 60 * 1000 * 10,
+          enabled: Boolean(enabledQueries.mashes),
+        }
+      ),
+      enable: toggleQueryFn("mashes", true),
+      disable: toggleQueryFn("mashes", false),
     },
 
     waters: {
       ...useQuery<WaterData, ErrorData>(
-        ["waters", currentBrewery, auth?.accessToken],
+        ["waters", currentBrewery, authState?.accessToken],
         apiRequest({
           baseURL: breweryPath,
           url: "waters",
@@ -166,13 +183,13 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
           enabled: Boolean(enabledQueries.waters),
         }
       ),
-      enable: useCallback(toggleQueryFn("waters", true), []),
-      disable: useCallback(toggleQueryFn("waters", false), []),
+      enable: toggleQueryFn("waters", true),
+      disable: toggleQueryFn("waters", false),
     },
 
     yeasts: {
       ...useQuery<YeastData, ErrorData>(
-        ["yeasts", currentBrewery, auth?.accessToken],
+        ["yeasts", currentBrewery, authState?.accessToken],
         apiRequest({
           baseURL: breweryPath,
           url: "yeasts",
@@ -182,13 +199,13 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
           enabled: Boolean(enabledQueries.yeasts),
         }
       ),
-      enable: useCallback(toggleQueryFn("yeasts", true), []),
-      disable: useCallback(toggleQueryFn("yeasts", false), []),
+      enable: toggleQueryFn("yeasts", true),
+      disable: toggleQueryFn("yeasts", false),
     },
 
     miscs: {
       ...useQuery<MiscData, ErrorData>(
-        ["miscs", currentBrewery, auth?.accessToken],
+        ["miscs", currentBrewery, authState?.accessToken],
         apiRequest({
           baseURL: breweryPath,
           url: "miscs",
@@ -198,8 +215,8 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
           enabled: Boolean(enabledQueries.miscs),
         }
       ),
-      enable: useCallback(toggleQueryFn("miscs", true), []),
-      disable: useCallback(toggleQueryFn("miscs", false), []),
+      enable: toggleQueryFn("miscs", true),
+      disable: toggleQueryFn("miscs", false),
     },
   };
 
@@ -209,18 +226,18 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
     // remove data for all active queries, without removing them from the cache or triggering a refetch
     await queryClient.setQueriesData({ type: "active" }, (): any => null);
     console.log("API cache reset");
-  }, []);
+  }, [queryClient]);
 
   const invalidateAll = useCallback(async () => {
     await queryClient.cancelQueries();
     console.log("invalidating all cached API queries");
     return queryClient.invalidateQueries({ refetchType: "none" });
-  }, []);
+  }, [queryClient]);
 
   const refetchAll = useCallback(async () => {
     console.log("refetching all API queries");
     return queryClient.refetchQueries();
-  }, []);
+  }, [queryClient]);
 
   const disableAll = useCallback(() => {
     setEnabledQueries({});

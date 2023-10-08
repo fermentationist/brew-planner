@@ -32,6 +32,7 @@ const TitleContainer = styled.div`
   justify-content: left;
   align-items: center;
   position: relative;
+  gap: 1em;
 `;
 
 const ToolbarContainer = styled.div`
@@ -65,10 +66,11 @@ const Title = styled.h1`
   justify-self: center;
   text-justify: center;
   font-size: 36px;
-  color:#F79420;
+  /* color:#F79420; */
+  color: gray;
   margin-left: 1em;
   @media screen and (max-width: 600px) {
-    font-size: 12px;
+    font-size: 16px;
   }
 `;
 
@@ -76,19 +78,12 @@ const Button = muiStyled(IconButton)`
   margin-left: 0.5em;
 `;
 
-const Header = ({ children }: ChildProps) => {
-  const [globalState, setGlobalState] = useGlobalState();
+const Header = ({ children }: {children: ChildProps}) => {
+  const [globalState, dispatch] = useGlobalState();
   const location = useLocation();
   const toggleMenu = () => {
-    console.log("toggleMenu!!")
-    console.log("setGlobalState:", setGlobalState);
-    console.log("globalState:", globalState);
-    setGlobalState({
-      ...globalState,
-      menu: {
-        ...globalState.menu,
-        isOpen: !globalState.menu?.isOpen
-      }
+    dispatch({
+      type: globalState.menu?.isOpen ? "CLOSE_MENU" : "OPEN_MENU"
     });
   };
   const pathnameToTitle = (pathname: string) => {
@@ -116,10 +111,9 @@ const Header = ({ children }: ChildProps) => {
               <MenuIcon />
             </Button>
           </Tooltip>
-          <Link to="/search">
+          {/* <Link to="/home">
             <HeaderLogo src={logo} alt="logo" />
-            {/* <BeerIcon size="lg"/> */}
-          </Link>
+          </Link> */}
           <Title>{pathnameToTitle(location?.pathname)}</Title>
         </TitleContainer>
         <ToolbarContainer>{children}</ToolbarContainer>

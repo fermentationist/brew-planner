@@ -53,9 +53,10 @@ CREATE TABLE IF NOT EXISTS fermentable_version (
 
 CREATE TABLE IF NOT EXISTS recipe_fermentable (
   fermentable_uuid BINARY (16) NOT NULL,
+  CONSTRAINT fk_recipe_fermentable_fermentable_uuid FOREIGN KEY (fermentable_uuid) REFERENCES fermentable(fermentable_uuid),
   version INT NOT NULL,
   recipe_uuid BINARY (16) NOT NULL,
-  CONSTRAINT fk_fermentable_recipe_uuid FOREIGN KEY (recipe_uuid) REFERENCES recipe(recipe_uuid),
+  CONSTRAINT fk_recipe_fermentable_recipe_uuid FOREIGN KEY (recipe_uuid) REFERENCES recipe(recipe_uuid),
   UNIQUE KEY (fermentable_uuid, version, recipe_uuid),
   amount DECIMAL (10, 3), -- weight in kilograms
   mash BOOLEAN DEFAULT 1, -- whether or not the fermentable will be mashed
