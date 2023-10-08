@@ -20,6 +20,20 @@ import EntityModal from "./EntityModal";
 import { Mode, APIError } from "../../types";
 import { FormInputOptions } from "../../components/FormModal";
 
+export interface EntityOptions {
+  entityName: string;
+  inputList: FormInputOptions[];
+  title?: string;
+  baseURL?: string;
+  pluralEntityName?: string;
+  pathName?: string;
+}
+
+export interface EntityPageProps extends EntityOptions {
+  startLoading?: () => void;
+  doneLoading?: () => void;
+}
+
 const capitalize = (str: string) => {
   return str[0].toUpperCase() + str.slice(1);
 }
@@ -34,8 +48,8 @@ function EntityPage<EntityType>({
   pluralEntityName,
   pathName,
 }: {
-  startLoading: () => void;
-  doneLoading: () => void;
+  startLoading?: () => void;
+  doneLoading?: () => void;
   entityName: string;
   inputList: FormInputOptions[];
   title?: string;
@@ -48,7 +62,7 @@ function EntityPage<EntityType>({
   const [mode, setMode]: [mode: Mode, setMode: Dispatch<SetStateAction<Mode>>] =
     useState("create" as Mode);
   const [columns, setColumns] = useState([]);
-  const [modalData, setModalData] = useState(null);
+  const [modalData, setModalData]: [modalData: EntityType, setModalData: Dispatch<SetStateAction<EntityType>>] = useState(null as EntityType);
   const modalStep = useRef(0);
   const [refreshNumber, setRefreshNumber] = useState(0);
   const { callAlert, alertError, alertErrorProm, resetAlertState } = useAlert();
@@ -76,7 +90,7 @@ function EntityPage<EntityType>({
   }, [refetch, refreshNumber, setRefreshNumber, setTableData, tableData]);
 
   const editEntity = useCallback((rowData: EntityType) => {
-    setModalData(rowData);
+    setModalData(rowData as EntityType);
     setMode("edit");
     setShowEntityModal(true);
   }, []);
@@ -135,7 +149,7 @@ function EntityPage<EntityType>({
         console.error(entitiesError);
         alertError(entitiesError);
       }
-      doneLoading();
+      doneLoading && doneLoading();
     }
   }, [
     entitiesData,
@@ -152,7 +166,7 @@ function EntityPage<EntityType>({
     editMode: boolean,
   ) => {
     if (editMode) {
-      const entityUuid = modalData[`${entityName}Uuid`];
+      const entityUuid = (modalData as Record<string, any>)[`${entityName}Uuid`];
       return `${
         pathName ?? pluralEntityName ?? entityName + "s"
       }/${entityUuid}`;
@@ -230,7 +244,7 @@ function EntityPage<EntityType>({
         return;
       }
     }
-    startLoading();
+    startLoading && startLoading();
     let count = 1;
     for (const uuid of entityUuidsToDelete) {
       console.log(`attempting to delete ${title || entityName}:`, uuid);
@@ -245,7 +259,7 @@ function EntityPage<EntityType>({
     }
     resetAlertState();
     refresh();
-    doneLoading();
+    doneLoading && doneLoading();
   };
 
   return (

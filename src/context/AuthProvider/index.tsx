@@ -137,6 +137,10 @@ const AuthProvider = ({ children }: { children: ChildProps }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetAuth, dispatch, authState.currentBrewery, validBreweryUuids, authState.accessToken]);
 
+  useEffect(() => {
+    console.log("authState in useEffect:", authState);
+  }, [authState]);
+
   const login = useCallback(async (email: string, password: string) => {
     console.log("login called.");
     const credentials: any = await signInWithEmailAndPassword(
@@ -154,7 +158,12 @@ const AuthProvider = ({ children }: { children: ChildProps }) => {
     };
     dispatch({ type: "OVERWRITE_AUTH_STATE", payload: newAuthState });
     setStorage("authState", newAuthState);
-    return credentials?.user?.accessToken || false;
+    const token = await credentials?.user?.accessToken;
+    if (token) {
+      window.location.reload();
+      return token;
+    }
+    return false;
   }, [authState, dispatch]);
 
   const logout = useCallback(async () => {

@@ -85,7 +85,7 @@ export const hopInputs = [
     tableOptions: {
       display: false,
     },
-    modalStep: 0,
+    modalStep: 1,
   },
   {
     name: "cohumulone",

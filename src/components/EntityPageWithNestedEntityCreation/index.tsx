@@ -4,7 +4,6 @@ import {
   Dispatch,
   SetStateAction,
   useCallback,
-  useRef,
 } from "react";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
@@ -16,61 +15,51 @@ import withLoadingSpinner from "../../hoc/withLoadingSpinner";
 import useAlert from "../../hooks/useAlert";
 import useConfirm from "../../hooks/useConfirm";
 import useConvertUnits from "../../hooks/useConvertUnits";
-import EntityModal from "./EntityModal";
+import EntityWithNestedEntityCreationModal from "./EntityWithNestedEntityCreationModal";
 import { Mode, APIError } from "../../types";
-import { FormInputOptions } from "../../components/FormModal";
+import { EntityOptions as _EntityOptions } from "../EntityPage";
+import { FormInputOptions } from "../FormModal";
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface EntityOptions extends _EntityOptions {}
+
+export interface SecondaryEntityOptions extends EntityOptions {
+  dependency: string;
+}
+
+export interface EntityPageWithNestedEntityCreationOptions {
+  primaryEntity: EntityOptions;
+  secondaryEntity: SecondaryEntityOptions;
+}
+
+export interface EntityPageWithNestedEntityCreationProps
+  extends EntityPageWithNestedEntityCreationOptions {
+  startLoading?: () => void;
+  doneLoading?: () => void;
+}
 
 const capitalize = (str: string) => {
   return str[0].toUpperCase() + str.slice(1);
 }
 
-function EntityPage<EntityType>({
+function EntityPageWithNestedEntityCreation<EntityType>({
+  primaryEntity,
+  secondaryEntity,
   startLoading,
   doneLoading,
-  entityName,
-  inputList = [],
-  title,
-  baseURL,
-  pluralEntityName,
-  numModalSteps = 1,
-  submitEachModalStep,
-  stepKeys = [],
-}: {
-  startLoading: () => void;
-  doneLoading: () => void;
-  entityName: string | string[];
-  inputList: FormInputOptions[];
-  title?: string | string[];
-  baseURL?: string;
-  pluralEntityName?: string | string[];
-  numModalSteps?: number;
-  submitEachModalStep?: boolean;
-  stepKeys?: string[];
-}) {
+}: EntityPageWithNestedEntityCreationProps) {
   const [tableData, setTableData] = useState([]);
   const [showEntityModal, setShowEntityModal] = useState(false);
   const [mode, setMode]: [mode: Mode, setMode: Dispatch<SetStateAction<Mode>>] =
     useState("create" as Mode);
   const [columns, setColumns] = useState([]);
   const [modalData, setModalData] = useState(null);
-  const modalStep = useRef(0);
-  const modalTitle = useRef(Array.isArray(title) ? title[0] : title ?? "");
-  const urlPath = useRef("");
+  const [isPrimaryStep, setIsPrimaryStep] = useState(true);
+  const [inputSteps, setInputSteps] = useState([primaryEntity.inputList, secondaryEntity.inputList] as FormInputOptions[][]);
+  const [primaryEntityUuid, setPrimaryEntityUuid] = useState("");
   const [refreshNumber, setRefreshNumber] = useState(0);
   const { callAlert, alertError, alertErrorProm, resetAlertState } = useAlert();
   const { confirmDelete, confirm } = useConfirm();
-
-  const getEntityNameString = useCallback((stepNum?: number) => {
-    return Array.isArray(entityName) ? entityName[stepNum ?? modalStep.current] : entityName;
-  }, [entityName]);
-
-  const getPluralEntityNameString = useCallback((stepNum?: number) => {
-    return Array.isArray(pluralEntityName) ? pluralEntityName[stepNum ?? modalStep.current] : pluralEntityName;
-  }, [pluralEntityName]);
-
-  const getTitleString = useCallback((stepNum?: number) => {
-    return Array.isArray(title) ? title[stepNum ?? modalStep.current] : title;
-  }, [title]);
 
   const {
     isLoading,
@@ -80,7 +69,7 @@ function EntityPage<EntityType>({
     refetch,
     APIRequest,
     breweryPath,
-  } = useAPI(getPluralEntityNameString(0) ?? `${getEntityNameString(0)}s`);
+  } = useAPI(primaryEntity.pluralEntityName ?? `${primaryEntity.entityName}s`);
   const { generateColumnsFromInputs, renameTempPreferredUnits } =
     useConvertUnits();
 
@@ -100,13 +89,11 @@ function EntityPage<EntityType>({
   }, []);
 
   useEffect(() => {
-    const generatedColumns = generateColumnsFromInputs(inputList);
+    const generatedColumns = generateColumnsFromInputs(primaryEntity.inputList);
     const cols = [
       {
-        label: `${
-          getEntityNameString(0)[0].toUpperCase() + getEntityNameString(0).slice(1)
-        } ID`,
-        name: `${getEntityNameString(0)}Uuid`,
+        label: `${capitalize(primaryEntity.entityName)} ID`,
+        name: `${primaryEntity.entityName}Uuid`,
         options: {
           ...columnOptions.options,
           display: false,
@@ -120,7 +107,7 @@ function EntityPage<EntityType>({
       {
         name: "",
         options: columnOptions.createRenderEditButtonOptions(
-          `edit ${getTitleString(0) || getEntityNameString(0)}`,
+          `edit ${primaryEntity.title ?? primaryEntity.entityName}`,
           editEntity
         ),
       },
@@ -129,12 +116,11 @@ function EntityPage<EntityType>({
     setColumns(cols);
   }, [
     generateColumnsFromInputs,
-    inputList,
+    primaryEntity.inputList,
     editEntity,
-    title,
+    primaryEntity.title,
     refreshNumber,
-    getEntityNameString,
-    getTitleString,
+    primaryEntity.entityName,
   ]);
 
   useEffect(() => {
@@ -144,7 +130,7 @@ function EntityPage<EntityType>({
     if (!isLoading) {
       if (entitiesData) {
         const dataWithNestedRowData = entitiesData.data?.[
-          getPluralEntityNameString(0) || `${getEntityNameString(0)}s`
+          primaryEntity.pluralEntityName || `${primaryEntity.entityName}s`
         ]?.map((row: EntityType & { data?: any }) => {
           const rowCopy = { ...row };
           rowCopy.data = { ...row };
@@ -165,62 +151,36 @@ function EntityPage<EntityType>({
     doneLoading,
     alertError,
     enableEntitiesQuery,
-    getEntityNameString,
-    getPluralEntityNameString,
+    primaryEntity.entityName,
+    primaryEntity.pluralEntityName,
   ]);
+
+  const getPrimaryPathName = () => {
+    return primaryEntity.pathName ?? primaryEntity.pluralEntityName ?? primaryEntity.entityName + "s";
+  }
 
   const getCreateOrUpdateUrl = (
     editMode: boolean,
-    stepNum: number,
-    formData: EntityType
+    isPrimary: boolean
   ) => {
-    let path;
-    const entityNameString = getEntityNameString(stepNum);
-    const pluralEntityNameString = getPluralEntityNameString(stepNum);
     if (editMode) {
-      const entityUuid =
-        stepKeys && stepKeys.length
-          ? modalData[stepKeys[stepNum]] ??
-            (formData as Record<string, any>)[stepKeys[stepNum]]
-          : modalData[`${entityNameString}Uuid`] ??
-            (formData as Record<string, any>)[`${entityNameString}Uuid`];
-      path = `${urlPath.current ? `${urlPath.current}/` : ""}${
-        pluralEntityNameString || entityNameString + "s"
+      const entityUuid = modalData[`${primaryEntity.entityName}Uuid`];
+      return `${
+        primaryEntity.pathName ?? primaryEntity.pluralEntityName ?? primaryEntity.entityName + "s"
       }/${entityUuid}`;
-      urlPath.current = path;
-      console.log("path a", path);
-      return path;
+    } 
+    if (isPrimary) {
+      return getPrimaryPathName();
     }
-    if (urlPath.current) {
-      console.log("url path", urlPath.current);
-      const prevEntityUuid =
-        stepKeys && stepKeys.length
-          ? (modalData && modalData[stepKeys[stepNum - 1]]) ??
-            (formData as Record<string, any>)[stepKeys[stepNum - 1]]
-          : (modalData && modalData[`${entityName[modalStep.current - 1]}Uuid`]) ??
-            (formData as Record<string, any>)[
-              `${entityName[modalStep.current - 1]}Uuid`
-            ];
-      path = `${urlPath.current}/${prevEntityUuid}/${
-        pluralEntityNameString ?? entityNameString + "s"
-      }`;
-      console.log("path b", path);
-      urlPath.current += path;
-      return path;
-    }
-    path = pluralEntityNameString ?? entityNameString + "s";
-    console.log("path c", path);
-    urlPath.current = path;
-    return path;
+    return `${getPrimaryPathName}/${primaryEntityUuid}/${secondaryEntity.pathName ?? secondaryEntity.pluralEntityName ?? secondaryEntity.entityName + "s"}`;
   };
 
-  const createOrUpdateEntity = async (formData: EntityType) => {
-    console.log("modalStep.current in createOrUpdateEntity", modalStep.current);
+  const createOrUpdateEntity = async (formData: EntityType, isPrimary: boolean) => {
     const editMode = mode === "edit";
     const reqBody = editMode ? formData : { ...formData };
-    const url = getCreateOrUpdateUrl(editMode, modalStep.current, formData);
+    const url = getCreateOrUpdateUrl(editMode, isPrimary);
     const apiReq = new APIRequest({
-      baseURL: baseURL || breweryPath,
+      baseURL: primaryEntity.baseURL || breweryPath,
       url,
       method: editMode ? "patch" : "post",
       data: reqBody,
@@ -238,13 +198,8 @@ function EntityPage<EntityType>({
       setShowEntityModal(false);
       return;
     }
-    if (modalStep.current === numModalSteps - 1) {
-      renameTempPreferredUnits(response?.data?.uuid);
-      setShowEntityModal(false);
-    }
-    modalStep.current += 1;
-    modalTitle.current = getTitleString(modalStep.current);
-    console.log("modalTitle.current:", modalTitle.current);
+    renameTempPreferredUnits(response?.data?.uuid);
+    setShowEntityModal(false);
     refresh();
     return response?.data?.uuid;
   };
@@ -257,8 +212,8 @@ function EntityPage<EntityType>({
 
   const deleteEntity = async (entityUuid: string) => {
     const deleteEntityRequest = new APIRequest({
-      baseURL: baseURL || breweryPath,
-      url: `/${getPluralEntityNameString(0) ?? getEntityNameString(0) + "s"}/${entityUuid}`,
+      baseURL: primaryEntity.baseURL || breweryPath,
+      url: `/${primaryEntity.pluralEntityName ?? primaryEntity.entityName + "s"}/${entityUuid}`,
       method: "delete",
     });
     return deleteEntityRequest.dispatch().catch(async (error: APIError) => {
@@ -269,14 +224,14 @@ function EntityPage<EntityType>({
   const deleteRows = async (rowsDeleted: any) => {
     const entityUuidsToDelete = rowsDeleted.data.map(
       (row: { index: number; dataIndex: number }) => {
-        return tableData[row.dataIndex][`${getEntityNameString(0)}Uuid`];
+        return tableData[row.dataIndex][`${primaryEntity.entityName}Uuid`];
       }
     );
     const qty = entityUuidsToDelete.length;
     const confirmResult = await confirmDelete(
       qty,
-      getTitleString(0) || getEntityNameString(0),
-      getPluralEntityNameString(0)
+      primaryEntity.title ?? primaryEntity.entityName,
+      primaryEntity.pluralEntityName ?? primaryEntity.entityName + "s"
     );
     if (!confirmResult) {
       return;
@@ -292,12 +247,10 @@ function EntityPage<EntityType>({
     startLoading();
     let count = 1;
     for (const uuid of entityUuidsToDelete) {
-      const entityNameString = getEntityNameString(0);
-      const mainTitle = getTitleString(0);
-      console.log(`attempting to delete ${mainTitle || entityNameString}:`, uuid);
+      console.log(`attempting to delete ${primaryEntity.title || primaryEntity.entityName}:`, uuid);
       callAlert({
         message: `Deleting ${count} of ${entityUuidsToDelete.length} ${
-          getPluralEntityNameString(0) ?? (mainTitle && mainTitle + "s") ?? entityNameString + "s"
+          primaryEntity.pluralEntityName ?? (primaryEntity.title && primaryEntity.title + "s") ?? primaryEntity.entityName + "s"
         }`,
         showCloseButton: false,
       });
@@ -309,9 +262,22 @@ function EntityPage<EntityType>({
     doneLoading();
   };
 
+  const askForNextStep = (currentStep: number) => {
+    //
+  }
+
+  const onIntermediateSubmit = async (formData: EntityType) => {
+    //
+    const uuid = await createOrUpdateEntity(formData, isPrimaryStep);
+    if (uuid && isPrimaryStep) {
+      setPrimaryEntityUuid(uuid);
+      setIsPrimaryStep(false);
+    }
+  };
+
   return (
     <Page>
-      <Tooltip title={`add ${getTitleString() || getEntityNameString()}`}>
+      <Tooltip title={`add ${primaryEntity.title ?? primaryEntity.entityName}`}>
         <IconButton onClick={addEntity}>
           <AddIcon />
         </IconButton>
@@ -327,24 +293,21 @@ function EntityPage<EntityType>({
         }}
       />
       {showEntityModal ? (
-        <EntityModal
+        <EntityWithNestedEntityCreationModal
           showModal={showEntityModal}
           closeModal={() => setShowEntityModal(false)}
           mode={mode}
           data={modalData}
-          onSubmit={createOrUpdateEntity}
-          inputList={inputList}
+          onSubmit={onIntermediateSubmit}
+          inputList={isPrimaryStep ? primaryEntity.inputList : secondaryEntity.inputList} 
           title={
-            capitalize(modalTitle.current ?? getEntityNameString())
+            capitalize(primaryEntity.title ?? primaryEntity.entityName)
           }
           refresh={refresh}
-          numSteps={numModalSteps}
-          submitEachStep={submitEachModalStep}
-          stepKeys={stepKeys}
         />
       ) : null}
     </Page>
   );
 }
 
-export default withLoadingSpinner(EntityPage);
+export default withLoadingSpinner(EntityPageWithNestedEntityCreation);

@@ -8,6 +8,7 @@ export const yeastInputs = [
     name: "name",
     label: "Name",
     type: "text",
+    modalStep: 0,
     validation: {...required, maxLength: 100},
     errorMessages: {...requiredMessage, maxLength: "Maximum length - 100 characters"},
     width: "250px",
@@ -16,6 +17,7 @@ export const yeastInputs = [
     name: "type",
     label: "Type",
     type: "select",
+    modalStep: 0,
     selectOptions: ["Ale", "Lager", "Wheat", "Wine", "Champagne", "Kveik"],
     selectRestricted: true,
     validation: required,
@@ -26,6 +28,7 @@ export const yeastInputs = [
     name: "laboratory",
     label: "Manufacturer",
     type: "text",
+    modalStep: 0,
     width: "250px",
     validation: {maxLength: 100},
     errorMessages: maxLengthErrorMessageFactory(100),
@@ -34,32 +37,16 @@ export const yeastInputs = [
     name: "productId",
     label: "Product ID",
     type: "text",
+    modalStep: 0,
     validation: {maxLength: 36},
     errorMessages: maxLengthErrorMessageFactory(36),
     width: "250px",
   },
   {
-    name: "minTemperature",
-    label: "Min temperature",
-    type: "fakeNumber",
-    width: "250px",
-    tableOptions: {
-      display: false,
-    },
-  },
-  {
-    name: "maxTemperature",
-    label: "Max temperature",
-    type: "fakeNumber",
-    width: "250px",
-    tableOptions: {
-      display: false,
-    },
-  },
-  {
     name: "flocculation",
     label: "Flocculation",
     type: "select",
+    modalStep: 0,
     selectOptions: ["Low", "Medium", "High", "Very High"],
     selectRestricted: true,
     width: "250px",
@@ -71,6 +58,7 @@ export const yeastInputs = [
     name: "attenuation",
     label: "Attenuation (%)",
     type: "fakeNumber",
+    modalStep: 0,
     width: "250px",
     validation: percentage,
     errorMessages: percentageMessage,
@@ -79,19 +67,30 @@ export const yeastInputs = [
     },
   },
   {
-    name: "notes",
-    label: "Notes",
-    type: "textarea",
-    width: "250px",
-    tableOptions: {
-      display: false,
-      ...columnOptions.createEllipsisOptions(10)
-    },
-  },
-  {
     name: "bestFor",
     label: "Styles",
     type: "text",
+    modalStep: 1,
+    width: "250px",
+    tableOptions: {
+      display: false,
+    },
+  },
+  {
+    name: "minTemperature",
+    label: "Min temperature",
+    type: "fakeNumber",
+    modalStep: 1,
+    width: "250px",
+    tableOptions: {
+      display: false,
+    },
+  },
+  {
+    name: "maxTemperature",
+    label: "Max temperature",
+    type: "fakeNumber",
+    modalStep: 1,
     width: "250px",
     tableOptions: {
       display: false,
@@ -101,7 +100,7 @@ export const yeastInputs = [
     name: "maxReuse",
     label: "Max repitches",
     type: "fakeNumber",
-    step: "1",
+    modalStep: 1,
     width: "250px",
     validation: {min: 0},
     errorMessages: {min: "Please enter a positive integer"},
@@ -109,6 +108,17 @@ export const yeastInputs = [
       display: false,
     },
     integerOnly: true,
+  },
+  {
+    name: "notes",
+    label: "Notes",
+    type: "textarea",
+    modalStep: 1,
+    width: "250px",
+    tableOptions: {
+      display: false,
+      ...columnOptions.createEllipsisOptions(10)
+    },
   },
   
 ];

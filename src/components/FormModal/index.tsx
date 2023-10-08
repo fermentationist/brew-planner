@@ -1,4 +1,4 @@
-import { useState, useCallback, memo, useEffect } from "react";
+import { useState, useCallback, memo, FormEvent } from "react";
 import CustomDialog from "../CustomDialog";
 import ReactHookForm, {
   FormInputOptions as InputOptions,
@@ -54,24 +54,16 @@ const FormModal = ({
     return Object.values(pages);
   };
 
-  useEffect(() => {
-    console.log("formOutput:", formOutput);
-  }, [formOutput]);
-
-  const [inputPages] = useState(divideIntoPages(inputs));
+  const [inputPages, setInputPages] = useState(divideIntoPages(inputs));
 
   const finalSubmitWrapper = (onSubmitFn: (val: any) => any) => {
     return (formData: any) => {
-      console.log("formData in finalSubmit:", formData);
       setButtonLoadingState(true);
       try {
-        console.log("formOutput:", formOutput);
-        console.log("formData:", formData);
         const output = { 
           ...formData,
           ...formOutput,
         };
-        console.log("output:", output);
         return onSubmitFn(output);
       } catch (error) {
         console.error(error);
@@ -83,14 +75,58 @@ const FormModal = ({
     };
   };
 
+  const updateDefaultValues = (formData: any) => {
+    const updatedInputs = [...inputs].map((input) => {
+      if (input.name && formData[input.name]) {
+        return {
+          ...input,
+          defaultValue: formData[input.name],
+        };
+      }
+      return input;
+    });
+    setInputPages(divideIntoPages(updatedInputs));
+  }
+
+  const onBack = (formData: any) => {
+    const merged = { ...formOutput, ...formData }
+    // update form output with data from current step
+    setFormOutput(merged);
+    // update default values, so that if the user goes back on multi-step form, the values are still there
+    updateDefaultValues(merged);
+    setModalStep(modalStep - 1);
+  }
+
   const onNext = (formData: any) => {
-    console.log("formData in onNext:", formData);
-    setFormOutput({ ...formOutput, ...formData });
+    const merged = { ...formOutput, ...formData }
+    // update form output with data from current step
+    setFormOutput(merged);
+    // update default values, so that if the user goes back on multi-step form, the values are still there
+    updateDefaultValues(merged);
+    // go to next step
     setModalStep(modalStep + 1);
   };
 
-  const formSubmitFn =
-    modalStep === inputPages.length - 1 ? finalSubmitWrapper(onSubmit) : onNext;
+  // const formSubmitFn =
+  //   modalStep === inputPages.length - 1 ? finalSubmitWrapper(onSubmit) : onNext;
+
+  const formSubmitFn = (formData: any, event: FormEvent) => {
+    console.log("submitter: ", (event.nativeEvent as SubmitEvent).submitter);
+    const action = (event.nativeEvent as SubmitEvent).submitter?.dataset?.action;
+    switch (action) {
+      case "back":
+        onBack(formData);
+        break;
+      case "next":
+        onNext(formData);
+        break;
+      case "submit":
+        finalSubmitWrapper(onSubmit)(formData);
+        break;
+      default:
+        break;
+    }
+  }
 
   const form = inputPages.length ? (
     <>
@@ -105,7 +141,8 @@ const FormModal = ({
           <Button
             form={`${formId}-${modalStep}`}
             variant="contained"
-            onClick={() => setModalStep(modalStep - 1)}
+            type="submit"
+            data-action="back"
           >
             Back
           </Button>
@@ -116,6 +153,7 @@ const FormModal = ({
           type="submit"
           form={`${formId}-${modalStep}`}
           variant="contained"
+          data-action="next"
         >
           Next
         </Button>
@@ -125,6 +163,7 @@ const FormModal = ({
           form={`${formId}-${modalStep}`}
           variant="contained"
           loading={buttonLoadingState}
+          data-action="submit"
         >
           Save
         </LoadingButton>

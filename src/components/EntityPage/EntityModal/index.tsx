@@ -24,7 +24,7 @@ const EntityModal = ({
   // add defaultValues from existing data (present if in "edit" mode)
   const formInputs: FormInputOptions[] = inputList.map((input) => {
     const inputCopy = { ...input } as FormInputOptions;
-    if (inputCopy.modalStep === 0) {
+    // if (inputCopy.modalStep === 0) {
       inputCopy.defaultValue = data?.[input.name] ?? inputCopy.defaultValue;
       if (Object.hasOwnProperty.call(inputCopy, "defaultChecked")) {
         inputCopy.defaultChecked =
@@ -34,12 +34,14 @@ const EntityModal = ({
         inputCopy.preferredUnitKey =
           data?.[inputCopy.preferredUnitKeyField] || "temp";
       }
-    } else {
-      inputCopy.preferredUnitKey = "temp"
-    }
+    // } else {
+    //   inputCopy.preferredUnitKey = "temp"
+    // }
     delete inputCopy.tableOptions;
     return inputCopy;
   });
+
+  console.log("formInputs", formInputs);
   
   const refreshOnClose = () => {
     refresh && refresh();

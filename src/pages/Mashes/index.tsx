@@ -1,7 +1,7 @@
-import entityPageFactory from "../../componentFactories/entityPageFactory";
+import entityPageWithNestedEntityCreationFactory from "../../componentFactories/entityPageWithNestedEntityCreationFactory";
 import { MashData } from "../../types";
 import { columnOptions } from "../../components/DataTable";
-import {required, requiredMessage} from "../../utils/validationHelpers";
+import { required, requiredMessage } from "../../utils/validationHelpers";
 
 /*
   mashUuid: string;
@@ -17,11 +17,11 @@ import {required, requiredMessage} from "../../utils/validationHelpers";
   equipAdjust?: boolean;
   */
 
- export const MASH_STEP_TYPES = [
-  "Infusion",
-  "Temperature",
-  "Decoction"
-];
+export const MASH_STEP_TYPES = ["Infusion", "Temperature", "Decoction"];
+
+const displayFalse = {
+  display: false,
+};
 
 export const mashInputs = [
   {
@@ -42,72 +42,78 @@ export const mashInputs = [
   {
     name: "grainTemp",
     label: "Grain temp",
-    modalStep: 0,
     type: "numberWithUnits",
+    modalStep: 0,
+    tableOptions: displayFalse,
     convertOnUnitChange: true,
     preferredUnitKeyField: "mashUuid",
-    validation: {min: 0},
-    errorMessages: {min: "Please enter a positive number"},
+    validation: { min: 0 },
+    errorMessages: { min: "Please enter a positive number" },
     width: "250px",
   },
   {
     name: "tunTemp",
     label: "Tun temp",
-    modalStep: 0,
     type: "numberWithUnits",
+    modalStep: 0,
+    tableOptions: displayFalse,
     convertOnUnitChange: true,
     preferredUnitKeyField: "mashUuid",
-    validation: {min: 0},
-    errorMessages: {min: "Please enter a positive number"},
+    validation: { min: 0 },
+    errorMessages: { min: "Please enter a positive number" },
     width: "250px",
   },
   {
     name: "spargeTemp",
     label: "Sparge temp",
-    modalStep: 0,
     type: "numberWithUnits",
+    modalStep: 0,
+    tableOptions: displayFalse,
     convertOnUnitChange: true,
     preferredUnitKeyField: "mashUuid",
-    validation: {min: 0},
-    errorMessages: {min: "Please enter a positive number"},
+    validation: { min: 0 },
+    errorMessages: { min: "Please enter a positive number" },
     width: "250px",
   },
   {
     name: "ph",
     label: "ph",
-    modalStep: 0,
     type: "fakeNumber",
-    validation: {min: 0},
-    errorMessages: {min: "Please enter a positive number"},
+    modalStep: 0,
+    tableOptions: displayFalse,
+    validation: { min: 0 },
+    errorMessages: { min: "Please enter a positive number" },
     width: "250px",
   },
   {
     name: "tunWeight",
     label: "Tun weight",
-    modalStep: 0,
     type: "numberWithUnits",
+    modalStep: 1,
+    tableOptions: displayFalse,
     convertOnUnitChange: true,
     preferredUnitKeyField: "mashUuid",
-    validation: {min: 0},
-    errorMessages: {min: "Please enter a positive number"},
+    validation: { min: 0 },
+    errorMessages: { min: "Please enter a positive number" },
     width: "250px",
   },
   {
     name: "tunSpecificHeat",
     label: "Tun specific heat",
-    modalStep: 0,
     type: "numberWithUnits",
+    modalStep: 1,
+    tableOptions: displayFalse,
     convertOnUnitChange: true,
     preferredUnitKeyField: "mashUuid",
-    validation: {min: 0},
-    errorMessages: {min: "Please enter a positive number"},
+    validation: { min: 0 },
+    errorMessages: { min: "Please enter a positive number" },
     width: "250px",
   },
   {
     name: "equipAdjust",
     label: "Equipment adjustment",
-    modalStep: 0,
     type: "switch",
+    modalStep: 1,
     defaultChecked: false,
     tableOptions: columnOptions.booleanOptions,
     width: "250px",
@@ -115,8 +121,8 @@ export const mashInputs = [
   {
     name: "notes",
     label: "Notes",
-    modalStep: 0,
     type: "textarea",
+    modalStep: 1,
     tableOptions: columnOptions.createEllipsisOptions(10),
     width: "250px",
   },
@@ -227,27 +233,28 @@ export const mashStepInputs = [
     convertOnUnitChange: true,
     preferredUnitKeyField: "mashUuid",
     allowNegative: false,
-  }
-];
-
-const mainStep = {
-  displayName: "Mash",
-  pluralDisplayName: "Mashes",
-  routeName: "mashes",
-  entityKey: "mashUuid",
-  inputList: mashInputs,
-}
-const dependentSteps = [
-  {
-    displayName: "Mash step",
-    pluralDisplayName: "Mash steps",
-    routeName: "mash_steps",
-    entityKey: "mashStepUuid",
-    dependency: "mashUuid",
-    inputList: mashStepInputs,
   },
 ];
 
-const Mashes = entityPageFactory<MashData>({entityName: ["mash", "mash_step"], pluralEntityName: ["mashes", "mash_steps"], inputList: mashInputs, numModalSteps: 2, submitEachModalStep: true, stepKeys: ["mashUuid"], title: ["Mash", "Mash step"]});
+const primaryEntity = {
+  entityName: "mash",
+  pluralEntityName: "mashes",
+  routeName: "mashes",
+  entityKey: "mashUuid",
+  inputList: mashInputs,
+};
+const secondaryEntity = {
+  entityName: "mashStep",
+  pluralEntityName: "mashSteps",
+  routeName: "mash_steps",
+  entityKey: "mashStepUuid",
+  dependency: "mashUuid",
+  inputList: mashStepInputs,
+};
+
+const Mashes = entityPageWithNestedEntityCreationFactory<MashData>({
+  primaryEntity,
+  secondaryEntity,
+});
 
 export default Mashes;

@@ -99,7 +99,6 @@ const Form = function (props: FormProps) {
     }, {});
   };
 
-  // const defaultValues = getDefaultValues(props.inputs, true);
   const [defaultValues, setDefaultValues] = useState(getDefaultValues(props.inputs, true));
   const callbackValuesRef = useRef(getDefaultValues(props.inputs));
   console.log("callbackValuesRef.current in ReactHookForm:", callbackValuesRef.current);
@@ -109,16 +108,11 @@ const Form = function (props: FormProps) {
     formState,
     setValue: setInputValue,
     trigger: triggerFormValidation,
-    reset,
   } = useForm({ defaultValues });
 
   useEffect(() => {
-    // reset({
-    //   keepDefaultValues: true,
-    //   keepValues: true,
-    //   keepDirty: true,
-    // });
-    setDefaultValues(getDefaultValues(props.inputs, true));
+    const values = getDefaultValues(props.inputs, true);
+    setDefaultValues(values);
     callbackValuesRef.current = getDefaultValues(props.inputs);
   }, [props.inputs]);
 
@@ -136,9 +130,7 @@ const Form = function (props: FormProps) {
         ...callbackValuesRef.current,
         [inputName]: transformedValue,
       };
-      console.log("newValues", newValues);
       callbackValuesRef.current = newValues;
-      console.log("callbackValuesRef.current in ReactHookForm:callbackWrapper:", callbackValuesRef.current)
       return cb(transformedValue);
     };
   };
@@ -147,11 +139,19 @@ const Form = function (props: FormProps) {
     onSubmitFn: (val: any, event?: FormEvent) => any
   ) => {
     return (event: FormEvent, partialFormData: any) => {
+      console.log("partialFormData in onSubmitWrapper:", partialFormData);
+      const currentInputNames = props.inputs.map((input) => input.name);
+      // remove any keys from partialFormData that are not in currentInputNames
+      const filteredFormData = Object.entries(partialFormData).reduce((map, [key, value]) => {
+        if (currentInputNames.includes(key)) {
+          map[key] = value;
+        }
+        return map;
+      }, {} as Record<string, any>);
       const formData = {
-        ...partialFormData,
+        ...filteredFormData,
         ...callbackValuesRef.current,
       };
-      console.log("callbackValuesRef.current in ReactHookForm:onSubmitWrapper:", callbackValuesRef.current);
       return onSubmitFn(formData, event);
     };
   };
@@ -275,7 +275,7 @@ const Form = function (props: FormProps) {
           const inputProps = getProps(input);
           const { ref, onChange, onBlur } = register(
             input.name,
-            input.validation
+            input.validation,
           );
           const allProps = {
             ...inputProps,
@@ -306,7 +306,7 @@ const Form = function (props: FormProps) {
                     ...(input.componentProps || {}),
                   } as ComponentPropsWithoutRef<any>)
                 : createElement<any>(
-                    COMPONENT_TYPES[input.type] || CustomTextField,
+                    (input.type && COMPONENT_TYPES[input.type]) ?? CustomTextField,
                     allProps as ComponentPropsWithoutRef<any>
                   )}
               <FormError
