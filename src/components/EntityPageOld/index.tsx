@@ -1,11 +1,4 @@
-import {
-  useState,
-  useEffect,
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useRef,
-} from "react";
+import { useState, useEffect, Dispatch, SetStateAction, useCallback } from "react";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import AddIcon from "@mui/icons-material/AddCircle";
@@ -15,29 +8,11 @@ import Page from "../../components/Page";
 import withLoadingSpinner from "../../hoc/withLoadingSpinner";
 import useAlert from "../../hooks/useAlert";
 import useConfirm from "../../hooks/useConfirm";
+import useAuth from "../../hooks/useAuth";
 import useConvertUnits from "../../hooks/useConvertUnits";
 import EntityModal from "./EntityModal";
 import { Mode, APIError } from "../../types";
 import { FormInputOptions } from "../../components/FormModal";
-
-export interface EntityOptions {
-  entityName: string;
-  inputList: FormInputOptions[];
-  pluralEntityName?: string;
-  title?: string;
-  pluralTitle?: string;
-  baseURL?: string;
-  pathName?: string;
-}
-
-export interface EntityPageProps extends EntityOptions {
-  startLoading?: () => void;
-  doneLoading?: () => void;
-}
-
-const capitalize = (str: string) => {
-  return str[0].toUpperCase() + str.slice(1);
-}
 
 function EntityPage<EntityType>({
   startLoading,
@@ -47,28 +22,25 @@ function EntityPage<EntityType>({
   title,
   baseURL,
   pluralEntityName,
-  pathName,
 }: {
-  startLoading?: () => void;
-  doneLoading?: () => void;
+  startLoading: () => void;
+  doneLoading: () => void;
   entityName: string;
   inputList: FormInputOptions[];
   title?: string;
   baseURL?: string;
   pluralEntityName?: string;
-  pathName?: string;
 }) {
   const [tableData, setTableData] = useState([]);
   const [showEntityModal, setShowEntityModal] = useState(false);
   const [mode, setMode]: [mode: Mode, setMode: Dispatch<SetStateAction<Mode>>] =
     useState("create" as Mode);
   const [columns, setColumns] = useState([]);
-  const [modalData, setModalData]: [modalData: EntityType, setModalData: Dispatch<SetStateAction<EntityType>>] = useState(null as EntityType);
-  const modalStep = useRef(0);
+  const [modalData, setModalData] = useState(null);
   const [refreshNumber, setRefreshNumber] = useState(0);
   const { callAlert, alertError, alertErrorProm, resetAlertState } = useAlert();
+  const { auth: [authState] } = useAuth();
   const { confirmDelete, confirm } = useConfirm();
-
   const {
     isLoading,
     enable: enableEntitiesQuery,
@@ -77,9 +49,8 @@ function EntityPage<EntityType>({
     refetch,
     APIRequest,
     breweryPath,
-  } = useAPI(pluralEntityName ?? `${entityName}s`);
-  const { generateColumnsFromInputs, renameTempPreferredUnits } =
-    useConvertUnits();
+  } = useAPI(pluralEntityName || `${entityName}s`);
+  const { generateColumnsFromInputs, renameTempPreferredUnits } = useConvertUnits();
 
   const refresh = useCallback(() => {
     // causes the table to re-render (in case the data is the same)
@@ -91,7 +62,7 @@ function EntityPage<EntityType>({
   }, [refetch, refreshNumber, setRefreshNumber, setTableData, tableData]);
 
   const editEntity = useCallback((rowData: EntityType) => {
-    setModalData(rowData as EntityType);
+    setModalData(rowData);
     setMode("edit");
     setShowEntityModal(true);
   }, []);
@@ -99,36 +70,36 @@ function EntityPage<EntityType>({
   useEffect(() => {
     const generatedColumns = generateColumnsFromInputs(inputList);
     const cols = [
-      {
-        label: `${capitalize(entityName)} ID`,
-        name: `${entityName}Uuid`,
-        options: {
-          ...columnOptions.options,
-          display: false,
-        },
+    {
+      label: `${entityName[0].toUpperCase() + entityName.slice(1)} ID`,
+      name: `${entityName}Uuid`,
+      options: {
+        ...columnOptions.options,
+        display: false,
       },
-      ...generatedColumns,
-      {
-        name: "data",
-        options: columnOptions.rowDataOptions,
-      },
-      {
-        name: "",
-        options: columnOptions.createRenderEditButtonOptions(
-          `edit ${title ?? entityName}`,
-          editEntity
-        ),
-      },
-    ];
-
-    setColumns(cols);
+    },
+    ...generatedColumns,
+    {
+      name: "data",
+      options: columnOptions.rowDataOptions,
+    },
+    {
+      name: "",
+      options: columnOptions.createRenderEditButtonOptions(
+        `edit ${title || entityName}`,
+        editEntity
+      ),
+    },
+  ];
+  
+  setColumns(cols);
   }, [
-    generateColumnsFromInputs,
-    inputList,
-    editEntity,
+    generateColumnsFromInputs, 
+    inputList, 
+    editEntity, 
+    entityName, 
     title,
-    refreshNumber,
-    entityName,
+    refreshNumber
   ]);
 
   useEffect(() => {
@@ -144,13 +115,13 @@ function EntityPage<EntityType>({
           rowCopy.data = { ...row };
           return rowCopy;
         });
-        setTableData(dataWithNestedRowData ?? []);
+        setTableData(dataWithNestedRowData);
       }
       if (entitiesError) {
         console.error(entitiesError);
         alertError(entitiesError);
       }
-      doneLoading && doneLoading();
+      doneLoading();
     }
   }, [
     entitiesData,
@@ -160,49 +131,29 @@ function EntityPage<EntityType>({
     alertError,
     enableEntitiesQuery,
     entityName,
-    pluralEntityName,
+    pluralEntityName
   ]);
 
-  const getCreateOrUpdateUrl = (
-    editMode: boolean,
-  ) => {
-    if (editMode) {
-      const entityUuid = (modalData as Record<string, any>)[`${entityName}Uuid`];
-      return `${
-        pathName ?? pluralEntityName ?? entityName + "s"
-      }/${entityUuid}`;
-    } 
-    return pathName ?? pluralEntityName ?? entityName + "s";
-  };
-
   const createOrUpdateEntity = async (formData: EntityType) => {
-    console.log("modalStep.current in createOrUpdateEntity", modalStep.current);
     const editMode = mode === "edit";
-    const reqBody = editMode ? formData : { ...formData };
-    const url = getCreateOrUpdateUrl(editMode);
+    const reqBody = editMode
+      ? formData
+      : { ...formData, createdBy: authState?.user?.uid };
+    const url = editMode
+      ? `/${pluralEntityName || entityName + "s"}/` + modalData[`${entityName}Uuid`]
+      : `/${pluralEntityName || entityName + "s"}`;
     const apiReq = new APIRequest({
       baseURL: baseURL || breweryPath,
       url,
       method: editMode ? "patch" : "post",
       data: reqBody,
     });
-    const response = await apiReq
-      .dispatch()
-      .catch(async (error: APIError) => {
-        await alertErrorProm(error);
-      })
-      .catch(async (error: APIError) => {
-        console.error(error);
-        await alertErrorProm(error);
-      });
-    if (!response) {
-      setShowEntityModal(false);
-      return;
-    }
+    const response = await apiReq.dispatch().catch(async (error: APIError) => {
+      await alertErrorProm(error);
+    });
     renameTempPreferredUnits(response?.data?.uuid);
-    setShowEntityModal(false);
     refresh();
-    return response?.data?.uuid;
+    setShowEntityModal(false);
   };
 
   const addEntity = () => {
@@ -214,7 +165,7 @@ function EntityPage<EntityType>({
   const deleteEntity = async (entityUuid: string) => {
     const deleteEntityRequest = new APIRequest({
       baseURL: baseURL || breweryPath,
-      url: `/${pluralEntityName ?? entityName + "s"}/${entityUuid}`,
+      url: `/${pluralEntityName || entityName + "s"}/${entityUuid}`,
       method: "delete",
     });
     return deleteEntityRequest.dispatch().catch(async (error: APIError) => {
@@ -229,11 +180,7 @@ function EntityPage<EntityType>({
       }
     );
     const qty = entityUuidsToDelete.length;
-    const confirmResult = await confirmDelete(
-      qty,
-      title ?? entityName,
-      pluralEntityName ?? entityName + "s"
-    );
+    const confirmResult = await confirmDelete(qty, title || entityName, pluralEntityName);
     if (!confirmResult) {
       return;
     }
@@ -245,13 +192,13 @@ function EntityPage<EntityType>({
         return;
       }
     }
-    startLoading && startLoading();
+    startLoading();
     let count = 1;
     for (const uuid of entityUuidsToDelete) {
       console.log(`attempting to delete ${title || entityName}:`, uuid);
       callAlert({
         message: `Deleting ${count} of ${entityUuidsToDelete.length} ${
-          pluralEntityName ?? (title && title + "s") ?? entityName + "s"
+          pluralEntityName || title + "s" || entityName + "s"
         }`,
         showCloseButton: false,
       });
@@ -260,12 +207,12 @@ function EntityPage<EntityType>({
     }
     resetAlertState();
     refresh();
-    doneLoading && doneLoading();
+    doneLoading();
   };
-
+  
   return (
     <Page>
-      <Tooltip title={`add ${title ?? entityName}`}>
+      <Tooltip title={`add ${title || entityName}`}>
         <IconButton onClick={addEntity}>
           <AddIcon />
         </IconButton>
@@ -289,7 +236,8 @@ function EntityPage<EntityType>({
           onSubmit={createOrUpdateEntity}
           inputList={inputList}
           title={
-            capitalize(title ?? entityName)
+            (title || entityName)[0].toUpperCase() +
+            (title || entityName).slice(1)
           }
           refresh={refresh}
         />

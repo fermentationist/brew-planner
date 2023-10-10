@@ -16,9 +16,27 @@ export interface CustomDialogProps {
   children?: ChildProps;
 }
 
+const StyledDialog = muiStyled(Dialog)`
+  padding: 0.5em;
+  // min-width: 10vw;
+  @media screen and (max-width: 600px) {
+    min-width: 95vw;
+  }
+  div[role="dialog"] {
+    // display: none;
+    container-type: inline-size;
+    @media screen and (max-width: 600px) {
+      min-width: 90vw;
+
+    }
+  }
+`;
+
 const StyledContent = muiStyled(DialogContent)`
   padding-top: 1em !important;
   margin-top: 1em;
+  max-width: 93cqi;
+  container-type: inline-size;
 `;
 
 const CustomDialog = ({
@@ -33,12 +51,13 @@ const CustomDialog = ({
   return (
     <>
       {showDialog ? (
-        <Dialog
+        <StyledDialog
           open={showDialog}
           onClose={closeDialog}
+          className={`custom-dialog${className ? ` ${className}` : ""}`}
         >
           {title ? <DialogTitle>{title}</DialogTitle> : null}
-          <StyledContent className={className}>{children}</StyledContent>
+          <StyledContent className={`custom-dialog-content${className ? ` ${className}` : ""}`}>{children}</StyledContent>
           {confirm ? (
             <DialogActions>
               <Button
@@ -54,7 +73,7 @@ const CustomDialog = ({
               </Button>
             </DialogActions>
           ) : null}
-        </Dialog>
+        </StyledDialog>
       ) : null}
     </>
   );

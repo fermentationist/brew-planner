@@ -44,6 +44,7 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
   type ErrorData = { error: APIError; status: string };
   type BreweriesData = { data: BreweryData[]; status: string };
   type BrewhousesData = { data: BrewhouseData[]; status: string };
+  type MashesData = { data: MashData[]; status: string };
 
   const toggleQueryFn = useCallback(
     (queryName: string, boolean: boolean) => () =>
@@ -156,12 +157,12 @@ const APIProvider = ({ children }: { children: ChildProps }) => {
     },
 
     mashes: {
-      ...useQuery<MashData, ErrorData>(
+      ...useQuery<MashesData, ErrorData>(
         ["mashes", currentBrewery, authState?.accessToken],
         apiRequest({
           baseURL: breweryPath,
           url: "mashes",
-        }) as QueryFunction<MashData, QueryKey>,
+        }) as QueryFunction<MashesData, QueryKey>,
         {
           staleTime: 60 * 1000 * 10,
           enabled: Boolean(enabledQueries.mashes),

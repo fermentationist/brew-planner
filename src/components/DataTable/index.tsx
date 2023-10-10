@@ -10,11 +10,13 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import TrueIcon from "@mui/icons-material/Check";
 import FalseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
+import ListIcon from "@mui/icons-material/List";
 import Tooltip from "@mui/material/Tooltip";
 import DatePopper from "../DatePopper";
 import TextEllipsis from "../TextEllipsis";
-import { memo } from "react";
+import { memo, ReactNode } from "react";
 import { deepEquals } from "../../utils/helpers";
+import { create } from "@mui/material/styles/createTransitions";
 
 let cols: any[] = [];
 
@@ -246,23 +248,47 @@ export const columnOptions = ((): Record<string, any> => {
     sort: false,
   };
 
-  const createRenderEditButtonOptions = (
-    tooltipText: string,
-    callback: (rowData: any) => void
-  ) => {
-    return {
-      customBodyRender: (value: any, meta: MUIDataTableMeta) => {
-        return (
-          <Tooltip title={tooltipText}>
-            <IconButton onClick={callback.bind(null, getRowData(meta.rowData))}>
-              <EditIcon />
-            </IconButton>
-          </Tooltip>
-        );
-      },
-      ...actionOptions,
+  // const createRenderEditButtonOptions = (
+  //   tooltipText: string,
+  //   callback: (rowData: any) => void
+  // ) => {
+  //   return {
+  //     customBodyRender: (value: any, meta: MUIDataTableMeta) => {
+  //       return (
+  //         <Tooltip title={tooltipText}>
+  //           <IconButton onClick={callback.bind(null, getRowData(meta.rowData))}>
+  //             <EditIcon />
+  //           </IconButton>
+  //         </Tooltip>
+  //       );
+  //     },
+  //     ...actionOptions,
+  //   };
+  // };
+
+  const createRenderButtonColumnOptionsFactory =
+    (iconComponent: ReactNode) =>
+    (tooltipText: string, callback: (rowData: any) => void) => {
+      return {
+        customBodyRender: (value: any, meta: MUIDataTableMeta) => {
+          return (
+            <Tooltip title={tooltipText}>
+              <IconButton
+                onClick={callback.bind(null, getRowData(meta.rowData))}
+              >
+                {iconComponent}
+              </IconButton>
+            </Tooltip>
+          );
+        },
+        ...actionOptions,
+      };
     };
-  };
+
+  const createRenderEditButtonOptions =
+    createRenderButtonColumnOptionsFactory(<EditIcon />);
+
+  const createRenderChildEntitiesButtonOptions = createRenderButtonColumnOptionsFactory(<ListIcon />);
 
   return {
     options,
@@ -273,5 +299,6 @@ export const columnOptions = ((): Record<string, any> => {
     rowDataOptions,
     createEllipsisOptions,
     createRenderEditButtonOptions,
+    createRenderChildEntitiesButtonOptions,
   };
 })();

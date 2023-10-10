@@ -111,7 +111,6 @@ const FormModal = ({
   //   modalStep === inputPages.length - 1 ? finalSubmitWrapper(onSubmit) : onNext;
 
   const formSubmitFn = (formData: any, event: FormEvent) => {
-    console.log("submitter: ", (event.nativeEvent as SubmitEvent).submitter);
     const action = (event.nativeEvent as SubmitEvent).submitter?.dataset?.action;
     switch (action) {
       case "back":

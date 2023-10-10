@@ -134,7 +134,6 @@ export const mashStepInputs = [
     label: "Name",
     modalStep: 1,
     type: "text",
-    excludeFromColumns: true,
     validation: {
       ...required,
       maxLength: 100,
@@ -150,7 +149,6 @@ export const mashStepInputs = [
     label: "Type",
     modalStep: 1,
     type: "select",
-    excludeFromColumns: true,
     selectOptions: MASH_STEP_TYPES,
     validation: required,
     errorMessages: requiredMessage,
@@ -161,7 +159,7 @@ export const mashStepInputs = [
     label: "Infusion volume",
     modalStep: 1,
     type: "numberWithUnits",
-    excludeFromColumns: true,
+    tableOptions: displayFalse,
     convertOnUnitChange: true,
     preferredUnitKeyField: "mashUuid",
     allowNegative: false,
@@ -171,7 +169,6 @@ export const mashStepInputs = [
     label: "Step temperature",
     modalStep: 1,
     type: "numberWithUnits",
-    excludeFromColumns: true,
     convertOnUnitChange: true,
     validation: {
       ...required,
@@ -197,7 +194,6 @@ export const mashStepInputs = [
       ...requiredMessage,
       min: "Please enter a positive number",
     },
-    excludeFromColumns: true,
     convertOnUnitChange: true,
     preferredUnitKeyField: "mashUuid",
     allowNegative: false,
@@ -207,13 +203,13 @@ export const mashStepInputs = [
     label: "Ramp time",
     modalStep: 1,
     type: "numberWithUnits",
+    tableOptions: displayFalse,
     validation: {
       min: 0,
     },
     errorMessages: {
       min: "Please enter a positive number",
     },
-    excludeFromColumns: true,
     convertOnUnitChange: true,
     preferredUnitKeyField: "mashUuid",
     allowNegative: false,
@@ -223,13 +219,13 @@ export const mashStepInputs = [
     label: "End temperature",
     modalStep: 1,
     type: "numberWithUnits",
+    tableOptions: displayFalse,
     validation: {
       min: 0,
     },
     errorMessages: {
       min: "Please enter a positive number",
     },
-    excludeFromColumns: true,
     convertOnUnitChange: true,
     preferredUnitKeyField: "mashUuid",
     allowNegative: false,
@@ -239,17 +235,21 @@ export const mashStepInputs = [
 const primaryEntity = {
   entityName: "mash",
   pluralEntityName: "mashes",
-  routeName: "mashes",
+  pathName: "mashes",
   entityKey: "mashUuid",
   inputList: mashInputs,
+  title: "mash",
+  pluralTitle: "mashes",
 };
 const secondaryEntity = {
   entityName: "mashStep",
   pluralEntityName: "mashSteps",
-  routeName: "mash_steps",
+  pathName: "mash_steps",
   entityKey: "mashStepUuid",
   dependency: "mashUuid",
   inputList: mashStepInputs,
+  title: "mash step",
+  pluralTitle: "mash steps",
 };
 
 const Mashes = entityPageWithNestedEntityCreationFactory<MashData>({

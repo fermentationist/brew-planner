@@ -222,3 +222,15 @@ export interface ReducerAction {
   type: string;
   payload: any;
 }
+
+export type MashStepType = "Infusion" | "Temperature" | "Decoction";
+
+export interface MashStepData {
+  name: string;
+  type: MashStepType;
+  infuseAmount?: number;
+  stepTemp: number;
+  stepTime: number;
+  rampTime?: number;
+  endTemp?: number;
+}
