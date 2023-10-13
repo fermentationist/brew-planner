@@ -1,15 +1,14 @@
 import { useEffect, useState, useCallback } from "react";
 import { styled as muiStyled } from "@mui/material/styles";
-import CustomDialog from "../../../CustomDialog";
+import CustomDialog from "../../CustomDialog";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import AddIcon from "@mui/icons-material/AddCircle";
 import MuiButton from "@mui/material/Button";
-import DataTable, { columnOptions } from "../../../DataTable";
-import useAPI from "../../../../hooks/useAPI";
-import useAlert from "../../../../hooks/useAlert";
-import useConvertUnits from "../../../../hooks/useConvertUnits";
-import styled from "styled-components";
+import DataTable, { columnOptions } from "../../DataTable";
+import useAPI from "../../../hooks/useAPI";
+import useAlert from "../../../hooks/useAlert";
+import useConvertUnits from "../../../hooks/useConvertUnits";
 
 const StyledDialog = muiStyled(CustomDialog)`
   padding: 0.5em;
@@ -20,10 +19,10 @@ const Button = muiStyled(MuiButton)`
 `;
 
 const StyledDataTable = muiStyled(DataTable)`
-  max-width: 10cqi;
+  max-width: 95cqi;
   padding: 0.5em;
   @media screen and (max-width: 600px) {
-    max-width: 83vw;
+    max-width: 80vw;
   }
 `;
 
@@ -70,7 +69,6 @@ const ChildEntityModal = ({
       const secondaryEntitiesResponse = await getSecondaryEntities
         .dispatch()
         .catch(alertErrorProm);
-      console.log("secondaryEntitiesResponse", secondaryEntitiesResponse);
       return (
         secondaryEntitiesResponse.data?.[childEntity.pluralEntityName] ?? []
       );
@@ -119,7 +117,7 @@ const ChildEntityModal = ({
     <StyledDialog
       showDialog={showModal}
       closeDialog={closeModal}
-      title={`Add ${capitalize(title)}`}
+      title={capitalize(title ?? childEntity.pluralTitle ?? childEntity.pluralEntityName)}
       className="child-entity-modal"
     >
       <>

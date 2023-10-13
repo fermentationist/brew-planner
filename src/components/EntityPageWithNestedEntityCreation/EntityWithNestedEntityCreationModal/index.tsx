@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from "react";
 import FormModal, { FormInputOptions } from "../../../components/FormModal";
 import { EntityOptions, capitalize } from "../index";
 import useAlert from "../../../hooks/useAlert";
-import ChildEntityModal from "./ChildEntityModal";
+import ChildEntityModal from "../ChildEntityModal";
 
 function EntityWithNestedEntityCreationModal<EntityType>({
   showModal,
@@ -15,6 +15,7 @@ function EntityWithNestedEntityCreationModal<EntityType>({
   title,
   formId,
   refresh,
+  startStage = "primary",
 }: {
   showModal: boolean;
   closeModal: () => void;
@@ -30,8 +31,11 @@ function EntityWithNestedEntityCreationModal<EntityType>({
   title: string;
   formId?: string;
   refresh?: () => void;
+  startStage?: string;
 }) {
-  const [stage, setStage] = useState(0);
+  const initialStage = startStage === "secondary" ? 1 : 0;
+  const [stage, setStage] = useState(initialStage);
+  
   const [secondaryEditMode, setSecondaryEditMode] = useState<"create" | "edit">(
     "create"
   );
@@ -154,7 +158,7 @@ function EntityWithNestedEntityCreationModal<EntityType>({
           showModal={showModal}
           closeModal={closeModal}
           title={capitalize(
-            secondaryEntity.title ?? secondaryEntity.entityName
+            secondaryEntity.pluralTitle ?? secondaryEntity.pluralEntityName
           )}
           addEntity={addSecondaryEntity}
           editEntity={editSecondaryEntity}

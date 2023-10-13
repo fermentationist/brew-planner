@@ -23,19 +23,33 @@ const StyledDialog = muiStyled(Dialog)`
     min-width: 95vw;
   }
   div[role="dialog"] {
-    // display: none;
-    container-type: inline-size;
-    @media screen and (max-width: 600px) {
+    // container-type: inline-size;
+    // overflow: auto;
+    // width: min-content;
+    // min-width: 325px;
+    // width: clamp(325px, 65vw, 85vw);
+    // width: auto;
+    // width: fit-content;
+    @media screen and (max-width: 400px) {
       min-width: 90vw;
+    }
+
+    @media screen and (max-width: 600px) {
+      width: clamp(325px, 65vw, 85vw);
 
     }
+
+    @media screen and (max-width: 900px) {
+      width: clamp(325px, 25vw, 65vw);
+    }
+    
   }
 `;
 
 const StyledContent = muiStyled(DialogContent)`
   padding-top: 1em !important;
   margin-top: 1em;
-  max-width: 93cqi;
+  max-width: 95cqi;
   container-type: inline-size;
 `;
 

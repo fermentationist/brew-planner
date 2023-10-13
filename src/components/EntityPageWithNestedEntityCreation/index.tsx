@@ -16,6 +16,7 @@ import useAlert from "../../hooks/useAlert";
 import useConfirm from "../../hooks/useConfirm";
 import useConvertUnits from "../../hooks/useConvertUnits";
 import EntityWithNestedEntityCreationModal from "./EntityWithNestedEntityCreationModal";
+import ChildEntityModal from "./ChildEntityModal";
 import { Mode as EditMode, APIError } from "../../types";
 import { EntityOptions as _EntityOptions } from "../EntityPage";
 
@@ -45,11 +46,18 @@ function EntityPageWithNestedEntityCreation<EntityType>({
 }: EntityPageWithNestedEntityCreationProps) {
   const [tableData, setTableData] = useState([]);
   const [showEntityModal, setShowEntityModal] = useState(false);
-  const [editMode, setEditMode]: [editMode: EditMode, setEditMode: Dispatch<SetStateAction<EditMode>>] =
-    useState("create" as EditMode);
+  const [editMode, setEditMode]: [
+    editMode: EditMode,
+    setEditMode: Dispatch<SetStateAction<EditMode>>
+  ] = useState("create" as EditMode);
   const [columns, setColumns] = useState([]);
   const [modalData, setModalData] = useState(null);
   const [refreshNumber, setRefreshNumber] = useState(0);
+  const [modalStartStage, setModalStartStage] = useState("primary");
+  const [showChildEntityModal, setShowChildEntityModal] = useState(false);
+  const [childModalParentEntityUuid, setChildModalParentEntityUuid] = useState(
+    null
+  );
   const { callAlert, alertError, alertErrorProm, resetAlertState } = useAlert();
   const { confirmDelete, confirm } = useConfirm();
 
@@ -61,7 +69,11 @@ function EntityPageWithNestedEntityCreation<EntityType>({
     refetch: primaryEntitiesRefetch,
     APIRequest,
     breweryPath,
-  } = useAPI(primaryEntity.pathName ?? primaryEntity.pluralEntityName ?? `${primaryEntity.entityName}s`);
+  } = useAPI(
+    primaryEntity.pathName ??
+      primaryEntity.pluralEntityName ??
+      `${primaryEntity.entityName}s`
+  );
 
   const { generateColumnsFromInputs, renameTempPreferredUnits } =
     useConvertUnits();
@@ -73,7 +85,13 @@ function EntityPageWithNestedEntityCreation<EntityType>({
     primaryEntitiesRefetch();
     // causes the table to re-generate columns
     setRefreshNumber(refreshNumber + Math.random());
-  }, [primaryEntitiesRefetch, refreshNumber, setRefreshNumber, setTableData, tableData]);
+  }, [
+    primaryEntitiesRefetch,
+    refreshNumber,
+    setRefreshNumber,
+    setTableData,
+    tableData,
+  ]);
 
   const editEntity = useCallback((rowData: EntityType) => {
     setModalData(rowData);
@@ -81,13 +99,13 @@ function EntityPageWithNestedEntityCreation<EntityType>({
     setShowEntityModal(true);
   }, []);
 
-  const editSecondaryEntity = useCallback((rowData: EntityType) => {
-    // setModalData(rowData);
-    // setEditMode("edit");
-    // setIsPrimaryStep(false);
-    // setShowEntityModal(true);
-    console.log("editSecondaryEntity", rowData);
-  }, []);
+  const viewSecondaryEntities = useCallback((rowData?: EntityType) => {
+    if (rowData) {
+      setModalData(rowData);
+    }
+    setModalStartStage("secondary");
+    setShowEntityModal(true);
+  }, [setModalData]);
 
   // this useEffect generates the columns for the primary table
   useEffect(() => {
@@ -107,10 +125,17 @@ function EntityPageWithNestedEntityCreation<EntityType>({
         options: columnOptions.rowDataOptions,
       },
       {
-        name: secondaryEntity.pluralTitle ?? secondaryEntity.pluralEntityName ?? secondaryEntity.entityName + "s",
+        name:
+          secondaryEntity.pluralTitle ??
+          secondaryEntity.pluralEntityName ??
+          secondaryEntity.entityName + "s",
         options: columnOptions.createRenderChildEntitiesButtonOptions(
-          `view ${secondaryEntity.pluralTitle ?? secondaryEntity.pluralEntityName ?? secondaryEntity.entityName + "s"}`,
-          editSecondaryEntity
+          `view ${
+            secondaryEntity.pluralTitle ??
+            secondaryEntity.pluralEntityName ??
+            secondaryEntity.entityName + "s"
+          }`,
+          viewSecondaryEntities
         ),
       },
       {
@@ -128,7 +153,7 @@ function EntityPageWithNestedEntityCreation<EntityType>({
     secondaryEntity,
     refreshNumber,
     editEntity,
-    editSecondaryEntity,
+    viewSecondaryEntities,
   ]);
 
   // this useEffect loads the primary table data
@@ -172,7 +197,11 @@ function EntityPageWithNestedEntityCreation<EntityType>({
     );
   };
 
-  const getCreateOrUpdateUrl = (editMode: boolean, isPrimary: boolean, primaryEntityUuid?: string) => {
+  const getCreateOrUpdateUrl = (
+    editMode: boolean,
+    isPrimary: boolean,
+    primaryEntityUuid?: string
+  ) => {
     if (editMode) {
       const entityUuid = modalData[`${primaryEntity.entityName}Uuid`];
       return `${
@@ -319,8 +348,28 @@ function EntityPageWithNestedEntityCreation<EntityType>({
           secondaryEntity={secondaryEntity}
           title={capitalize(primaryEntity.title ?? primaryEntity.entityName)}
           refresh={refresh}
+          startStage={modalStartStage}
         />
       ) : null}
+      {/* {showChildEntityModal ? (
+        <ChildEntityModal
+          showModal={showChildEntityModal}
+          closeModal={closeChildEntityModal}
+          title={capitalize(
+            secondaryEntity.title ?? secondaryEntity.entityName
+          )}
+          addEntity={addSecondaryEntity}
+          editEntity={viewSecondaryEntities}
+          parentPath={
+            primaryEntity.pathName ??
+            primaryEntity.pluralEntityName ??
+            primaryEntity.entityName + "s"
+          }
+          parentUuid={childModalParentEntityUuid}
+          childEntity={secondaryEntity}
+          deleteChildRows={deleteSecondaryRows}
+        />
+      ) : null} */}
     </Page>
   );
 }

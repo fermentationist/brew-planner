@@ -268,6 +268,7 @@ const Form = function (props: FormProps) {
         handleSubmit(wrappedOnSubmit.bind(null, event))(event)
       }
       id={props.formId}
+      style={{width: "fit-content", display: "block"}}
     >
       <Stack>
         {/* loop through list of inputs and create the specified input components */}
